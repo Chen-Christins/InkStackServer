@@ -284,7 +284,7 @@ void Index::cutWord(const std::string& str, std::vector<std::string>& words)
 int32_t Index::getIdx(uint64_t article_id)
 {
     auto it = m_docMap.find(article_id);
-    return it == m_docMap.end() ? -1 : static_cast<int32_t>(it->second);
+    return it == m_docMap.end() ? -1 : it->second;
 }
 
 void Index::addArticle(data::ArticleInfo::ptr info)

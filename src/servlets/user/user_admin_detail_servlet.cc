@@ -30,14 +30,14 @@ int32_t UserAdminDetailServlet::handle(
 
         std::vector<data::ArticleInfo::ptr> articles;
         ArticleMgr::GetInstance()->listByUserId(articles, user_id, false);
-        int64_t article_count = static_cast<int64_t>(articles.size());
+        int64_t article_count = articles.size();
 
         std::vector<data::CommentInfo::ptr> comments;
         auto db = getDB();
         if (db) {
             data::CommentInfoDao::QueryByUserId(comments, user_id, db);
         }
-        int64_t comment_count = static_cast<int64_t>(comments.size());
+        int64_t comment_count = comments.size();
 
         result->set("id", info->getId());
         result->set("account", info->getAccount());

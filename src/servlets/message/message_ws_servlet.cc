@@ -61,14 +61,7 @@ int32_t MessageWSServlet::onClose(chen::http::HttpRequest::ptr header, chen::htt
     int64_t uid = 0;
     if (header) {
         AuthContext ctx = AuthService::Resolve(header, nullptr, false);
-        if (ctx.valid()) {
-            uid = ctx.uid;
-        } else {
-            std::string uid_str = header->getParam("uid");
-            if (!uid_str.empty()) {
-                uid = chen::TypeUtil::Atoi(uid_str);
-            }
-        }
+        uid = ctx.valid() ? ctx.uid : header->getParamAs<int64_t>("uid", 0);
     }
     if (uid) {
         MessageMgr::GetInstance()->removeChatConnection(uid, session);
@@ -86,10 +79,7 @@ int32_t MessageWSServlet::handle(chen::http::HttpRequest::ptr header, chen::http
         // 身份解析：优先握手请求里的 uid，其次按连接反查
         int64_t uid = MessageMgr::GetInstance()->getUidBySession(session);
         if (!uid) {
-            std::string uid_str = header->getParam("uid");
-            if (!uid_str.empty()) {
-                uid = atoi(uid_str.c_str());
-            }
+            uid = header->getParamAs<int64_t>("uid", 0);
         }
         if (!uid) {
             sendError(session, errcode::NOT_LOGIN, "Not logged in");

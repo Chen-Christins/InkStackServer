@@ -1,6 +1,5 @@
 #include "user_oauth_github_callback_servlet.h"
 
-#include <ctime>
 #include <map>
 #include <regex>
 #include <unistd.h>
@@ -9,7 +8,9 @@
 #include <chen/db/redis.h>
 #include <chen/http/http_connection.h>
 #include <chen/log/log.h>
+#include <chen/util/json_util.h>
 #include <chen/util/string_util.h>
+#include <chen/util/time_util.h>
 
 #include "../../auth/auth_service.h"
 #include "../../manager/user_manager.h"
@@ -127,8 +128,7 @@ static bool ExchangeAccessToken(
     }
 
     Json::Value json;
-    Json::Reader reader;
-    if (!reader.parse(result->response->getBody(), json)) {
+    if (!chen::JsonUtil::FromString(json, result->response->getBody())) {
         ERROR(logger) << "ExchangeAccessToken: parse json failed";
         return false;
     }
@@ -156,8 +156,7 @@ static bool FetchGithubProfile(const std::string& access_token, GithubProfile& p
     }
 
     Json::Value json;
-    Json::Reader reader;
-    if (!reader.parse(result->response->getBody(), json)) {
+    if (!chen::JsonUtil::FromString(json, result->response->getBody())) {
         ERROR(logger) << "FetchGithubProfile: parse json failed";
         return false;
     }
@@ -207,8 +206,7 @@ static std::string FetchPrimaryEmail(const std::string& access_token)
     }
 
     Json::Value json;
-    Json::Reader reader;
-    if (!reader.parse(result->response->getBody(), json) || !json.isArray()) {
+    if (!chen::JsonUtil::FromString(json, result->response->getBody()) || !json.isArray()) {
         ERROR(logger) << "FetchPrimaryEmail: parse json failed";
         return "";
     }
@@ -389,8 +387,8 @@ int32_t UserOauthGithubCallbackServlet::handle(
                 user->setPasswd(HashPassword(UserManager::generateToken()));
                 user->setRole(UserManager::Role::USER);
                 user->setState(UserManager::Status::ACTIVE);
-                user->setCreateTime(time(0));
-                user->setUpdateTime(time(0));
+                user->setCreateTime(chen::TimeUtil::GetCurrentSec());
+                user->setUpdateTime(chen::TimeUtil::GetCurrentSec());
                 if (data::UserInfoDao::Insert(user, db)) {
                     ERROR(logger) << "callback: insert user failed"
                                   << ", errstr=" << db->getErrStr() << ", errno=" << db->getErrno();

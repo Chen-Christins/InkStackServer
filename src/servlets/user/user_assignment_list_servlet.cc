@@ -64,7 +64,7 @@ int32_t UserAssignmentListServlet::handle(
                 list.append(item);
             }
         }
-        result->set("total", static_cast<int32_t>(list.size()));
+        result->set("total", list.size());
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

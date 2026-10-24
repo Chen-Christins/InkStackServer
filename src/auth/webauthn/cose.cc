@@ -10,6 +10,8 @@
 namespace blog {
 namespace webauthn {
 
+// SDK 只封装了 RSA-SHA256(PEM) 验签；WebAuthn 还需要 ES256/EdDSA 和 COSE 原始公钥，
+// 因此这里直接使用 OpenSSL，避免把 EVP_PKEY 再转成 PEM。
 namespace {
 
 constexpr int32_t kCoseKtyOkp = 1;

@@ -1,10 +1,9 @@
 #include "auth_service.h"
 
-#include <ctime>
-
 #include <chen/config/config.h>
 #include <chen/http/session_data.h>
 #include <chen/log/log.h>
+#include <chen/util/time_util.h>
 #include <chen/util/type_util.h>
 
 #include "../error_codes.h"
@@ -42,7 +41,7 @@ static void ClearLegacyCookies(chen::http::HttpResponse::ptr response)
     if (!response) {
         return;
     }
-    int64_t past = time(0) - 3600 * 24;
+    int64_t past = chen::TimeUtil::GetCurrentSec() - 3600 * 24;
     response->setCookie(CookieKey::USER_ID, "", past, "/");
     response->setCookie(CookieKey::TOKEN, "", past, "/");
     response->setCookie(CookieKey::TOKEN_TIME, "", past, "/");
@@ -108,7 +107,7 @@ AuthContext AuthService::Resolve(chen::http::HttpRequest::ptr request, chen::htt
 
     const AuthConf& conf = g_auth_conf->getValue();
 
-    int64_t now = time(0);
+    int64_t now = chen::TimeUtil::GetCurrentSec();
     if (touch && now - info.last_seen >= 60) {
         if (!SessionStore::Touch(session_id, info, GetSessionTTL(), conf.session_absolute_ttl)) {
             chen::http::SessionDataMgr::GetInstance()->del(session_id);
@@ -148,7 +147,7 @@ bool AuthService::UpgradeLegacySession(
     }
 
     int64_t token_time = request->getCookieAs<int64_t>(CookieKey::TOKEN_TIME);
-    if (token_time <= time(0)) {
+    if (token_time <= chen::TimeUtil::GetCurrentSec()) {
         return false;
     }
 
@@ -159,7 +158,7 @@ bool AuthService::UpgradeLegacySession(
     if (user->getState() != UserManager::Status::ACTIVE || user->getIsDeleted()) {
         return false;
     }
-    if (!UserLoginDeviceMgr::GetInstance()->validateToken(uid, token, time(0))) {
+    if (!UserLoginDeviceMgr::GetInstance()->validateToken(uid, token, chen::TimeUtil::GetCurrentSec())) {
         INFO(logger) << "legacy token invalid uid=" << uid << " path=" << request->getPath();
         return false;
     }
@@ -222,7 +221,7 @@ int32_t AuthService::IssueSession(
     request->setCookie(CookieKey::SESSION_KEY, session_id);
 
     if (options.update_login_time) {
-        user->setLoginTime(time(0));
+        user->setLoginTime(chen::TimeUtil::GetCurrentSec());
         auto db = GetDB();
         if (db && data::UserInfoDao::Update(user, db) == 0) {
             UserMgr::GetInstance()->update(user);
@@ -304,7 +303,7 @@ bool AuthService::ResolveWs(chen::http::HttpRequest::ptr request, int64_t& uid, 
     } catch (...) {
         return false;
     }
-    if (!legacy_uid || token_time <= time(0)) {
+    if (!legacy_uid || token_time <= chen::TimeUtil::GetCurrentSec()) {
         return false;
     }
 
@@ -312,7 +311,7 @@ bool AuthService::ResolveWs(chen::http::HttpRequest::ptr request, int64_t& uid, 
     if (!legacy_user || legacy_user->getState() != UserManager::Status::ACTIVE || legacy_user->getIsDeleted()) {
         return false;
     }
-    if (!UserLoginDeviceMgr::GetInstance()->validateToken(legacy_uid, token, time(0))) {
+    if (!UserLoginDeviceMgr::GetInstance()->validateToken(legacy_uid, token, chen::TimeUtil::GetCurrentSec())) {
         return false;
     }
 
@@ -328,6 +327,7 @@ void AuthService::SetSessionCookie(chen::http::HttpResponse::ptr response, const
         return;
     }
 
+    // SDK 的 setCookie 不支持 HttpOnly/SameSite，这里直接写入 Set-Cookie。
     std::string cookie = CookieKey::SESSION_KEY + "=" + session_id + "; Path=/; HttpOnly; SameSite=" + NormalizeSameSite();
     if (UseSecureCookie()) {
         cookie += "; Secure";

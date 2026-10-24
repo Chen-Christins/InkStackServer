@@ -1,8 +1,7 @@
 #include "passkey_register_finish_servlet.h"
 
-#include <ctime>
-
 #include <chen/util/json_util.h>
+#include <chen/util/time_util.h>
 
 #include "../../auth/webauthn/webauthn.h"
 #include "../../manager/passkey_manager.h"
@@ -74,8 +73,8 @@ int32_t PasskeyRegisterFinishServlet::handle(
         info->setBackupEligible(registration.backup_eligible);
         info->setBackupState(registration.backup_state);
         info->setIsDeleted(0);
-        info->setCreatedAt(time(0));
-        info->setLastUsedAt(time(0));
+        info->setCreatedAt(chen::TimeUtil::GetCurrentSec());
+        info->setLastUsedAt(chen::TimeUtil::GetCurrentSec());
 
         if (PasskeyMgr::GetInstance()->add(info) != 0) {
             result->setErrno(errcode::PASSKEY_REGISTER_FAILED);

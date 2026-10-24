@@ -3,8 +3,7 @@
 #include "../util.h"
 
 #include <chen/log/log.h>
-
-#include <ctime>
+#include <chen/util/time_util.h>
 
 namespace blog {
 
@@ -72,7 +71,7 @@ int PasskeyManager::listByUser(std::vector<data::UserPasskeyInfo::ptr>& results,
             results.push_back(info);
         }
     }
-    return static_cast<int>(results.size());
+    return results.size();
 }
 
 int PasskeyManager::add(data::UserPasskeyInfo::ptr info)
@@ -137,7 +136,7 @@ int PasskeyManager::remove(int64_t id)
     }
 
     info->setIsDeleted(1);
-    info->setLastUsedAt(time(0));
+    info->setLastUsedAt(chen::TimeUtil::GetCurrentSec());
     return update(info);
 }
 

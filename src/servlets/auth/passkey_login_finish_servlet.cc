@@ -1,8 +1,7 @@
 #include "passkey_login_finish_servlet.h"
 
-#include <ctime>
-
 #include <chen/util/json_util.h>
+#include <chen/util/time_util.h>
 
 #include "../../auth/auth_service.h"
 #include "../../auth/webauthn/webauthn.h"
@@ -71,7 +70,7 @@ int32_t PasskeyLoginFinishServlet::handle(
         }
 
         passkey->setSignCount(auth_result.sign_count);
-        passkey->setLastUsedAt(time(0));
+        passkey->setLastUsedAt(chen::TimeUtil::GetCurrentSec());
         passkey->setBackupState(auth_result.backup_state);
         if (PasskeyMgr::GetInstance()->update(passkey) != 0) {
             result->setErrno(errcode::DB_OPERATION_FAILED);

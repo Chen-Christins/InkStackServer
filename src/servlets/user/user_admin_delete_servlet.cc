@@ -1,6 +1,7 @@
 #include "user_admin_delete_servlet.h"
 
 #include <chen/log/log.h>
+#include <chen/util/time_util.h>
 
 #include "../../auth/auth_service.h"
 #include "../../event/event_define.h"
@@ -46,7 +47,7 @@ int32_t UserAdminDeleteServlet::handle(
             result->setErrno(errcode::DB_TRANSACTION_FAILED);
             break;
         }
-        time_t now = time(0);
+        time_t now = chen::TimeUtil::GetCurrentSec();
         info->setIsDeleted(1);
         info->setState(UserManager::Status::INACTIVE);
         info->setUpdateTime(now);

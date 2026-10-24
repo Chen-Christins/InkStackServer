@@ -1,6 +1,7 @@
 #include "user_admin_update_servlet.h"
 
 #include <chen/log/log.h>
+#include <chen/util/time_util.h>
 
 #include "../../auth/auth_service.h"
 #include "../../manager/user_manager.h"
@@ -95,7 +96,7 @@ int32_t UserAdminUpdateServlet::handle(
             info->setState(state);
         }
 
-        info->setUpdateTime(time(0));
+        info->setUpdateTime(chen::TimeUtil::GetCurrentSec());
 
         auto db = getDB();
         if (!db) {

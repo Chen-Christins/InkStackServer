@@ -1,15 +1,17 @@
 #include "session_store.h"
 
-#include <ctime>
-
 #include <chen/config/config.h>
 #include <chen/db/redis.h>
 #include <chen/log/log.h>
 #include <chen/util/encryptor_util.h>
+#include <chen/util/string_util.h>
+#include <chen/util/time_util.h>
 #include <chen/util/type_util.h>
 
 namespace blog {
 
+// SDK 的 SessionDataMgr 只做进程内缓存，不提供 Redis 持久化；
+// 这里用 Redis 保存服务端会话，Cookie 只保存随机 SESSIONID。
 static chen::Logger::ptr logger = LOG_ROOT();
 
 static chen::ConfigVar<std::string>::ptr g_redis_pool_name = chen::Config::Lookup("redis.name", std::string("blog"), "Redis connection pool name");
@@ -18,18 +20,6 @@ static chen::ConfigVar<std::string>::ptr g_redis_pool_name = chen::Config::Looku
 static const char* kSessionKeyPrefix = "auth:sess:";
 /// 用户会话集合 key 前缀
 static const char* kUserSessionKeyPrefix = "auth:uid:";
-
-static std::string HexEncode(const std::string& data)
-{
-    static const char* hex = "0123456789abcdef";
-    std::string out;
-    out.reserve(data.size() * 2);
-    for (unsigned char c : data) {
-        out.push_back(hex[c >> 4]);
-        out.push_back(hex[c & 0x0F]);
-    }
-    return out;
-}
 
 static std::string sessionKey(const std::string& hash)
 {
@@ -86,7 +76,7 @@ std::string SessionStore::Create(int64_t uid, const std::string& ip, const std::
         return "";
     }
 
-    int64_t now = time(0);
+    int64_t now = chen::TimeUtil::GetCurrentSec();
     int64_t idle = idle_ttl > 0 ? idle_ttl : 24 * 3600;
     int64_t expires_at = now + idle;
     if (absolute_ttl > 0 && expires_at > now + absolute_ttl) {
@@ -100,7 +90,7 @@ std::string SessionStore::Create(int64_t uid, const std::string& ip, const std::
         ERROR(logger) << "generate session random failed";
         return "";
     }
-    std::string session_id = HexEncode(random);
+    std::string session_id = chen::StringUtil::HexEncode(random, false);
     if (session_id.empty()) {
         ERROR(logger) << "generate session id failed";
         return "";
@@ -144,7 +134,7 @@ bool SessionStore::Get(const std::string& session_id, SessionInfo& info)
         return false;
     }
 
-    int64_t now = time(0);
+    int64_t now = chen::TimeUtil::GetCurrentSec();
     if (info.expires_at > 0 && info.expires_at <= now) {
         DestroyByHash(hash, info.uid);
         return false;
@@ -158,7 +148,7 @@ bool SessionStore::Touch(const std::string& session_id, const SessionInfo& info,
         return false;
     }
 
-    int64_t now = time(0);
+    int64_t now = chen::TimeUtil::GetCurrentSec();
     int64_t idle = idle_ttl > 0 ? idle_ttl : 24 * 3600;
     int64_t expires_at = now + idle;
     if (absolute_ttl > 0 && info.created_at > 0 && expires_at > info.created_at + absolute_ttl) {
@@ -254,7 +244,7 @@ void SessionStore::List(int64_t uid, std::vector<SessionInfo>& sessions)
     }
 
     std::string user_key = userSessionKey(uid);
-    int64_t now = time(0);
+    int64_t now = chen::TimeUtil::GetCurrentSec();
     chen::RedisUtil::Cmd(g_redis_pool_name->getValue(), "zremrangebyscore %s 0 %lld", user_key.c_str(), now);
 
     auto rpy = chen::RedisUtil::Cmd(g_redis_pool_name->getValue(), "zrange %s 0 -1", user_key.c_str());

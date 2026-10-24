@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <sstream>
 #include <string>
 
 #include <chen/http/http.h>
@@ -17,7 +18,7 @@
 
 struct AuthConf {
     bool cookie_secure = false;
-    std::string cookie_same_site;
+    std::string cookie_same_site = "Lax";
     // 会话绝对有效期（秒），<=0 表示不限制
     int64_t session_absolute_ttl = 604800;
     // 迁移期兼容 WebSocket 的旧 token query 认证
@@ -37,15 +38,23 @@ class LexicalCast<std::string, AuthConf> {
 public:
     AuthConf operator()(const std::string& value)
     {
-        AuthConf conf = {};
+        AuthConf conf;
         YAML::Node node = YAML::Load(value);
         if (!node.IsMap()) {
             return conf;
         }
-        conf.cookie_secure = LexicalCast<std::string, bool>()(node["cookie_secure"].Scalar());
-        conf.cookie_same_site = node["cookie_same_site"].as<std::string>();
-        conf.session_absolute_ttl = node["session_absolute_ttl"].as<int64_t>();
-        conf.ws_legacy_token = LexicalCast<std::string, bool>()(node["ws_legacy_token"].Scalar());
+        if (node["cookie_secure"]) {
+            conf.cookie_secure = LexicalCast<std::string, bool>()(node["cookie_secure"].Scalar());
+        }
+        if (node["cookie_same_site"]) {
+            conf.cookie_same_site = node["cookie_same_site"].as<std::string>();
+        }
+        if (node["session_absolute_ttl"]) {
+            conf.session_absolute_ttl = node["session_absolute_ttl"].as<int64_t>();
+        }
+        if (node["ws_legacy_token"]) {
+            conf.ws_legacy_token = LexicalCast<std::string, bool>()(node["ws_legacy_token"].Scalar());
+        }
         return conf;
     }
 };

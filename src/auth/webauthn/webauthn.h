@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -48,14 +49,30 @@ public:
         if (!node.IsMap()) {
             return conf;
         }
-        conf.rp_id = node["rp_id"].as<std::string>();
-        conf.rp_name = node["rp_name"].as<std::string>();
-        conf.origin = node["origin"].as<std::string>();
-        conf.timeout_ms = node["timeout_ms"].as<int64_t>();
-        conf.user_verification = node["user_verification"].as<std::string>();
-        conf.attestation = node["attestation"].as<std::string>();
-        conf.user_handle_secret = node["user_handle_secret"].as<std::string>();
-        conf.challenge_ttl = node["challenge_ttl"].as<int64_t>();
+        if (node["rp_id"]) {
+            conf.rp_id = node["rp_id"].as<std::string>();
+        }
+        if (node["rp_name"]) {
+            conf.rp_name = node["rp_name"].as<std::string>();
+        }
+        if (node["origin"]) {
+            conf.origin = node["origin"].as<std::string>();
+        }
+        if (node["timeout_ms"]) {
+            conf.timeout_ms = node["timeout_ms"].as<int64_t>();
+        }
+        if (node["user_verification"]) {
+            conf.user_verification = node["user_verification"].as<std::string>();
+        }
+        if (node["attestation"]) {
+            conf.attestation = node["attestation"].as<std::string>();
+        }
+        if (node["user_handle_secret"]) {
+            conf.user_handle_secret = node["user_handle_secret"].as<std::string>();
+        }
+        if (node["challenge_ttl"]) {
+            conf.challenge_ttl = node["challenge_ttl"].as<int64_t>();
+        }
         return conf;
     }
 };
