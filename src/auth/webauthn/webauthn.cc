@@ -150,11 +150,6 @@ bool ParseRegistrationData(const std::string& data, AuthData& out)
     return true;
 }
 
-std::string Sha256Raw(const std::string& data)
-{
-    return chen::StringUtil::HexDecode(chen::EncryptorUtil::SHA256(data));
-}
-
 } // namespace
 
 bool WebAuthnService::IsConfigured()
@@ -638,7 +633,7 @@ int32_t WebAuthnService::VerifyAuthentication(
         return errcode::WEBAUTHN_UNSUPPORTED_ALG;
     }
 
-    std::string client_data_hash = Sha256Raw(client_data_json);
+    std::string client_data_hash = chen::EncryptorUtil::SHA256Raw(client_data_json);
     if (client_data_hash.empty()) {
         return errcode::INTERNAL_ERROR;
     }
