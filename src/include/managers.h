@@ -30,6 +30,5 @@
 #include "../manager/task_manager.h"                        // IWYU pragma: keep
 #include "../manager/user_ai_config_manager.h"              // IWYU pragma: keep
 #include "../manager/user_follow_rel_manager.h"             // IWYU pragma: keep
-#include "../manager/user_login_device_manager.h"           // IWYU pragma: keep
 #include "../manager/user_manager.h"                        // IWYU pragma: keep
 #include "../manager/user_oauth_manager.h"                  // IWYU pragma: keep

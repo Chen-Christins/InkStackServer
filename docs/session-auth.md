@@ -26,7 +26,6 @@ auth:
   cookie_secure: false        # 生产必须 true
   cookie_same_site: Lax       # Lax / Strict / None
   session_absolute_ttl: 604800
-  ws_legacy_token: true
 ```
 
 空闲有效期沿用系统设置里的“会话时长”（默认 24 小时），每次活跃会滑动续期；绝对有效期由 `auth.session_absolute_ttl` 控制。
@@ -50,7 +49,7 @@ auth:
 
 1. `BlogServlet::handlePre` 发现请求带登录 Cookie 时调用 `initLogin`。
 2. `AuthService::Resolve` 读取 `SESSIONID`，查 Redis，校验用户存在且状态为 `ACTIVE`、未删除。
-3. 校验通过后把 `uid` 映射到框架 `SessionData`，兼容 2FA 临时密钥等旧逻辑。
+3. 校验通过后把 `uid` 映射到框架 `SessionData`，用于保存 2FA 临时密钥等会话内数据。
 4. `BlogLoginedServlet` 要求解析成功；`BlogAdminServlet` 再校验 `ADMIN`。
 5. `getUserId(request)` 统一走 `AuthService::Resolve`，不再信任内存中的旧 uid。
 
@@ -70,17 +69,12 @@ auth:
 `IssueSession` 会生成新的 `SESSIONID`，删除旧会话，从而避免会话固定。新登录不再签发 `S_UID` / `S_TOKEN` / `S_TOKEN_TIME` /
 `DEVICE_ID`。
 
-## 迁移兼容
+## 认证入口
 
-- 旧 Cookie 仍可自动登录：`AuthService::UpgradeLegacySession` 校验 `S_UID + S_TOKEN + S_TOKEN_TIME`，成功后换成新的
-  `SESSIONID`。
-- WebSocket 优先使用握手 Cookie；`auth.ws_legacy_token=true` 时兼容旧 `uid/token/token_time` query。
-- `user_device_list` / `user_device_kick` 已切换为会话列表，并保留旧设备 token 的兜底逻辑。
-- `user_refresh_token` 在新会话下直接返回成功（无需刷新 token），旧 token 仍可正常轮换。
-- 迁移期结束后：
-    - 关闭 `auth.ws_legacy_token`；
-    - 删除旧 token / 设备表相关代码；
-    - 删除旧 `session:` Redis 会话。
+- 只接受 `SESSIONID` Cookie，不再读取或清理 `S_UID` / `S_TOKEN` / `S_TOKEN_TIME`。
+- WebSocket 握手只使用 Cookie 中的服务端会话，不再接受 `uid/token/token_time` query。
+- `user_device_list` / `user_device_kick` 只操作 `SessionStore` 中的会话。
+- `user_refresh_token` 接口已移除；会话过期后重新登录即可。
 
 ## 后续
 
@@ -89,4 +83,4 @@ auth:
   `user/device/list`、`user/device/kick`。
   - `docs/passkey-login.md`
   - `docs/email-recovery.md`
-- 阶段 4：关闭密码登录、移除旧 token/设备体系。
+- 阶段 4：关闭密码登录、清理旧设备表及相关 ORM。
