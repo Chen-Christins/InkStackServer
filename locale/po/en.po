@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TechHaven-Server 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 07:05+0000\n"
+"POT-Creation-Date: 2026-10-23 13:38+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -156,6 +156,50 @@ msgstr "GitHub OAuth login failed"
 #. errno: 2028
 msgid "GITHUB_STATE_INVALID"
 msgstr "OAuth state invalid or expired"
+
+#. errno: 2029
+msgid "PASSKEY_NOT_FOUND"
+msgstr "Passkey not found"
+
+#. errno: 2030
+msgid "PASSKEY_ALREADY_EXISTS"
+msgstr "Passkey already registered"
+
+#. errno: 2031
+msgid "PASSKEY_REGISTER_FAILED"
+msgstr "Failed to register passkey"
+
+#. errno: 2032
+msgid "WEBAUTHN_NOT_CONFIGURED"
+msgstr "WebAuthn is not configured"
+
+#. errno: 2033
+msgid "WEBAUTHN_CHALLENGE_INVALID"
+msgstr "WebAuthn challenge invalid or expired"
+
+#. errno: 2034
+msgid "WEBAUTHN_ORIGIN_MISMATCH"
+msgstr "WebAuthn origin mismatch"
+
+#. errno: 2035
+msgid "WEBAUTHN_RP_ID_MISMATCH"
+msgstr "WebAuthn rpId mismatch"
+
+#. errno: 2036
+msgid "WEBAUTHN_INVALID_CREDENTIAL"
+msgstr "Invalid WebAuthn credential"
+
+#. errno: 2037
+msgid "WEBAUTHN_UNSUPPORTED_ALG"
+msgstr "Unsupported WebAuthn algorithm"
+
+#. errno: 2038
+msgid "WEBAUTHN_VERIFY_FAILED"
+msgstr "WebAuthn verification failed"
+
+#. errno: 2039
+msgid "EMAIL_CODE_ATTEMPTS_EXCEEDED"
+msgstr "Too many verification code attempts, please try again later"
 
 #. errno: 3001
 msgid "ARTICLE_NOT_FOUND"
@@ -577,15 +621,20 @@ msgstr "Cannot message yourself"
 msgid "invalid year or month"
 msgstr "invalid year or month"
 
+#: src/servlets/auth/passkey_register_begin_servlet.cc:43
+#: src/servlets/auth/passkey_register_finish_servlet.cc:56
+msgid "passkey name too long"
+msgstr "Passkey name is too long"
+
 #: src/servlets/category/category_create_servlet.cc:44
 msgid "invalid parent_id"
 msgstr "invalid parent_id"
 
-#: src/servlets/category/category_create_servlet.cc:54
+#: src/servlets/category/category_create_servlet.cc:53
 msgid "invalid cid"
 msgstr "invalid cid"
 
-#: src/servlets/category/category_create_servlet.cc:85
+#: src/servlets/category/category_create_servlet.cc:83
 msgid "category operation failed"
 msgstr "category operation failed"
 
@@ -593,16 +642,16 @@ msgstr "category operation failed"
 msgid "no categories"
 msgstr "no categories"
 
-#: src/servlets/database/backup_create_servlet.cc:55
+#: src/servlets/database/backup_create_servlet.cc:53
 #: src/servlets/database/export_create_servlet.cc:38
 msgid "param type is required"
 msgstr "param type is required"
 
-#: src/servlets/database/backup_create_servlet.cc:59
+#: src/servlets/database/backup_create_servlet.cc:57
 msgid "type must be full or incremental"
 msgstr "type must be full or incremental"
 
-#: src/servlets/database/backup_create_servlet.cc:68
+#: src/servlets/database/backup_create_servlet.cc:66
 msgid "create backup failed"
 msgstr "create backup failed"
 
@@ -685,11 +734,11 @@ msgstr "query feedbacks failed"
 msgid "feedback insert failed"
 msgstr "feedback insert failed"
 
-#: src/servlets/label/label_create_servlet.cc:41
+#: src/servlets/label/label_create_servlet.cc:40
 msgid "invalid lid"
 msgstr "invalid lid"
 
-#: src/servlets/label/label_create_servlet.cc:73
+#: src/servlets/label/label_create_servlet.cc:71
 msgid "label operation failed"
 msgstr "label operation failed"
 
@@ -717,7 +766,7 @@ msgstr "invalid peer_id"
 msgid "私信仅对内部成员开放"
 msgstr "Direct messages are only available to internal members"
 
-#: src/servlets/notify/notification_read_servlet.cc:41
+#: src/servlets/notify/notification_read_servlet.cc:43
 msgid "id or ids is required"
 msgstr "id or ids is required"
 
@@ -730,8 +779,8 @@ msgid "action must be approve or reject"
 msgstr "action must be approve or reject"
 
 #: src/servlets/organization/organization_join_check_servlet.cc:35
-#: src/servlets/user/user_admin_create_servlet.cc:77
-#: src/servlets/user/user_admin_update_servlet.cc:103
+#: src/servlets/user/user_admin_create_servlet.cc:60
+#: src/servlets/user/user_admin_update_servlet.cc:92
 msgid "invalid state"
 msgstr "invalid state"
 
@@ -820,8 +869,8 @@ msgid "保存 Token 失败"
 msgstr "Failed to save token"
 
 #: src/servlets/organization/organization_user_switch_role_servlet.cc:70
-#: src/servlets/user/user_admin_create_servlet.cc:73
-#: src/servlets/user/user_admin_update_servlet.cc:96
+#: src/servlets/user/user_admin_create_servlet.cc:56
+#: src/servlets/user/user_admin_update_servlet.cc:85
 msgid "invalid role"
 msgstr "invalid role"
 
@@ -835,11 +884,35 @@ msgstr "id is required"
 msgid "type is required"
 msgstr "type is required"
 
-#: src/servlets/rd/rd_trend_servlet.cc:181
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:98
+msgid "range is required"
+msgstr "Range is required"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:102
+msgid "granularity is required"
+msgstr "Granularity is required"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:106
+msgid "invalid org_id"
+msgstr "Invalid organization ID"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:112
+msgid "range must be 15d or 3m"
+msgstr "Range must be 15d or 3m"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:116
+msgid "granularity does not match range"
+msgstr "Granularity does not match the range"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:158
+msgid "no accessible organization"
+msgstr "No accessible organization"
+
+#: src/servlets/rd/rd_trend_servlet.cc:153
 msgid "日期范围不合法"
 msgstr "Invalid date range"
 
-#: src/servlets/rd/rd_trend_servlet.cc:195
+#: src/servlets/rd/rd_trend_servlet.cc:167
 msgid "无权访问任何组织"
 msgstr "No access to any organization"
 
@@ -855,29 +928,29 @@ msgstr "disable 2fa failed"
 msgid "reset 2fa failed"
 msgstr "reset 2fa failed"
 
-#: src/servlets/user/user_admin_create_servlet.cc:49
+#: src/servlets/user/user_admin_create_servlet.cc:32
 #: src/servlets/user/user_create_servlet.cc:36
 msgid "account and password required"
 msgstr "account and password required"
 
-#: src/servlets/user/user_admin_create_servlet.cc:96
-#: src/servlets/user/user_admin_reset_passwd_servlet.cc:72
-#: src/servlets/user/user_create_servlet.cc:86
-#: src/servlets/user/user_reset_passwd_servlet.cc:63
+#: src/servlets/user/user_admin_create_servlet.cc:85
+#: src/servlets/user/user_admin_reset_passwd_servlet.cc:66
+#: src/servlets/user/user_create_servlet.cc:92
+#: src/servlets/user/user_reset_passwd_servlet.cc:78
 msgid "insert user failed"
 msgstr "insert user failed"
 
-#: src/servlets/user/user_admin_delete_servlet.cc:67
+#: src/servlets/user/user_admin_delete_servlet.cc:55
 msgid "delete user failed"
 msgstr "delete user failed"
 
-#: src/servlets/user/user_admin_reset_passwd_servlet.cc:48
-#: src/servlets/user/user_reset_passwd_servlet.cc:34
+#: src/servlets/user/user_admin_reset_passwd_servlet.cc:32
+#: src/servlets/user/user_reset_passwd_servlet.cc:35
 msgid "password required"
 msgstr "password required"
 
-#: src/servlets/user/user_admin_update_servlet.cc:117
-#: src/servlets/user/user_update_servlet.cc:94
+#: src/servlets/user/user_admin_update_servlet.cc:106
+#: src/servlets/user/user_update_servlet.cc:99
 msgid "update user failed"
 msgstr "update user failed"
 
@@ -889,16 +962,16 @@ msgstr "type must be openai, claude or glm"
 msgid "max_tokens is required for claude"
 msgstr "max_tokens is required for claude"
 
-#: src/servlets/user/user_oauth_github_callback_servlet.cc:308
+#: src/servlets/user/user_oauth_github_callback_servlet.cc:305
 #: src/servlets/user/user_oauth_github_servlet.cc:59
 msgid "GitHub OAuth 未配置"
 msgstr "GitHub OAuth is not configured"
 
-#: src/servlets/user/user_refresh_token_servlet.cc:52
+#: src/servlets/user/user_refresh_token_servlet.cc:60
 msgid "token is required"
 msgstr "token is required"
 
-#: src/servlets/user/user_refresh_token_servlet.cc:58
+#: src/servlets/user/user_refresh_token_servlet.cc:66
 msgid "token mismatch, please re-login"
 msgstr "token mismatch, please re-login"
 
@@ -906,7 +979,7 @@ msgstr "token mismatch, please re-login"
 msgid "old password required"
 msgstr "old password required"
 
-#: src/util.h:128 src/util.h:137
+#: src/util.h:147 src/util.h:156
 #, c-format
 msgid "param %s is required"
 msgstr "param %s is required"

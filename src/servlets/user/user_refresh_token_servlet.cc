@@ -1,6 +1,7 @@
 #include "user_refresh_token_servlet.h"
 
 #include <chen/log/log.h>
+#include <chen/util/time_util.h>
 
 #include "../../manager/system_settings_manager.h"
 #include "../../manager/user_login_device_manager.h"
@@ -49,17 +50,25 @@ int32_t UserRefreshTokenServlet::handle(
             token = request->getCookie(CookieKey::TOKEN);
         }
         if (token.empty()) {
+            // 新会话体系下没有 token 需要刷新；会话有效直接返回成功
+            int64_t session_uid = getUserId(request);
+            if (session_uid) {
+                result->set("uid", EncryptUserId(session_uid));
+                result->set("session", true);
+                result->setErrno(errcode::SUCCESS);
+                break;
+            }
             result->setErrno(errcode::PARAM_MISSING, "token is required");
             break;
         }
 
         // 校验 token：以设备表 token 为准
-        if (!UserLoginDeviceMgr::GetInstance()->validateToken(uid, token, time(0))) {
+        if (!UserLoginDeviceMgr::GetInstance()->validateToken(uid, token, chen::TimeUtil::GetCurrentSec())) {
             result->setErrno(errcode::NOT_LOGIN, "token mismatch, please re-login");
             break;
         }
 
-        int64_t now = time(0);
+        int64_t now = chen::TimeUtil::GetCurrentSec();
         int32_t session_timeout = 24;
         auto sys_settings = SystemSettingsMgr::GetInstance()->get();
         if (sys_settings && sys_settings->getSessionTimeout() > 0) {

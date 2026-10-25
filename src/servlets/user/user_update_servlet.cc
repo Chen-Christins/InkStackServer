@@ -1,7 +1,9 @@
 #include "user_update_servlet.h"
 
 #include <chen/log/log.h>
+#include <chen/util/time_util.h>
 
+#include "../../auth/auth_service.h"
 #include "../../manager/user_manager.h"
 #include "../../util.h"
 
@@ -40,8 +42,7 @@ int32_t UserUpdateServlet::handle(
             break;
         }
 
-        auto sdata = getSessionData(request, response);
-        int64_t uid = sdata->getData<int64_t>(CookieKey::USER_ID);
+        int64_t uid = getUserId(request);
         if (!uid) {
             result->setErrno(errcode::NOT_LOGIN);
             break;
@@ -88,7 +89,7 @@ int32_t UserUpdateServlet::handle(
         if (!github.empty()) {
             info->setGithub(github);
         }
-        info->setUpdateTime(time(0));
+        info->setUpdateTime(chen::TimeUtil::GetCurrentSec());
 
         auto db = getDB();
         if (!db) {
@@ -104,11 +105,10 @@ int32_t UserUpdateServlet::handle(
         result->setErrno(errcode::SUCCESS);
 
         if (!passwd.empty()) {
-            int64_t token_time = time(0) + 3600 * 24;
-            response->setCookie(CookieKey::USER_ID, EncryptUserId(info->getId()), token_time, "/");
-            auto token = UserMgr::GetInstance()->GetToken(info, token_time);
-            response->setCookie(CookieKey::TOKEN, token, token_time, "/");
-            response->setCookie(CookieKey::TOKEN_TIME, std::to_string(token_time), token_time, "/");
+            // 密码变更后全端下线，要求重新登录
+            AuthService::RevokeAllSessions(info->getId());
+            AuthService::ClearSessionCookie(response);
+            result->set("relogin", true);
         }
     } while (0);
     response->setBody(result->toJsonString());

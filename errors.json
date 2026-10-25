@@ -40,6 +40,72 @@
     { "errno": 2026,  "key": "TEMP_TOKEN_INVALID",         "zh": "临时凭证无效或已过期",        "en": "Temporary token invalid or expired" },
     { "errno": 2027,  "key": "GITHUB_OAUTH_FAILED",        "zh": "GitHub 授权登录失败",        "en": "GitHub OAuth login failed" },
     { "errno": 2028,  "key": "GITHUB_STATE_INVALID",       "zh": "登录状态校验失败，请重试",    "en": "OAuth state invalid or expired" },
+    {
+      "errno": 2029,
+      "key": "PASSKEY_NOT_FOUND",
+      "zh": "Passkey 不存在",
+      "en": "Passkey not found"
+    },
+    {
+      "errno": 2030,
+      "key": "PASSKEY_ALREADY_EXISTS",
+      "zh": "该 Passkey 已注册",
+      "en": "Passkey already registered"
+    },
+    {
+      "errno": 2031,
+      "key": "PASSKEY_REGISTER_FAILED",
+      "zh": "Passkey 注册失败",
+      "en": "Failed to register passkey"
+    },
+    {
+      "errno": 2032,
+      "key": "WEBAUTHN_NOT_CONFIGURED",
+      "zh": "WebAuthn 未配置",
+      "en": "WebAuthn is not configured"
+    },
+    {
+      "errno": 2033,
+      "key": "WEBAUTHN_CHALLENGE_INVALID",
+      "zh": "WebAuthn 校验已过期，请重试",
+      "en": "WebAuthn challenge invalid or expired"
+    },
+    {
+      "errno": 2034,
+      "key": "WEBAUTHN_ORIGIN_MISMATCH",
+      "zh": "WebAuthn 来源不匹配",
+      "en": "WebAuthn origin mismatch"
+    },
+    {
+      "errno": 2035,
+      "key": "WEBAUTHN_RP_ID_MISMATCH",
+      "zh": "WebAuthn 域名不匹配",
+      "en": "WebAuthn rpId mismatch"
+    },
+    {
+      "errno": 2036,
+      "key": "WEBAUTHN_INVALID_CREDENTIAL",
+      "zh": "WebAuthn 凭据无效",
+      "en": "Invalid WebAuthn credential"
+    },
+    {
+      "errno": 2037,
+      "key": "WEBAUTHN_UNSUPPORTED_ALG",
+      "zh": "WebAuthn 算法不支持",
+      "en": "Unsupported WebAuthn algorithm"
+    },
+    {
+      "errno": 2038,
+      "key": "WEBAUTHN_VERIFY_FAILED",
+      "zh": "WebAuthn 校验失败",
+      "en": "WebAuthn verification failed"
+    },
+    {
+      "errno": 2039,
+      "key": "EMAIL_CODE_ATTEMPTS_EXCEEDED",
+      "zh": "验证码尝试次数过多，请稍后再试",
+      "en": "Too many verification code attempts, please try again later"
+    },
 
     { "errno": 3001,  "key": "ARTICLE_NOT_FOUND",           "zh": "文章不存在",               "en": "Article not found" },
     { "errno": 3002,  "key": "ARTICLE_INVALID_TYPE",        "zh": "文章类型错误",              "en": "Invalid article type" },

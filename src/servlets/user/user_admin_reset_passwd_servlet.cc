@@ -2,6 +2,7 @@
 
 #include <chen/log/log.h>
 
+#include "../../auth/auth_service.h"
 #include "../../event/event_define.h"
 #include "../../manager/user_manager.h"
 #include "../../util.h"
@@ -50,6 +51,10 @@ int32_t UserAdminResetPasswdServlet::handle(
         }
 
         chen::ITransaction::ptr trans = db->openTransaction();
+        if (!trans) {
+            result->setErrno(errcode::DB_TRANSACTION_FAILED);
+            break;
+        }
         data::UserInfo::ptr info = UserMgr::GetInstance()->get(id);
         if (!info) {
             result->setErrno(errcode::USER_NOT_FOUND);
@@ -63,6 +68,7 @@ int32_t UserAdminResetPasswdServlet::handle(
         }
         trans->commit();
         UserMgr::GetInstance()->update(info);
+        AuthService::RevokeAllSessions(info->getId());
 
         // Notify affected user
         {

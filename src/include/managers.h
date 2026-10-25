@@ -23,6 +23,7 @@
 #include "../manager/organization_repo_manager.h"           // IWYU pragma: keep
 #include "../manager/organization_repo_pr_manager.h"        // IWYU pragma: keep
 #include "../manager/organization_user_rel_manager.h"       // IWYU pragma: keep
+#include "../manager/passkey_manager.h"                     // IWYU pragma: keep
 #include "../manager/requirement_manager.h"                 // IWYU pragma: keep
 #include "../manager/resource_manager.h"                    // IWYU pragma: keep
 #include "../manager/system_settings_manager.h"             // IWYU pragma: keep

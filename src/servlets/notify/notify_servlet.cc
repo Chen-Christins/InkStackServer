@@ -2,10 +2,9 @@
 
 #include "../../util.h"
 
+#include "../../auth/auth_service.h"
 #include "../../error_codes.h"
 #include "../../manager/notification_manager.h"
-#include "../../manager/user_login_device_manager.h"
-#include "../../manager/user_manager.h"
 
 #include <chen/log/log.h>
 #include <json/json.h>
@@ -35,43 +34,12 @@ int32_t NotifyServlet::onConnect(chen::http::HttpRequest::ptr header, chen::http
     if (!header || !session) {
         return -1;
     }
-    std::string uid_str = header->getParam("uid");
-    std::string token = header->getParam("token");
-    std::string token_time_str = header->getParam("token_time");
 
-    INFO(logger) << "[WS] onConnect: uid=" << uid_str << " token=" << (token.empty() ? "(empty)" : "***") << " token_time=" << token_time_str;
-
-    if (uid_str.empty() || token.empty() || token_time_str.empty()) {
-        INFO(logger) << "[WS] onConnect FAIL: missing params";
-        sendError(session, errcode::PARAM_MISSING, "Required parameter missing");
-        return -1;
-    }
-
-    int64_t uid = chen::TypeUtil::Atoi(uid_str);
-    int64_t token_time = chen::TypeUtil::Atoi(token_time_str);
-
-    if (token_time <= time(0)) {
-        INFO(logger) << "[WS] onConnect FAIL: token expired, token_time=" << token_time << " now=" << time(0);
-        sendError(session, errcode::NOT_LOGIN, "Token expired, please re-login");
-        return -1;
-    }
-
-    data::UserInfo::ptr uinfo = UserMgr::GetInstance()->get(uid);
-    if (!uinfo) {
-        INFO(logger) << "[WS] onConnect FAIL: user not found uid=" << uid;
-        sendError(session, errcode::USER_NOT_FOUND, "User not found");
-        return -1;
-    }
-    if (uinfo->getState() != 1) {
-        INFO(logger) << "[WS] onConnect FAIL: user state=" << uinfo->getState() << " uid=" << uid;
-        sendError(session, errcode::ACCOUNT_INVALID, "Account status abnormal");
-        return -1;
-    }
-
-    // 以设备表 token 为准校验（Redis 优先，DB 兜底）
-    if (!UserLoginDeviceMgr::GetInstance()->validateToken(uid, token, time(0))) {
-        INFO(logger) << "[WS] onConnect FAIL: token mismatch, uid=" << uid;
-        sendError(session, errcode::NOT_LOGIN, "Token mismatch, please re-login");
+    int64_t uid = 0;
+    data::UserInfo::ptr uinfo;
+    if (!AuthService::ResolveWs(header, uid, uinfo)) {
+        INFO(logger) << "[WS] onConnect FAIL: not logged in";
+        sendError(session, errcode::NOT_LOGIN, "Please login first");
         return -1;
     }
 
@@ -83,9 +51,19 @@ int32_t NotifyServlet::onConnect(chen::http::HttpRequest::ptr header, chen::http
 
 int32_t NotifyServlet::onClose(chen::http::HttpRequest::ptr header, chen::http::WSSession::ptr session)
 {
-    std::string uid_str = header->getParam("uid");
-    if (!uid_str.empty()) {
-        int64_t uid = chen::TypeUtil::Atoi(uid_str);
+    int64_t uid = 0;
+    if (header) {
+        AuthContext ctx = AuthService::Resolve(header, nullptr, false);
+        if (ctx.valid()) {
+            uid = ctx.uid;
+        } else {
+            std::string uid_str = header->getParam("uid");
+            if (!uid_str.empty()) {
+                uid = chen::TypeUtil::Atoi(uid_str);
+            }
+        }
+    }
+    if (uid) {
         NotificationMgr::GetInstance()->removeConnection(uid);
     }
 

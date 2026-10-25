@@ -11,7 +11,7 @@ namespace servlet {
 static chen::Logger::ptr logger = LOG_ROOT();
 
 CategoryCreateServlet::CategoryCreateServlet()
-    : BlogLoginedServlet("CategoryCreateServlet")
+    : BlogAdminServlet("CategoryCreateServlet")
 {
 }
 

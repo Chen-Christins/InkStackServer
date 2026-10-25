@@ -35,6 +35,9 @@ int32_t ArticleDeleteServlet::handle(
         std::vector<data::ArticleInfo::ptr> infos;
         for (auto& id : art_ids) {
             auto info = ArticleMgr::GetInstance()->get(id);
+            if (!info) {
+                continue;
+            }
             if (info->getUserId() != uid) {
                 continue;
             }

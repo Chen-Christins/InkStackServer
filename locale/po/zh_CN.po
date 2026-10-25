@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TechHaven-Server 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-18 07:05+0000\n"
+"POT-Creation-Date: 2026-10-23 13:38+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -156,6 +156,50 @@ msgstr "GitHub 授权登录失败"
 #. errno: 2028
 msgid "GITHUB_STATE_INVALID"
 msgstr "登录状态校验失败，请重试"
+
+#. errno: 2029
+msgid "PASSKEY_NOT_FOUND"
+msgstr "Passkey 不存在"
+
+#. errno: 2030
+msgid "PASSKEY_ALREADY_EXISTS"
+msgstr "该 Passkey 已注册"
+
+#. errno: 2031
+msgid "PASSKEY_REGISTER_FAILED"
+msgstr "Passkey 注册失败"
+
+#. errno: 2032
+msgid "WEBAUTHN_NOT_CONFIGURED"
+msgstr "WebAuthn 未配置"
+
+#. errno: 2033
+msgid "WEBAUTHN_CHALLENGE_INVALID"
+msgstr "WebAuthn 校验已过期，请重试"
+
+#. errno: 2034
+msgid "WEBAUTHN_ORIGIN_MISMATCH"
+msgstr "WebAuthn 来源不匹配"
+
+#. errno: 2035
+msgid "WEBAUTHN_RP_ID_MISMATCH"
+msgstr "WebAuthn 域名不匹配"
+
+#. errno: 2036
+msgid "WEBAUTHN_INVALID_CREDENTIAL"
+msgstr "WebAuthn 凭据无效"
+
+#. errno: 2037
+msgid "WEBAUTHN_UNSUPPORTED_ALG"
+msgstr "WebAuthn 算法不支持"
+
+#. errno: 2038
+msgid "WEBAUTHN_VERIFY_FAILED"
+msgstr "WebAuthn 校验失败"
+
+#. errno: 2039
+msgid "EMAIL_CODE_ATTEMPTS_EXCEEDED"
+msgstr "验证码尝试次数过多，请稍后再试"
 
 #. errno: 3001
 msgid "ARTICLE_NOT_FOUND"
@@ -577,15 +621,20 @@ msgstr "不能与自己私信"
 msgid "invalid year or month"
 msgstr "无效的年份或月份"
 
+#: src/servlets/auth/passkey_register_begin_servlet.cc:43
+#: src/servlets/auth/passkey_register_finish_servlet.cc:56
+msgid "passkey name too long"
+msgstr "Passkey 名称过长"
+
 #: src/servlets/category/category_create_servlet.cc:44
 msgid "invalid parent_id"
 msgstr "无效的 parent_id"
 
-#: src/servlets/category/category_create_servlet.cc:54
+#: src/servlets/category/category_create_servlet.cc:53
 msgid "invalid cid"
 msgstr "无效的 cid"
 
-#: src/servlets/category/category_create_servlet.cc:85
+#: src/servlets/category/category_create_servlet.cc:83
 msgid "category operation failed"
 msgstr "分类操作失败"
 
@@ -593,16 +642,16 @@ msgstr "分类操作失败"
 msgid "no categories"
 msgstr "没有可用的分类"
 
-#: src/servlets/database/backup_create_servlet.cc:55
+#: src/servlets/database/backup_create_servlet.cc:53
 #: src/servlets/database/export_create_servlet.cc:38
 msgid "param type is required"
 msgstr "缺少必填参数 type"
 
-#: src/servlets/database/backup_create_servlet.cc:59
+#: src/servlets/database/backup_create_servlet.cc:57
 msgid "type must be full or incremental"
 msgstr "type 必须是 full 或 incremental"
 
-#: src/servlets/database/backup_create_servlet.cc:68
+#: src/servlets/database/backup_create_servlet.cc:66
 msgid "create backup failed"
 msgstr "创建备份失败"
 
@@ -685,11 +734,11 @@ msgstr "查询反馈失败"
 msgid "feedback insert failed"
 msgstr "提交反馈失败"
 
-#: src/servlets/label/label_create_servlet.cc:41
+#: src/servlets/label/label_create_servlet.cc:40
 msgid "invalid lid"
 msgstr "无效的 lid"
 
-#: src/servlets/label/label_create_servlet.cc:73
+#: src/servlets/label/label_create_servlet.cc:71
 msgid "label operation failed"
 msgstr "标签操作失败"
 
@@ -717,7 +766,7 @@ msgstr "无效的 peer_id"
 msgid "私信仅对内部成员开放"
 msgstr "私信仅对内部成员开放"
 
-#: src/servlets/notify/notification_read_servlet.cc:41
+#: src/servlets/notify/notification_read_servlet.cc:43
 msgid "id or ids is required"
 msgstr "缺少必填参数 id 或 ids"
 
@@ -730,8 +779,8 @@ msgid "action must be approve or reject"
 msgstr "action 必须是 approve 或 reject"
 
 #: src/servlets/organization/organization_join_check_servlet.cc:35
-#: src/servlets/user/user_admin_create_servlet.cc:77
-#: src/servlets/user/user_admin_update_servlet.cc:103
+#: src/servlets/user/user_admin_create_servlet.cc:60
+#: src/servlets/user/user_admin_update_servlet.cc:92
 msgid "invalid state"
 msgstr "无效的状态"
 
@@ -820,8 +869,8 @@ msgid "保存 Token 失败"
 msgstr "保存 Token 失败"
 
 #: src/servlets/organization/organization_user_switch_role_servlet.cc:70
-#: src/servlets/user/user_admin_create_servlet.cc:73
-#: src/servlets/user/user_admin_update_servlet.cc:96
+#: src/servlets/user/user_admin_create_servlet.cc:56
+#: src/servlets/user/user_admin_update_servlet.cc:85
 msgid "invalid role"
 msgstr "无效的角色"
 
@@ -835,11 +884,35 @@ msgstr "缺少必填参数 id"
 msgid "type is required"
 msgstr "缺少必填参数 type"
 
-#: src/servlets/rd/rd_trend_servlet.cc:181
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:98
+msgid "range is required"
+msgstr "时间范围不能为空"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:102
+msgid "granularity is required"
+msgstr "统计粒度不能为空"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:106
+msgid "invalid org_id"
+msgstr "组织 ID 无效"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:112
+msgid "range must be 15d or 3m"
+msgstr "时间范围必须是 15d 或 3m"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:116
+msgid "granularity does not match range"
+msgstr "统计粒度与时间范围不匹配"
+
+#: src/servlets/rd/rd_pr_distribution_servlet.cc:158
+msgid "no accessible organization"
+msgstr "无可访问的组织"
+
+#: src/servlets/rd/rd_trend_servlet.cc:153
 msgid "日期范围不合法"
 msgstr "日期范围不合法"
 
-#: src/servlets/rd/rd_trend_servlet.cc:195
+#: src/servlets/rd/rd_trend_servlet.cc:167
 msgid "无权访问任何组织"
 msgstr "无权访问任何组织"
 
@@ -855,29 +928,29 @@ msgstr "关闭双因素认证失败"
 msgid "reset 2fa failed"
 msgstr "重置双因素认证失败"
 
-#: src/servlets/user/user_admin_create_servlet.cc:49
+#: src/servlets/user/user_admin_create_servlet.cc:32
 #: src/servlets/user/user_create_servlet.cc:36
 msgid "account and password required"
 msgstr "缺少账号或密码"
 
-#: src/servlets/user/user_admin_create_servlet.cc:96
-#: src/servlets/user/user_admin_reset_passwd_servlet.cc:72
-#: src/servlets/user/user_create_servlet.cc:86
-#: src/servlets/user/user_reset_passwd_servlet.cc:63
+#: src/servlets/user/user_admin_create_servlet.cc:85
+#: src/servlets/user/user_admin_reset_passwd_servlet.cc:66
+#: src/servlets/user/user_create_servlet.cc:92
+#: src/servlets/user/user_reset_passwd_servlet.cc:78
 msgid "insert user failed"
 msgstr "创建用户失败"
 
-#: src/servlets/user/user_admin_delete_servlet.cc:67
+#: src/servlets/user/user_admin_delete_servlet.cc:55
 msgid "delete user failed"
 msgstr "删除用户失败"
 
-#: src/servlets/user/user_admin_reset_passwd_servlet.cc:48
-#: src/servlets/user/user_reset_passwd_servlet.cc:34
+#: src/servlets/user/user_admin_reset_passwd_servlet.cc:32
+#: src/servlets/user/user_reset_passwd_servlet.cc:35
 msgid "password required"
 msgstr "缺少密码"
 
-#: src/servlets/user/user_admin_update_servlet.cc:117
-#: src/servlets/user/user_update_servlet.cc:94
+#: src/servlets/user/user_admin_update_servlet.cc:106
+#: src/servlets/user/user_update_servlet.cc:99
 msgid "update user failed"
 msgstr "更新用户失败"
 
@@ -889,16 +962,16 @@ msgstr "type 必须是 openai、claude 或 glm"
 msgid "max_tokens is required for claude"
 msgstr "claude 必须提供 max_tokens"
 
-#: src/servlets/user/user_oauth_github_callback_servlet.cc:308
+#: src/servlets/user/user_oauth_github_callback_servlet.cc:305
 #: src/servlets/user/user_oauth_github_servlet.cc:59
 msgid "GitHub OAuth 未配置"
 msgstr "GitHub OAuth 未配置"
 
-#: src/servlets/user/user_refresh_token_servlet.cc:52
+#: src/servlets/user/user_refresh_token_servlet.cc:60
 msgid "token is required"
 msgstr "缺少 token"
 
-#: src/servlets/user/user_refresh_token_servlet.cc:58
+#: src/servlets/user/user_refresh_token_servlet.cc:66
 msgid "token mismatch, please re-login"
 msgstr "token 不匹配，请重新登录"
 
@@ -906,7 +979,7 @@ msgstr "token 不匹配，请重新登录"
 msgid "old password required"
 msgstr "缺少旧密码"
 
-#: src/util.h:128 src/util.h:137
+#: src/util.h:147 src/util.h:156
 #, c-format
 msgid "param %s is required"
 msgstr "缺少必填参数 %s"

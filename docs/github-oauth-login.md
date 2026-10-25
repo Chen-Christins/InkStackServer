@@ -59,14 +59,13 @@
 
 ### 第四段：建立本地登录态
 
-这一段**刻意复用普通密码登录的逻辑**，唯一区别是 **GitHub 登录跳过两步验证**：
+这一段复用统一的 `AuthService::IssueSession`，与普通密码登录、2FA 登录完全一致：
 
-1. 从系统设置读会话时长（默认 24 小时），生成一个随机 token。
-2. 解析设备信息：User-Agent 判断平台、真实客户端 IP、设备 ID（优先请求头，其次 Cookie，都没有就新生成并写一个长期 Cookie）。
-3. **单点登录控制**：如果设备已被其他用户占用就踢掉；同一用户在同一平台的旧会话也会被踢。最终允许"一个移动端 + 一个 PC 端"两个并发位。
-4. 记录一条登录设备记录，把 token 缓存到 Redis。
-5. 更新用户最近登录时间。
-6. 设置 Cookie（用户标识、token、过期时间）和会话数据。
+1. 从系统设置读空闲会话时长（默认 24 小时），生成随机 `SESSIONID`。
+2. 在 Redis 中写入服务端会话（用户、IP、User-Agent、创建/活跃时间）。
+3. 设置 `SESSIONID` Cookie：`HttpOnly`、`SameSite=Lax`，生产环境带 `Secure`。
+4. 更新用户最近登录时间。
+5. OAuth 登录跳过两步验证，直接签发会话。
 
 ### 第五段：最终跳转
 
@@ -84,17 +83,15 @@
 
 ## 四、后续请求如何鉴权
 
-我们**没有用 JWT**，而是"服务端会话 + 每设备 token"，由 Redis 和 MySQL 共同支撑。
+我们 **没有用 JWT**，而是"服务端会话 + HttpOnly Cookie"：
 
-每个请求进来时，框架统一做登录初始化（登录、登出这两个路径除外）：
+1. 登录成功后 `AuthService` 生成随机 `SESSIONID`，写入 Redis 会话，并下发带 `HttpOnly` / `SameSite` 的 Cookie。
+2. 每个请求进来时，框架从 `SESSIONID` 解析会话、校验用户状态，并把登录上下文交给业务 servlet。
+3. 需要登录的接口由 `BlogLoginedServlet` 统一拦截；管理员接口再由 `BlogAdminServlet` 校验角色。
+4. 登出、改密、封禁、删除账号都会删除服务端会话并清理 Cookie。
 
-1. 会话里已有用户就直接校验 token 并刷新缓存。
-2. 否则用 Cookie 自动登录：解密用户标识、检查 token 和有效期、确认账号激活、校验 token（先查 Redis，失败回落数据库）。
-3. 校验通过就把用户写回会话。
-
-需要登录的接口在这个基础上再包一层，初始化失败就直接返回"未登录"。
-
-token 校验是双通道的：先看 Redis，再回落数据库行（要求活跃、用户匹配、未过期）。**踢人**就是把设备标记为不活跃并删除 Redis 里的 token。此外还有独立的**刷新 token** 和**登出**接口，刷新会轮换 token 并重设 Cookie，登出则清理设备和会话。
+迁移期仍兼容旧的 `S_UID` / `S_TOKEN` Cookie：没有 `SESSIONID` 时，`AuthService::UpgradeLegacySession` 会校验旧
+token，成功后自动换成新的会话 Cookie。该兼容逻辑在后续版本移除。
 
 ## 五、错误码
 

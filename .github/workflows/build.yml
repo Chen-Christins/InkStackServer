@@ -112,6 +112,11 @@ jobs:
           GITHUB_CLIENT_SECRET: ${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }}
           GITHUB_CALLBACK_URL: ${{ secrets.OAUTH_GITHUB_CALLBACK_URL }}
           FRONTEND_BASE: ${{ vars.FRONTEND_BASE }}
+          AUTH_COOKIE_SECURE: "true"
+          WEBAUTHN_RP_ID: ${{ vars.WEBAUTHN_RP_ID }}
+          WEBAUTHN_RP_NAME: ${{ vars.WEBAUTHN_RP_NAME }}
+          WEBAUTHN_ORIGIN: ${{ vars.WEBAUTHN_ORIGIN }}
+          WEBAUTHN_USER_HANDLE_SECRET: ${{ secrets.WEBAUTHN_USER_HANDLE_SECRET }}
         run: |
           {
             echo "WORK_PATH=${WORK_PATH:-/home/path/to/apps}"
@@ -128,6 +133,11 @@ jobs:
             echo "GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}"
             echo "GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL}"
             echo "FRONTEND_BASE=${FRONTEND_BASE}"
+            echo "AUTH_COOKIE_SECURE=${AUTH_COOKIE_SECURE:-true}"
+            echo "WEBAUTHN_RP_ID=${WEBAUTHN_RP_ID:-change.me}"
+            echo "WEBAUTHN_RP_NAME=${WEBAUTHN_RP_NAME:-InkStack}"
+            echo "WEBAUTHN_ORIGIN=${WEBAUTHN_ORIGIN:-https://change.me}"
+            echo "WEBAUTHN_USER_HANDLE_SECRET=${WEBAUTHN_USER_HANDLE_SECRET:-}"
           } > bin/conf/prod.env
 
       - name: Package

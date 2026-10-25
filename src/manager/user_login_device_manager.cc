@@ -5,6 +5,7 @@
 #include <chen/config/config.h>
 #include <chen/db/redis.h>
 #include <chen/log/log.h>
+#include <chen/util/time_util.h>
 
 namespace blog {
 
@@ -24,7 +25,7 @@ void UserLoginDeviceManager::cacheToken(const std::string& token, int64_t uid, i
     if (token.empty()) {
         return;
     }
-    int64_t ttl = token_time - time(0);
+    int64_t ttl = token_time - chen::TimeUtil::GetCurrentSec();
     if (ttl <= 0) {
         ttl = 1;
     }
@@ -58,8 +59,8 @@ int UserLoginDeviceManager::recordLogin(const LoginParam& param)
     info->setToken(param.token);
     info->setTokenTime(param.token_time);
     info->setIsActive(1);
-    info->setLoginTime(time(0));
-    info->setLastActiveTime(time(0));
+    info->setLoginTime(chen::TimeUtil::GetCurrentSec());
+    info->setLastActiveTime(chen::TimeUtil::GetCurrentSec());
     info->setLogoutTime(0);
     if (data::UserLoginDeviceInfoDao::Insert(info, db)) {
         ERROR(logger) << "recordLogin: Insert failed"
@@ -159,8 +160,8 @@ int UserLoginDeviceManager::kick(data::UserLoginDeviceInfo::ptr info)
         return -1;
     }
     info->setIsActive(0);
-    info->setLogoutTime(time(0));
-    info->setUpdateTime(time(0));
+    info->setLogoutTime(chen::TimeUtil::GetCurrentSec());
+    info->setUpdateTime(chen::TimeUtil::GetCurrentSec());
     if (data::UserLoginDeviceInfoDao::Update(info, db)) {
         ERROR(logger) << "kick: Update failed"
                       << ", errstr=" << db->getErrStr() << ", errno=" << db->getErrno();
@@ -179,6 +180,36 @@ int UserLoginDeviceManager::logout(const std::string& token)
     return kick(info);
 }
 
+int UserLoginDeviceManager::revokeAllByUser(int64_t uid)
+{
+    if (!uid) {
+        return -1;
+    }
+    auto db = GetDB();
+    if (!db) {
+        ERROR(logger) << "revokeAllByUser: GetDB failed";
+        return -1;
+    }
+
+    auto qb = data::UserLoginDeviceInfoDao::newQuery();
+    qb->where("user_id", "=", uid);
+    qb->where("is_active", "=", (int64_t)1);
+
+    std::vector<data::UserLoginDeviceInfo::ptr> results;
+    if (data::UserLoginDeviceInfoDao::QueryByBuilder(results, qb, db)) {
+        ERROR(logger) << "revokeAllByUser: QueryByBuilder failed"
+                      << ", errstr=" << db->getErrStr() << ", errno=" << db->getErrno();
+        return -1;
+    }
+
+    for (auto& info : results) {
+        if (info) {
+            kick(info);
+        }
+    }
+    return 0;
+}
+
 int UserLoginDeviceManager::updateToken(const std::string& old_token, const std::string& new_token, int64_t new_token_time)
 {
     auto info = getByToken(old_token);
@@ -192,8 +223,8 @@ int UserLoginDeviceManager::updateToken(const std::string& old_token, const std:
     }
     info->setToken(new_token);
     info->setTokenTime(new_token_time);
-    info->setLastActiveTime(time(0));
-    info->setUpdateTime(time(0));
+    info->setLastActiveTime(chen::TimeUtil::GetCurrentSec());
+    info->setUpdateTime(chen::TimeUtil::GetCurrentSec());
     if (data::UserLoginDeviceInfoDao::Update(info, db)) {
         ERROR(logger) << "updateToken: Update failed"
                       << ", errstr=" << db->getErrStr() << ", errno=" << db->getErrno();

@@ -33,4 +33,5 @@
 #include "blog/data/user_info.h"                        // IWYU pragma: keep
 #include "blog/data/user_login_device_info.h"           // IWYU pragma: keep
 #include "blog/data/user_oauth_info.h"                  // IWYU pragma: keep
+#include "blog/data/user_passkey_info.h"                // IWYU pragma: keep
 #include "blog/data/user_recovery_code_info.h"          // IWYU pragma: keep

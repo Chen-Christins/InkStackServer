@@ -123,12 +123,14 @@ make dist ENV=prod      # 架构按当前机器自动识别（dependencies.json 
 
 CI 生产配置由 **GitHub Secrets/Variables** 注入（见 workflow 的 `Prepare prod.env`），未配置时使用占位值，可在部署机再改。涉及的 Secrets/Variables：
 
-| 名称 | 类型 | 说明 |
-|------|------|------|
-| `MYSQL_HOST` / `MYSQL_PORT` / `MYSQL_USER` / `MYSQL_PASSWD` / `MYSQL_DBNAME` | Secret | MySQL 连接 |
-| `REDIS_HOST` / `REDIS_DBNAME` | Secret | Redis 连接 |
-| `OAUTH_GITHUB_CLIENT_ID` / `OAUTH_GITHUB_CLIENT_SECRET` / `OAUTH_GITHUB_CALLBACK_URL` | Secret | GitHub OAuth |
-| `WORK_PATH` / `LOG_LEVEL` / `FRONTEND_BASE` | Variable | 部署路径 / 日志级别 / 前端地址 |
+| 名称                                                                                  | 类型     | 说明                               |
+|---------------------------------------------------------------------------------------|----------|------------------------------------|
+| `MYSQL_HOST` / `MYSQL_PORT` / `MYSQL_USER` / `MYSQL_PASSWD` / `MYSQL_DBNAME`          | Secret   | MySQL 连接                         |
+| `REDIS_HOST` / `REDIS_DBNAME`                                                         | Secret   | Redis 连接                         |
+| `OAUTH_GITHUB_CLIENT_ID` / `OAUTH_GITHUB_CLIENT_SECRET` / `OAUTH_GITHUB_CALLBACK_URL` | Secret   | GitHub OAuth                       |
+| `WEBAUTHN_RP_ID` / `WEBAUTHN_RP_NAME` / `WEBAUTHN_ORIGIN`                             | Variable | Passkey RP ID / 名称 / 前端 origin |
+| `WEBAUTHN_USER_HANDLE_SECRET`                                                         | Secret   | Passkey user handle HMAC 密钥      |
+| `WORK_PATH` / `LOG_LEVEL` / `FRONTEND_BASE`                                           | Variable | 部署路径 / 日志级别 / 前端地址     |
 
 > 升级 SDK/依赖：改 `dependencies.json` 的 `chen-sdk.version`（或 `arch`）后推代码即可触发流水线。
 

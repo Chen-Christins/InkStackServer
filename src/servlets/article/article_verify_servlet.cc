@@ -42,6 +42,17 @@ int32_t ArticleVerifyServlet::handle(
             break;
         }
 
+        auto current_user = UserMgr::GetInstance()->get(uid);
+        if (!current_user) {
+            result->setErrno(errcode::USER_NOT_FOUND);
+            break;
+        }
+        int32_t role = current_user->getRole();
+        if (role != UserManager::Role::ADMIN && role != UserManager::Role::CHECKER) {
+            result->setErrno(errcode::ACCESS_DENIED);
+            break;
+        }
+
         data::ArticleInfo::ptr info = ArticleMgr::GetInstance()->get(id);
         if (!info) {
             result->setErrno(errcode::ARTICLE_INVALID_ID);

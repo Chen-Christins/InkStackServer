@@ -46,6 +46,17 @@ int32_t UserSendCodeServlet::handle(
             result->setErrno(errcode::USER_EMAIL_EXISTS);
             break;
         }
+        if (type == "5") {
+            auto recovery_user = blog::UserMgr::GetInstance()->getByEmail(email);
+            if (!recovery_user) {
+                result->setErrno(errcode::USER_EMAIL_NOT_REGISTER);
+                break;
+            }
+            if (recovery_user->getState() != UserManager::Status::ACTIVE || recovery_user->getIsDeleted()) {
+                result->setErrno(errcode::ACCOUNT_INVALID);
+                break;
+            }
+        }
 
         // IP 限流：每小时每 IP 最多 5 次
         {
@@ -87,15 +98,20 @@ int32_t UserSendCodeServlet::handle(
         std::string site_name = sys_settings->getSiteName();
 
         // 异步发送邮件，不阻塞请求响应
-        std::string title = (type == "1" ? " " + site_name + " 账号注册验证码" : " " + site_name + " 重置密码验证码");
+        // type: 1-注册, 3-重置密码, 5-账号恢复
+        bool is_register = (type == "1");
+        bool is_recovery = (type == "5");
+        std::string title = " " + site_name + (is_register ? " 账号注册验证码" : (is_recovery ? " 账号恢复验证码" : " 重置密码验证码"));
+        std::string intro = is_register
+            ? ("感谢注册 " + site_name + "，请使用以下验证码完成验证：")
+            : (is_recovery ? "您正在恢复账号登录，请使用以下验证码完成验证：" : "您正在重置密码，请使用以下验证码完成验证：");
         std::string code_html = std::string() + "<div style=\"max-width:480px;margin:0 auto;padding:32px 24px;"
             + "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;"
             + "background:#ffffff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.08)\">"
             + "<div style=\"text-align:center;padding-bottom:24px;border-bottom:1px solid #f0f0f0\">"
             + "<h1 style=\"margin:0;font-size:22px;color:#1a1a1a\">" + site_name + "</h1>" + "</div>" + "<div style=\"padding:24px 0\">"
             + "<p style=\"margin:0 0 8px;font-size:15px;color:#555\">您好，</p>"
-            + "<p style=\"margin:0 0 24px;font-size:15px;color:#555;line-height:1.6\">"
-            + (type == "1" ? "感谢注册 " + site_name + "，请使用以下验证码完成验证：" : "您正在重置密码，请使用以下验证码完成验证：") + "</p>"
+            + "<p style=\"margin:0 0 24px;font-size:15px;color:#555;line-height:1.6\">" + intro + "</p>"
             + "<div style=\"background:#f7f8fa;border-radius:8px;padding:20px;text-align:center;margin-bottom:24px\">"
             + "<span style=\"font-size:32px;font-weight:700;letter-spacing:6px;color:#1a1a1a;font-family:'Courier New',monospace\">" + code
             + "</span>" + "</div>" + "<p style=\"margin:0;font-size:13px;color:#999\">验证码 10 分钟内有效，请勿转发给他人。</p>" + "</div>"

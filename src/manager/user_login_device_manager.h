@@ -69,6 +69,12 @@ public:
     int logout(const std::string& token);
 
     /**
+     * @brief 撤销某用户全部活跃设备会话（改密、封禁、删除等场景）
+     * @return 0 成功，负数失败
+     */
+    int revokeAllByUser(int64_t uid);
+
+    /**
      * @brief 刷新设备会话 token
      * @return 0 成功，负数失败
      */

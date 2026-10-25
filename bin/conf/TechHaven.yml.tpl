@@ -29,6 +29,30 @@ oauth:
     # 授权成功后回跳的前端站点根地址
     frontend_base: ${FRONTEND_BASE}
 
+# 会话与认证
+auth:
+  # 生产环境必须为 true；本地 HTTP 调试可设为 false
+  cookie_secure: ${AUTH_COOKIE_SECURE}
+  cookie_same_site: Lax
+  # 会话绝对有效期（秒），<=0 表示不限制
+  session_absolute_ttl: 604800
+  # 迁移期兼容 WebSocket 的旧 token query 认证
+  ws_legacy_token: true
+
+# WebAuthn / Passkey
+webauthn:
+  # 注册域（不含端口），例如 example.com；开发环境为 localhost
+  rp_id: ${WEBAUTHN_RP_ID}
+  rp_name: ${WEBAUTHN_RP_NAME}
+  # 前端页面 origin（协议 + 域名 + 端口），必须与浏览器上报完全一致
+  origin: ${WEBAUTHN_ORIGIN}
+  timeout_ms: 60000
+  user_verification: preferred   # preferred | required
+  attestation: none
+  challenge_ttl: 300
+  # 用于生成稳定的 user.id，生产环境请配置随机密钥
+  user_handle_secret: ${WEBAUTHN_USER_HANDLE_SECRET}
+
 # Server configuration, including work path, PID file, and email service settings for sending notifications or alerts.
 server:
   work_path: ${WORK_PATH}

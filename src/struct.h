@@ -110,6 +110,11 @@ protected:
 
     bool initLogin(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response, chen::http::HttpSession::ptr session);
 
+    /**
+     * @brief 是否允许公开接口自动解析登录态（登录接口可覆盖为 false）
+     */
+    virtual bool allowAutoLogin() const;
+
 protected:
     chen::IDB::ptr getDB();
 };

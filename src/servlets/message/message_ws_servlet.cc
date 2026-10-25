@@ -7,8 +7,8 @@
 #include <json/json.h>
 
 #include "../../error_codes.h"
+#include "../../auth/auth_service.h"
 #include "../../manager/message_manager.h"
-#include "../../manager/user_login_device_manager.h"
 #include "../../manager/user_manager.h"
 #include "message_json.h"
 
@@ -37,48 +37,17 @@ int32_t MessageWSServlet::onConnect(chen::http::HttpRequest::ptr header, chen::h
     if (!header || !session) {
         return -1;
     }
-    std::string uid_str = header->getParam("uid");
-    std::string token = header->getParam("token");
-    std::string token_time_str = header->getParam("token_time");
 
-    INFO(logger) << "[ChatWS] onConnect: uid=" << uid_str << " token=" << (token.empty() ? "(empty)" : "***") << " token_time=" << token_time_str;
-
-    if (uid_str.empty() || token.empty() || token_time_str.empty()) {
-        INFO(logger) << "[ChatWS] onConnect FAIL: missing params";
-        sendError(session, errcode::PARAM_MISSING, "Required parameter missing");
-        return -1;
-    }
-
-    int64_t uid = chen::TypeUtil::Atoi(uid_str);
-    int64_t token_time = chen::TypeUtil::Atoi(token_time_str);
-
-    if (token_time <= time(0)) {
-        INFO(logger) << "[ChatWS] onConnect FAIL: token expired, token_time=" << token_time << " now=" << time(0);
-        sendError(session, errcode::NOT_LOGIN, "Token expired, please re-login");
-        return -1;
-    }
-
-    data::UserInfo::ptr uinfo = UserMgr::GetInstance()->get(uid);
-    if (!uinfo) {
-        INFO(logger) << "[ChatWS] onConnect FAIL: user not found uid=" << uid;
-        sendError(session, errcode::USER_NOT_FOUND, "User not found");
-        return -1;
-    }
-    if (uinfo->getState() != 1) {
-        INFO(logger) << "[ChatWS] onConnect FAIL: user state=" << uinfo->getState() << " uid=" << uid;
-        sendError(session, errcode::ACCOUNT_INVALID, "Account status abnormal");
+    int64_t uid = 0;
+    data::UserInfo::ptr uinfo;
+    if (!AuthService::ResolveWs(header, uid, uinfo)) {
+        INFO(logger) << "[ChatWS] onConnect FAIL: not logged in";
+        sendError(session, errcode::NOT_LOGIN, "Please login first");
         return -1;
     }
     if (uinfo->getRole() == UserManager::Role::USER) {
         INFO(logger) << "[ChatWS] onConnect FAIL: no permission uid=" << uid;
         sendError(session, errcode::ACCESS_DENIED, "Chat not available for normal users");
-        return -1;
-    }
-
-    // 以设备表 token 为准校验（Redis 优先，DB 兜底）
-    if (!UserLoginDeviceMgr::GetInstance()->validateToken(uid, token, time(0))) {
-        INFO(logger) << "[ChatWS] onConnect FAIL: token mismatch, uid=" << uid;
-        sendError(session, errcode::NOT_LOGIN, "Token mismatch, please re-login");
         return -1;
     }
 
@@ -89,9 +58,12 @@ int32_t MessageWSServlet::onConnect(chen::http::HttpRequest::ptr header, chen::h
 
 int32_t MessageWSServlet::onClose(chen::http::HttpRequest::ptr header, chen::http::WSSession::ptr session)
 {
-    std::string uid_str = header->getParam("uid");
-    if (!uid_str.empty()) {
-        int64_t uid = chen::TypeUtil::Atoi(uid_str);
+    int64_t uid = 0;
+    if (header) {
+        AuthContext ctx = AuthService::Resolve(header, nullptr, false);
+        uid = ctx.valid() ? ctx.uid : header->getParamAs<int64_t>("uid", 0);
+    }
+    if (uid) {
         MessageMgr::GetInstance()->removeChatConnection(uid, session);
         INFO(logger) << "[ChatWS] onClose: uid=" << uid;
     }
@@ -107,10 +79,7 @@ int32_t MessageWSServlet::handle(chen::http::HttpRequest::ptr header, chen::http
         // 身份解析：优先握手请求里的 uid，其次按连接反查
         int64_t uid = MessageMgr::GetInstance()->getUidBySession(session);
         if (!uid) {
-            std::string uid_str = header->getParam("uid");
-            if (!uid_str.empty()) {
-                uid = atoi(uid_str.c_str());
-            }
+            uid = header->getParamAs<int64_t>("uid", 0);
         }
         if (!uid) {
             sendError(session, errcode::NOT_LOGIN, "Not logged in");

@@ -129,7 +129,64 @@ cache:
 
 > 该配置项有代码默认值 `true`，不写也能正常工作；Redis 异常时缓存操作会静默降级为 DB 查询。
 
-## 6. 注意事项
+## 6. 会话与认证配置
+
+登录态使用服务端 Session + `SESSIONID` Cookie，配置位于 `TechHaven.yml.tpl` 的 `auth` 节点：
+
+```yaml
+auth:
+  cookie_secure: ${AUTH_COOKIE_SECURE}
+  cookie_same_site: Lax
+  session_absolute_ttl: 604800
+  ws_legacy_token: true
+```
+
+| 配置                        | 说明                                                                 |
+|-----------------------------|----------------------------------------------------------------------|
+| `auth.cookie_secure`        | `SESSIONID` 是否带 `Secure`；生产必须为 `true`                       |
+| `auth.cookie_same_site`     | `Lax` / `Strict` / `None`；`None` 会自动强制 `Secure`                |
+| `auth.session_absolute_ttl` | 会话绝对有效期（秒），`<=0` 不限制；空闲有效期取系统设置里的会话时长 |
+| `auth.ws_legacy_token`      | 迁移期是否允许 WebSocket 使用旧 `uid/token/token_time` query 认证    |
+
+> 升级后已有 `prod.env` 需要补充 `AUTH_COOKIE_SECURE=true`，否则 `switch-env.sh` 会因缺少占位符而失败。
+
+`SESSIONID` Cookie 固定带 `HttpOnly`，前端不需要也不应该读取它。
+
+## 7. WebAuthn / Passkey 配置
+
+Passkey 注册配置位于 `TechHaven.yml.tpl` 的 `webauthn` 节点：
+
+```yaml
+webauthn:
+  rp_id: ${WEBAUTHN_RP_ID}
+  rp_name: ${WEBAUTHN_RP_NAME}
+  origin: ${WEBAUTHN_ORIGIN}
+  timeout_ms: 60000
+  user_verification: preferred
+  attestation: none
+  challenge_ttl: 300
+  user_handle_secret: ${WEBAUTHN_USER_HANDLE_SECRET}
+```
+
+| 配置                          | 说明                                                                                                 |
+|-------------------------------|------------------------------------------------------------------------------------------------------|
+| `webauthn.rp_id`              | Relying Party ID，必须是注册域（如 `example.com`），**不含协议、端口和路径**；本地开发用 `localhost` |
+| `webauthn.rp_name`            | 浏览器弹窗中展示的站点名                                                                             |
+| `webauthn.origin`             | 前端页面的 origin（协议 + 域名 + 端口），必须与浏览器 `clientDataJSON.origin` 完全一致               |
+| `webauthn.timeout_ms`         | 浏览器认证超时时间                                                                                   |
+| `webauthn.user_verification`  | `preferred` 或 `required`；同时作用于 Passkey 注册和登录，`required` 要求生物识别/PIN                |
+| `webauthn.attestation`        | 注册时请求的 attestation 类型，当前默认 `none`                                                       |
+| `webauthn.challenge_ttl`      | challenge 在 Redis 中的有效期（秒）                                                                  |
+| `webauthn.user_handle_secret` | 生成稳定 `user.id` 的 HMAC 密钥，生产环境必须配置随机值且不要随意轮换                                |
+
+> 前后端同源时 `origin` 就是站点地址；前后端分离时，`origin` 填 **前端页面**地址，`rp_id` 填两者共同的注册域。
+
+> Passkey 登录默认不叠加 TOTP；如果要求每次登录都做本地用户验证，请把 `webauthn.user_verification` 设为 `required`。
+
+> 升级后已有 `prod.env` 需要补充 `WEBAUTHN_RP_ID` / `WEBAUTHN_RP_NAME` / `WEBAUTHN_ORIGIN` /
+> `WEBAUTHN_USER_HANDLE_SECRET`，否则 `switch-env.sh` 会因缺少占位符而失败。
+
+## 8. 注意事项
 
 1. **占位符命名**：统一用大写 snake_case（如 `MYSQL_HOST`、`UPLOAD_DIR`），并在 `dev.env` 与 `prod.env.example` 中保持一致。
 2. **密钥不入库**：生产密码、密钥只写在 `bin/conf/prod.env`（已被 `.gitignore` 忽略），不要写进 `prod.env.example` 或提交。

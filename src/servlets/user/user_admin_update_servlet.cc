@@ -1,7 +1,9 @@
 #include "user_admin_update_servlet.h"
 
 #include <chen/log/log.h>
+#include <chen/util/time_util.h>
 
+#include "../../auth/auth_service.h"
 #include "../../manager/user_manager.h"
 #include "../../util.h"
 
@@ -94,7 +96,7 @@ int32_t UserAdminUpdateServlet::handle(
             info->setState(state);
         }
 
-        info->setUpdateTime(time(0));
+        info->setUpdateTime(chen::TimeUtil::GetCurrentSec());
 
         auto db = getDB();
         if (!db) {
@@ -108,6 +110,11 @@ int32_t UserAdminUpdateServlet::handle(
         }
 
         UserMgr::GetInstance()->update(info);
+
+        // 改密或禁用账号后，立即撤销该用户全部会话
+        if (!passwd.empty() || (has_state && state != UserManager::Status::ACTIVE)) {
+            AuthService::RevokeAllSessions(user_id);
+        }
 
         result->set("id", info->getId());
         result->set("account", info->getAccount());

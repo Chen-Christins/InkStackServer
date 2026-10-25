@@ -62,6 +62,17 @@ constexpr int32_t RECOVERY_CODE_INVALID = 2025;   // 恢复码无效或已使用
 constexpr int32_t TEMP_TOKEN_INVALID = 2026;      // 临时凭证无效或已过期
 constexpr int32_t GITHUB_OAUTH_FAILED = 2027;     // GitHub 授权登录失败
 constexpr int32_t GITHUB_STATE_INVALID = 2028;    // OAuth state 无效或已过期
+constexpr int32_t PASSKEY_NOT_FOUND = 2029;       // Passkey 不存在
+constexpr int32_t PASSKEY_ALREADY_EXISTS = 2030;  // Passkey 已注册
+constexpr int32_t PASSKEY_REGISTER_FAILED = 2031; // Passkey 注册失败
+constexpr int32_t WEBAUTHN_NOT_CONFIGURED = 2032; // WebAuthn 未配置
+constexpr int32_t WEBAUTHN_CHALLENGE_INVALID = 2033;  // WebAuthn challenge 无效或已过期
+constexpr int32_t WEBAUTHN_ORIGIN_MISMATCH = 2034;    // WebAuthn origin 不匹配
+constexpr int32_t WEBAUTHN_RP_ID_MISMATCH = 2035;     // WebAuthn rpId 不匹配
+constexpr int32_t WEBAUTHN_INVALID_CREDENTIAL = 2036; // WebAuthn 凭据无效
+constexpr int32_t WEBAUTHN_UNSUPPORTED_ALG = 2037;    // WebAuthn 不支持的算法
+constexpr int32_t WEBAUTHN_VERIFY_FAILED = 2038;      // WebAuthn 校验失败
+constexpr int32_t EMAIL_CODE_ATTEMPTS_EXCEEDED = 2039; // 验证码尝试次数过多
 
 // ==================== 模块03: 文章模块 (03001-03999) ====================
 constexpr int32_t ARTICLE_NOT_FOUND = 3001;      // 文章不存在

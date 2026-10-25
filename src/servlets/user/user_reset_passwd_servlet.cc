@@ -4,6 +4,7 @@
 #include <chen/db/redis.h>
 #include <chen/log/log.h>
 
+#include "../../auth/auth_service.h"
 #include "../../manager/user_manager.h"
 #include "../../util.h"
 
@@ -62,6 +63,10 @@ int32_t UserResetPasswdServlet::handle(
         }
 
         chen::ITransaction::ptr trans = db->openTransaction();
+        if (!trans) {
+            result->setErrno(errcode::DB_TRANSACTION_FAILED);
+            break;
+        }
         data::UserInfo::ptr info = UserMgr::GetInstance()->getByEmail(email);
         if (!info) {
             result->setErrno(errcode::USER_EMAIL_NOT_REGISTER);
@@ -75,6 +80,7 @@ int32_t UserResetPasswdServlet::handle(
         }
         trans->commit();
         UserMgr::GetInstance()->update(info);
+        AuthService::RevokeAllSessions(info->getId());
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

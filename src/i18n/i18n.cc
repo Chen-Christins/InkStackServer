@@ -135,7 +135,7 @@ std::string I18n::NormalizeLanguage(std::string_view language)
 {
     std::string value = chen::StringUtil::Trim(std::string(language), kTrimChars);
     std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
-        return static_cast<char>(std::tolower(c));
+        return std::tolower(c);
     });
     std::replace(value.begin(), value.end(), '_', '-');
 

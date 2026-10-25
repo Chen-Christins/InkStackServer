@@ -1,0 +1,23 @@
+<table name="user_passkey" namespace="blog.data" desc="用户 Passkey 凭据表">
+    <columns>
+        <column name="id" type="int64" auto_increment="true" desc="主键"/>
+        <column name="user_id" type="int64" desc="用户ID"/>
+        <column name="credential_id" type="string" length="512" desc="WebAuthn credential ID（base64url）"/>
+        <column name="public_key" type="text" desc="COSE 公钥（base64url）"/>
+        <column name="alg" type="int32" default="0" desc="COSE 算法: -7 ES256, -257 RS256, -8 EdDSA"/>
+        <column name="sign_count" type="int64" default="0" desc="签名计数器"/>
+        <column name="transports" type="string" length="64" desc="认证器传输方式，逗号分隔"/>
+        <column name="aaguid" type="string" length="64" desc="认证器 AAGUID（hex）"/>
+        <column name="name" type="string" length="64" desc="用户自定义名称"/>
+        <column name="backup_eligible" type="int32" default="0" desc="是否可备份: 0否 1是"/>
+        <column name="backup_state" type="int32" default="0" desc="是否已备份: 0否 1是"/>
+        <column name="is_deleted" type="int32" default="0" desc="是否已删除: 0否 1是"/>
+        <column name="created_at" type="datetime" default="current_timestamp" desc="创建时间"/>
+        <column name="last_used_at" type="datetime" default="current_timestamp" desc="最近使用时间"/>
+    </columns>
+    <indexs>
+        <index name="pk" cols="id" type="pk"/>
+        <index name="uniq_credential" cols="credential_id" type="uniq"/>
+        <index name="idx_user" cols="user_id" type="index"/>
+    </indexs>
+</table>

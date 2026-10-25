@@ -24,8 +24,7 @@ int32_t UserStatsServlet::handle(
     do {
         int64_t uid = request->getParamAs<int64_t>("user_id", 0);
         if (!uid) {
-            auto sdata = getSessionData(request, response);
-            uid = sdata->getData<int64_t>(CookieKey::USER_ID);
+            uid = getUserId(request);
         }
         if (!uid) {
             result->setErrno(errcode::NOT_LOGIN);
