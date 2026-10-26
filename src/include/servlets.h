@@ -1,180 +1,215 @@
-#include "../servlets/article/admin_comment_approve_servlet.h"              // IWYU pragma: keep
-#include "../servlets/article/admin_comment_delete_servlet.h"               // IWYU pragma: keep
-#include "../servlets/article/admin_comment_list_servlet.h"                 // IWYU pragma: keep
-#include "../servlets/article/admin_comment_reject_servlet.h"               // IWYU pragma: keep
-#include "../servlets/article/admin_comment_spam_servlet.h"                 // IWYU pragma: keep
-#include "../servlets/article/admin_comment_stats_servlet.h"                // IWYU pragma: keep
-#include "../servlets/article/article_admin_lists_servlet.h"                // IWYU pragma: keep
-#include "../servlets/article/article_admin_stats_servlet.h"                // IWYU pragma: keep
-#include "../servlets/article/article_ai_summary_servlet.h"                 // IWYU pragma: keep
-#include "../servlets/article/article_calendar_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/article/article_create_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/article_delete_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/article_detail_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/article_is_praising_servlet.h"                // IWYU pragma: keep
-#include "../servlets/article/article_list_by_category_servlet.h"           // IWYU pragma: keep
-#include "../servlets/article/article_list_by_label_servlet.h"              // IWYU pragma: keep
-#include "../servlets/article/article_praise_list_servlet.h"                // IWYU pragma: keep
-#include "../servlets/article/article_praise_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/article_publish_servlet.h"                    // IWYU pragma: keep
-#include "../servlets/article/article_query_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/article/article_search_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/article_switch_state_servlet.h"               // IWYU pragma: keep
-#include "../servlets/article/article_update_category_servlet.h"            // IWYU pragma: keep
-#include "../servlets/article/article_update_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/article_verify_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/article_view_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/article/comment_create_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/comment_delete_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/comment_list_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/article/comment_praise_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/article/comment_replies_servlet.h"                    // IWYU pragma: keep
-#include "../servlets/article/comment_update_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/auth/email_recovery_servlet.h"                        // IWYU pragma: keep
-#include "../servlets/auth/passkey_delete_servlet.h"                        // IWYU pragma: keep
-#include "../servlets/auth/passkey_list_servlet.h"                          // IWYU pragma: keep
-#include "../servlets/auth/passkey_login_begin_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/auth/passkey_login_finish_servlet.h"                  // IWYU pragma: keep
-#include "../servlets/auth/passkey_register_begin_servlet.h"                // IWYU pragma: keep
-#include "../servlets/auth/passkey_register_finish_servlet.h"               // IWYU pragma: keep
-#include "../servlets/assignment/assignment_admin_lists_servlet.h"          // IWYU pragma: keep
-#include "../servlets/assignment/assignment_admin_stats_servlet.h"          // IWYU pragma: keep
-#include "../servlets/assignment/assignment_create_servlet.h"               // IWYU pragma: keep
-#include "../servlets/assignment/assignment_delete_servlet.h"               // IWYU pragma: keep
-#include "../servlets/assignment/assignment_detail_servlet.h"               // IWYU pragma: keep
-#include "../servlets/assignment/assignment_organization_create_servlet.h"  // IWYU pragma: keep
-#include "../servlets/assignment/assignment_submission_list_servlet.h"      // IWYU pragma: keep
-#include "../servlets/category/category_create_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/category/category_delete_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/category/category_query_servlet.h"                    // IWYU pragma: keep
-#include "../servlets/dashboard/dashboard_activities_servlet.h"             // IWYU pragma: keep
-#include "../servlets/dashboard/dashboard_recent_users_servlet.h"           // IWYU pragma: keep
-#include "../servlets/dashboard/dashboard_stats_servlet.h"                  // IWYU pragma: keep
-#include "../servlets/dashboard/dashboard_trend_servlet.h"                  // IWYU pragma: keep
-#include "../servlets/database/backup_create_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/database/backup_delete_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/database/backup_download_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/database/backup_list_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/database/cleanup_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/database/database_stats_servlet.h"                    // IWYU pragma: keep
-#include "../servlets/database/export_create_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/database/export_delete_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/database/export_download_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/database/export_list_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/file/chunk_upload_servlet.h"                          // IWYU pragma: keep
-#include "../servlets/file/file_download_servlet.h"                         // IWYU pragma: keep
-#include "../servlets/file/file_upload_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/help/admin_faq_delete_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/help/admin_faq_edit_servlet.h"                        // IWYU pragma: keep
-#include "../servlets/help/admin_feedback_convert_servlet.h"                // IWYU pragma: keep
-#include "../servlets/help/admin_feedback_delete_servlet.h"                 // IWYU pragma: keep
-#include "../servlets/help/admin_feedback_list_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/help/faqs_servlet.h"                                  // IWYU pragma: keep
-#include "../servlets/help/feedback_servlet.h"                              // IWYU pragma: keep
-#include "../servlets/label/label_create_servlet.h"                         // IWYU pragma: keep
-#include "../servlets/label/label_delete_servlet.h"                         // IWYU pragma: keep
-#include "../servlets/label/label_query_servlet.h"                          // IWYU pragma: keep
-#include "../servlets/message/conversation_delete_servlet.h"                // IWYU pragma: keep
-#include "../servlets/message/conversation_message_servlet.h"               // IWYU pragma: keep
-#include "../servlets/message/conversation_read_servlet.h"                  // IWYU pragma: keep
-#include "../servlets/message/conversation_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/message/message_ws_servlet.h"                         // IWYU pragma: keep
-#include "../servlets/notify/broadcast_close_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/notify/broadcast_list_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/notify/notification_list_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/notify/notification_read_all_servlet.h"               // IWYU pragma: keep
-#include "../servlets/notify/notification_read_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/notify/notification_send_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/notify/notification_unread_count_servlet.h"           // IWYU pragma: keep
-#include "../servlets/notify/notify_servlet.h"                              // IWYU pragma: keep
-#include "../servlets/notify/presence_servlet.h"                            // IWYU pragma: keep
-#include "../servlets/organization/organization_admin_lists_servlet.h"      // IWYU pragma: keep
-#include "../servlets/organization/organization_admin_stats_servlet.h"      // IWYU pragma: keep
-#include "../servlets/organization/organization_apply_create_servlet.h"     // IWYU pragma: keep
-#include "../servlets/organization/organization_apply_list_servlet.h"       // IWYU pragma: keep
-#include "../servlets/organization/organization_apply_review_servlet.h"     // IWYU pragma: keep
-#include "../servlets/organization/organization_assignment_list_servlet.h"  // IWYU pragma: keep
-#include "../servlets/organization/organization_create_servlet.h"           // IWYU pragma: keep
-#include "../servlets/organization/organization_delete_servlet.h"           // IWYU pragma: keep
-#include "../servlets/organization/organization_detail_servlet.h"           // IWYU pragma: keep
-#include "../servlets/organization/organization_join_check_servlet.h"       // IWYU pragma: keep
-#include "../servlets/organization/organization_join_servlet.h"             // IWYU pragma: keep
-#include "../servlets/organization/organization_list_servlet.h"             // IWYU pragma: keep
-#include "../servlets/organization/organization_my_applies_servlet.h"       // IWYU pragma: keep
-#include "../servlets/organization/organization_repo_prs_delete_servlet.h"  // IWYU pragma: keep
-#include "../servlets/organization/organization_repo_prs_list_servlet.h"    // IWYU pragma: keep
-#include "../servlets/organization/organization_repo_prs_sync_servlet.h"    // IWYU pragma: keep
-#include "../servlets/organization/organization_repos_add_servlet.h"        // IWYU pragma: keep
-#include "../servlets/organization/organization_repos_delete_servlet.h"     // IWYU pragma: keep
-#include "../servlets/organization/organization_repos_list_servlet.h"       // IWYU pragma: keep
-#include "../servlets/organization/organization_repos_stats_servlet.h"      // IWYU pragma: keep
-#include "../servlets/organization/organization_repos_sync_servlet.h"       // IWYU pragma: keep
-#include "../servlets/organization/organization_repos_token_servlet.h"      // IWYU pragma: keep
-#include "../servlets/organization/organization_stats_servlet.h"            // IWYU pragma: keep
-#include "../servlets/organization/organization_user_kick_servlet.h"        // IWYU pragma: keep
-#include "../servlets/organization/organization_user_list_servlet.h"        // IWYU pragma: keep
-#include "../servlets/organization/organization_user_switch_role_servlet.h" // IWYU pragma: keep
-#include "../servlets/rd/rd_bug_delete_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/rd/rd_bug_detail_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/rd/rd_bug_edit_servlet.h"                             // IWYU pragma: keep
-#include "../servlets/rd/rd_bug_servlet.h"                                  // IWYU pragma: keep
-#include "../servlets/rd/rd_check_access_servlet.h"                         // IWYU pragma: keep
-#include "../servlets/rd/rd_my_tickets_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/rd/rd_organization_members_servlet.h"                 // IWYU pragma: keep
-#include "../servlets/rd/rd_organizations_servlet.h"                        // IWYU pragma: keep
-#include "../servlets/rd/rd_pr_distribution_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/rd/rd_requirement_delete_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/rd/rd_requirement_detail_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/rd/rd_requirement_edit_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/rd/rd_requirement_servlet.h"                          // IWYU pragma: keep
-#include "../servlets/rd/rd_stats_servlet.h"                                // IWYU pragma: keep
-#include "../servlets/rd/rd_task_delete_servlet.h"                          // IWYU pragma: keep
-#include "../servlets/rd/rd_task_detail_servlet.h"                          // IWYU pragma: keep
-#include "../servlets/rd/rd_task_edit_servlet.h"                            // IWYU pragma: keep
-#include "../servlets/rd/rd_task_servlet.h"                                 // IWYU pragma: keep
-#include "../servlets/rd/rd_trend_servlet.h"                                // IWYU pragma: keep
-#include "../servlets/settings/error_codes_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/settings/site_settings_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/settings/site_status_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/settings/system_settings_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/settings/system_settings_upload_servlet.h"            // IWYU pragma: keep
-#include "../servlets/stats/stats_servlet.h"                                // IWYU pragma: keep
-#include "../servlets/user/user_achievements_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_admin_create_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_admin_delete_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_admin_detail_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_admin_lists_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/user/user_admin_recover_servlet.h"                    // IWYU pragma: keep
-#include "../servlets/user/user_admin_reset_passwd_servlet.h"               // IWYU pragma: keep
-#include "../servlets/user/user_admin_stats_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/user/user_admin_update_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_ai_config_servlet.h"                        // IWYU pragma: keep
-#include "../servlets/user/user_assignment_list_servlet.h"                  // IWYU pragma: keep
-#include "../servlets/user/user_create_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/user/user_device_kick_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/user/user_device_list_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/user/user_exists_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/user/user_follow_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/user/user_follower_list_servlet.h"                    // IWYU pragma: keep
-#include "../servlets/user/user_following_list_servlet.h"                   // IWYU pragma: keep
-#include "../servlets/user/user_info_servlet.h"                             // IWYU pragma: keep
-#include "../servlets/user/user_is_following_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_list_servlet.h"                             // IWYU pragma: keep
-#include "../servlets/user/user_login_servlet.h"                            // IWYU pragma: keep
-#include "../servlets/user/user_logout_servlet.h"                           // IWYU pragma: keep
-#include "../servlets/user/user_mutual_following_list_servlet.h"            // IWYU pragma: keep
-#include "../servlets/user/user_oauth_github_callback_servlet.h"             // IWYU pragma: keep
-#include "../servlets/user/user_oauth_github_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/user/user_2fa_enable_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/user/user_2fa_confirm_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/user/user_2fa_disable_servlet.h"                      // IWYU pragma: keep
-#include "../servlets/user/user_2fa_verify_servlet.h"                       // IWYU pragma: keep
-#include "../servlets/user/user_2fa_reset_servlet.h"                        // IWYU pragma: keep
-#include "../servlets/user/user_2fa_recovery_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_organization_list_servlet.h"                // IWYU pragma: keep
-#include "../servlets/user/user_query_servlet.h"                            // IWYU pragma: keep
-#include "../servlets/user/user_reset_passwd_servlet.h"                     // IWYU pragma: keep
-#include "../servlets/user/user_send_code_servlet.h"                        // IWYU pragma: keep
-#include "../servlets/user/user_stats_servlet.h"                            // IWYU pragma: keep
-#include "../servlets/user/user_unfollow_servlet.h"                         // IWYU pragma: keep
-#include "../servlets/user/user_update_servlet.h"                           // IWYU pragma: keep
+#pragma once
+
+// 管理部分
+#include "../servlets/admin/admin_comment_approve_servlet.h"
+#include "../servlets/admin/admin_comment_delete_servlet.h"
+#include "../servlets/admin/admin_comment_list_servlet.h"
+#include "../servlets/admin/admin_comment_reject_servlet.h"
+#include "../servlets/admin/admin_comment_spam_servlet.h"
+#include "../servlets/admin/admin_comment_stats_servlet.h"
+#include "../servlets/admin/admin_faq_delete_servlet.h"
+#include "../servlets/admin/admin_faq_edit_servlet.h"
+#include "../servlets/admin/admin_feedback_convert_servlet.h"
+#include "../servlets/admin/admin_feedback_delete_servlet.h"
+#include "../servlets/admin/admin_feedback_list_servlet.h"
+#include "../servlets/admin/article_admin_lists_servlet.h"
+#include "../servlets/admin/article_admin_stats_servlet.h"
+#include "../servlets/admin/assignment_admin_lists_servlet.h"
+#include "../servlets/admin/assignment_admin_stats_servlet.h"
+#include "../servlets/admin/organization_admin_lists_servlet.h"
+#include "../servlets/admin/organization_admin_stats_servlet.h"
+#include "../servlets/admin/user_admin_create_servlet.h"
+#include "../servlets/admin/user_admin_delete_servlet.h"
+#include "../servlets/admin/user_admin_detail_servlet.h"
+#include "../servlets/admin/user_admin_lists_servlet.h"
+#include "../servlets/admin/user_admin_recover_servlet.h"
+#include "../servlets/admin/user_admin_reset_passwd_servlet.h"
+#include "../servlets/admin/user_admin_stats_servlet.h"
+#include "../servlets/admin/user_admin_update_servlet.h"
+
+// 文章部分
+#include "../servlets/article/article_ai_summary_servlet.h"
+#include "../servlets/article/article_calendar_servlet.h"
+#include "../servlets/article/article_create_servlet.h"
+#include "../servlets/article/article_delete_servlet.h"
+#include "../servlets/article/article_detail_servlet.h"
+#include "../servlets/article/article_is_praising_servlet.h"
+#include "../servlets/article/article_list_by_category_servlet.h"
+#include "../servlets/article/article_list_by_label_servlet.h"
+#include "../servlets/article/article_praise_list_servlet.h"
+#include "../servlets/article/article_praise_servlet.h"
+#include "../servlets/article/article_publish_servlet.h"
+#include "../servlets/article/article_query_servlet.h"
+#include "../servlets/article/article_search_servlet.h"
+#include "../servlets/article/article_switch_state_servlet.h"
+#include "../servlets/article/article_update_category_servlet.h"
+#include "../servlets/article/article_update_servlet.h"
+#include "../servlets/article/article_verify_servlet.h"
+#include "../servlets/article/article_view_servlet.h"
+#include "../servlets/article/comment_create_servlet.h"
+#include "../servlets/article/comment_delete_servlet.h"
+#include "../servlets/article/comment_list_servlet.h"
+#include "../servlets/article/comment_praise_servlet.h"
+#include "../servlets/article/comment_replies_servlet.h"
+#include "../servlets/article/comment_update_servlet.h"
+
+// 任务部分
+#include "../servlets/assignment/assignment_create_servlet.h"
+#include "../servlets/assignment/assignment_delete_servlet.h"
+#include "../servlets/assignment/assignment_detail_servlet.h"
+#include "../servlets/assignment/assignment_organization_create_servlet.h"
+#include "../servlets/assignment/assignment_submission_list_servlet.h"
+
+// 认证部分
+#include "../servlets/auth/email_recovery_servlet.h"
+#include "../servlets/auth/passkey_delete_servlet.h"
+#include "../servlets/auth/passkey_list_servlet.h"
+#include "../servlets/auth/passkey_login_begin_servlet.h"
+#include "../servlets/auth/passkey_login_finish_servlet.h"
+#include "../servlets/auth/passkey_register_begin_servlet.h"
+#include "../servlets/auth/passkey_register_finish_servlet.h"
+#include "../servlets/auth/user_2fa_confirm_servlet.h"
+#include "../servlets/auth/user_2fa_disable_servlet.h"
+#include "../servlets/auth/user_2fa_enable_servlet.h"
+#include "../servlets/auth/user_2fa_recovery_servlet.h"
+#include "../servlets/auth/user_2fa_reset_servlet.h"
+#include "../servlets/auth/user_2fa_verify_servlet.h"
+#include "../servlets/auth/user_device_kick_servlet.h"
+#include "../servlets/auth/user_device_list_servlet.h"
+#include "../servlets/auth/user_login_servlet.h"
+#include "../servlets/auth/user_logout_servlet.h"
+#include "../servlets/auth/user_oauth_github_callback_servlet.h"
+#include "../servlets/auth/user_oauth_github_servlet.h"
+#include "../servlets/auth/user_reset_passwd_servlet.h"
+#include "../servlets/auth/user_send_code_servlet.h"
+
+// 分类部分
+#include "../servlets/category/category_create_servlet.h"
+#include "../servlets/category/category_delete_servlet.h"
+#include "../servlets/category/category_query_servlet.h"
+
+// 管理端的用户活动部分
+#include "../servlets/dashboard/dashboard_activities_servlet.h"
+#include "../servlets/dashboard/dashboard_recent_users_servlet.h"
+#include "../servlets/dashboard/dashboard_stats_servlet.h"
+#include "../servlets/dashboard/dashboard_trend_servlet.h"
+
+// 数据备份部分
+#include "../servlets/database/backup_create_servlet.h"
+#include "../servlets/database/backup_delete_servlet.h"
+#include "../servlets/database/backup_download_servlet.h"
+#include "../servlets/database/backup_list_servlet.h"
+#include "../servlets/database/cleanup_servlet.h"
+#include "../servlets/database/database_stats_servlet.h"
+#include "../servlets/database/export_create_servlet.h"
+#include "../servlets/database/export_delete_servlet.h"
+#include "../servlets/database/export_download_servlet.h"
+#include "../servlets/database/export_list_servlet.h"
+
+// 文件处理部分
+#include "../servlets/file/chunk_upload_servlet.h"
+#include "../servlets/file/file_download_servlet.h"
+#include "../servlets/file/file_upload_servlet.h"
+
+// 帮助中心部分
+#include "../servlets/help/faqs_servlet.h"
+#include "../servlets/help/feedback_servlet.h"
+
+// 文章标签部分
+#include "../servlets/label/label_create_servlet.h"
+#include "../servlets/label/label_delete_servlet.h"
+#include "../servlets/label/label_query_servlet.h"
+
+// 聊天部分
+#include "../servlets/message/conversation_delete_servlet.h"
+#include "../servlets/message/conversation_message_servlet.h"
+#include "../servlets/message/conversation_read_servlet.h"
+#include "../servlets/message/conversation_servlet.h"
+#include "../servlets/message/message_ws_servlet.h"
+
+// 广播，通知部分
+#include "../servlets/notify/broadcast_close_servlet.h"
+#include "../servlets/notify/broadcast_list_servlet.h"
+#include "../servlets/notify/notification_list_servlet.h"
+#include "../servlets/notify/notification_read_all_servlet.h"
+#include "../servlets/notify/notification_read_servlet.h"
+#include "../servlets/notify/notification_send_servlet.h"
+#include "../servlets/notify/notification_unread_count_servlet.h"
+#include "../servlets/notify/notify_servlet.h"
+#include "../servlets/notify/presence_servlet.h"
+
+// 组织部分
+#include "../servlets/organization/organization_apply_create_servlet.h"
+#include "../servlets/organization/organization_apply_list_servlet.h"
+#include "../servlets/organization/organization_apply_review_servlet.h"
+#include "../servlets/organization/organization_assignment_list_servlet.h"
+#include "../servlets/organization/organization_create_servlet.h"
+#include "../servlets/organization/organization_delete_servlet.h"
+#include "../servlets/organization/organization_detail_servlet.h"
+#include "../servlets/organization/organization_join_check_servlet.h"
+#include "../servlets/organization/organization_join_servlet.h"
+#include "../servlets/organization/organization_list_servlet.h"
+#include "../servlets/organization/organization_my_applies_servlet.h"
+#include "../servlets/organization/organization_repo_prs_delete_servlet.h"
+#include "../servlets/organization/organization_repo_prs_list_servlet.h"
+#include "../servlets/organization/organization_repo_prs_sync_servlet.h"
+#include "../servlets/organization/organization_repos_add_servlet.h"
+#include "../servlets/organization/organization_repos_delete_servlet.h"
+#include "../servlets/organization/organization_repos_list_servlet.h"
+#include "../servlets/organization/organization_repos_stats_servlet.h"
+#include "../servlets/organization/organization_repos_sync_servlet.h"
+#include "../servlets/organization/organization_repos_token_servlet.h"
+#include "../servlets/organization/organization_stats_servlet.h"
+#include "../servlets/organization/organization_user_kick_servlet.h"
+#include "../servlets/organization/organization_user_list_servlet.h"
+#include "../servlets/organization/organization_user_switch_role_servlet.h"
+
+// 研发平台部分
+#include "../servlets/rd/rd_bug_delete_servlet.h"
+#include "../servlets/rd/rd_bug_detail_servlet.h"
+#include "../servlets/rd/rd_bug_edit_servlet.h"
+#include "../servlets/rd/rd_bug_servlet.h"
+#include "../servlets/rd/rd_check_access_servlet.h"
+#include "../servlets/rd/rd_my_tickets_servlet.h"
+#include "../servlets/rd/rd_organization_members_servlet.h"
+#include "../servlets/rd/rd_organizations_servlet.h"
+#include "../servlets/rd/rd_pr_distribution_servlet.h"
+#include "../servlets/rd/rd_requirement_delete_servlet.h"
+#include "../servlets/rd/rd_requirement_detail_servlet.h"
+#include "../servlets/rd/rd_requirement_edit_servlet.h"
+#include "../servlets/rd/rd_requirement_servlet.h"
+#include "../servlets/rd/rd_stats_servlet.h"
+#include "../servlets/rd/rd_task_delete_servlet.h"
+#include "../servlets/rd/rd_task_detail_servlet.h"
+#include "../servlets/rd/rd_task_edit_servlet.h"
+#include "../servlets/rd/rd_task_servlet.h"
+#include "../servlets/rd/rd_trend_servlet.h"
+
+// 站点信息部分
+#include "../servlets/settings/error_codes_servlet.h"
+#include "../servlets/settings/site_settings_servlet.h"
+#include "../servlets/settings/site_status_servlet.h"
+#include "../servlets/settings/system_settings_servlet.h"
+#include "../servlets/settings/system_settings_upload_servlet.h"
+
+// 统计信息部分
+#include "../servlets/stats/stats_servlet.h"
+
+// 用户部分
+#include "../servlets/user/user_achievements_servlet.h"
+#include "../servlets/user/user_ai_config_servlet.h"
+#include "../servlets/user/user_assignment_list_servlet.h"
+#include "../servlets/user/user_create_servlet.h"
+#include "../servlets/user/user_exists_servlet.h"
+#include "../servlets/user/user_follow_servlet.h"
+#include "../servlets/user/user_follower_list_servlet.h"
+#include "../servlets/user/user_following_list_servlet.h"
+#include "../servlets/user/user_info_servlet.h"
+#include "../servlets/user/user_is_following_servlet.h"
+#include "../servlets/user/user_list_servlet.h"
+#include "../servlets/user/user_mutual_following_list_servlet.h"
+#include "../servlets/user/user_organization_list_servlet.h"
+#include "../servlets/user/user_query_servlet.h"
+#include "../servlets/user/user_stats_servlet.h"
+#include "../servlets/user/user_unfollow_servlet.h"
+#include "../servlets/user/user_update_servlet.h"
