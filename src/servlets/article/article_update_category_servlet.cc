@@ -2,6 +2,7 @@
 
 #include <chen/log/log.h>
 
+#include "../../index.h"
 #include "../../manager/article_category_rel_manager.h"
 #include "../../manager/article_manager.h"
 #include "../../manager/category_manager.h"
@@ -133,6 +134,9 @@ int32_t ArticleUpdateCategoryServlet::handle(
             result->setErrno(errcode::DB_COMMIT_FAILED);
             break;
         }
+
+        // 分类关联已变化，同步刷新搜索索引中的 CAT_ID，避免按分类筛选结果滞后
+        IndexMgr::GetInstance()->updateArticle(ainfo);
 
         if (!update_add_infos.empty()) {
             auto& v = result->jsondata["add_category_ids"];
