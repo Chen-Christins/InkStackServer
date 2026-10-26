@@ -431,10 +431,14 @@ void BlogModule::registerServlets()
         dp->addServlet("/api/v1/admin/database/exports/:id/delete", XX(ExportDeleteServlet));
         dp->addServlet("/api/v1/admin/database/exports/:id/download", XX(ExportDownloadServlet));
         dp->addServlet("/api/v1/admin/database/cleanup", XX(CleanupServlet));
-        // 文章分类相关
-        dp->addServlet("/api/v1/category/admin/create", XX(CategoryCreateServlet));
-        dp->addServlet("/api/v1/category/admin/delete", XX(CategoryDeleteServlet));
-        dp->addServlet("/api/v1/category/admin/query", XX(CategoryQueryServlet));
+        // 文章分类相关（个人分类，登录后使用）
+        dp->addServlet("/api/v1/category/create", XX(CategoryCreateServlet));
+        dp->addServlet("/api/v1/category/delete", XX(CategoryDeleteServlet));
+        dp->addServlet("/api/v1/category/query", XX(CategoryQueryServlet));
+        // 管理端分类管理（可跨用户操作）
+        dp->addServlet("/api/v1/category/admin/create", XX(CategoryAdminCreateServlet));
+        dp->addServlet("/api/v1/category/admin/delete", XX(CategoryAdminDeleteServlet));
+        dp->addServlet("/api/v1/category/admin/query", XX(CategoryAdminQueryServlet));
         // 错误码下发（公开接口）
         dp->addServlet("/api/v1/error-codes", XX(ErrorCodesServlet));
         // 站点公开配置

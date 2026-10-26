@@ -42,9 +42,16 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Switch apt mirror
+        run: |
+          # GitHub 托管 runner 默认走 Azure 镜像，下载系统库容易卡住，切换到官方源
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's/azure\.archive\.ubuntu\.com/archive.ubuntu.com/g' /etc/apt/apt-mirrors.txt
+          fi
+          sudo apt-get update
+
       - name: Install system dependencies
         run: |
-          sudo apt-get update
           sudo apt-get install -y \
             build-essential \
             ninja-build \

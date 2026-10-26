@@ -79,7 +79,8 @@ int32_t ArticleCreateServlet::handle(
             for (auto& s : cat_ids) {
                 int64_t cid = chen::TypeUtil::Atoi(s);
                 auto cinfo = CategoryMgr::GetInstance()->get(cid);
-                if (!cinfo) {
+                if (!cinfo || cinfo->getUserId() != uid) {
+                    WARN(logger) << "skip category not owned by user, user_id=" << uid << " category_id=" << cid;
                     continue;
                 }
                 data::ArticleCategoryRelInfo::ptr rel(new data::ArticleCategoryRelInfo);

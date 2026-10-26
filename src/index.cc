@@ -42,6 +42,9 @@ static chen::ConfigVar<std::string>::ptr g_jieba_dict_path =
 
 static chen::ConfigVar<std::string>::ptr g_index_path = chen::Config::Lookup("search.index_path", std::string(""), "search index file path");
 
+/// 索引文件格式版本。数据结构/内容口径变化时递增，旧文件会被丢弃并全量重建
+static const uint32_t kIndexFileVersion = 2;
+
 Index::Index()
     : m_createTime(0)
     , m_endTime(0)
@@ -358,7 +361,7 @@ bool Index::save(const std::string& path)
     }
     chen::ByteArray::ptr ba(new chen::ByteArray);
     ba->writeUint32(0x42494458); // magic 'BIDX'
-    ba->writeUint32(1);          // version
+    ba->writeUint32(kIndexFileVersion);
     ba->writeInt64(m_docs.size());
     for (auto id : m_docs) {
         ba->writeInt64(id);
@@ -419,7 +422,10 @@ bool Index::load(const std::string& path)
         return false;
     }
     uint32_t version = ba->readUint32();
-    (void)version;
+    if (version != kIndexFileVersion) {
+        WARN(logger) << "index file version mismatch, file=" << version << " expect=" << kIndexFileVersion << ", rebuild from scratch";
+        return false;
+    }
 
     initJieba();
 
