@@ -170,8 +170,7 @@ static int32_t HandlePRReviewWebhook(const tagGithubPRReviewInfo& info)
             reviewerArr.append(entry);
         }
 
-        Json::FastWriter writer;
-        pr->setReviewers(writer.write(reviewerArr));
+        pr->setReviewers(chen::JsonUtil::ToString(reviewerArr));
     }
 
     pr->setUpdateTime(time(0));
