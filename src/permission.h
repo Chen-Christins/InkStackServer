@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "error_codes.h"
 #include "manager/organization_manager.h"
 #include "manager/user_manager.h"
 
@@ -180,6 +181,39 @@ inline bool CanAssignTask(int32_t org_role)
 inline bool CanBypassReview(int32_t system_role)
 {
     return system_role == UserManager::Role::ADMIN || system_role == UserManager::Role::CHECKER;
+}
+
+// ============================================================================
+// 管理端路由权限
+// ============================================================================
+
+/// 是否系统管理员
+inline bool IsAdmin(int32_t system_role)
+{
+    return system_role == UserManager::Role::ADMIN;
+}
+
+/**
+ * @brief 校验管理端路由访问权限
+ * @param uid 当前登录用户 id
+ * @param user 当前登录用户信息
+ * @return 0 表示通过，否则返回需要下发的错误码
+ */
+inline int32_t CheckAdminRoute(int64_t uid, const data::UserInfo::ptr& user)
+{
+    if (!uid) {
+        return errcode::NOT_LOGIN;
+    }
+    if (!user) {
+        return errcode::USER_NOT_FOUND;
+    }
+    if (user->getState() != UserManager::Status::ACTIVE || user->getIsDeleted()) {
+        return errcode::ACCOUNT_INVALID;
+    }
+    if (!IsAdmin(user->getRole())) {
+        return errcode::ACCESS_DENIED;
+    }
+    return 0;
 }
 
 } // namespace permission

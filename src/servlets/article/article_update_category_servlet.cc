@@ -73,7 +73,8 @@ int32_t ArticleUpdateCategoryServlet::handle(
         for (auto& i : tmps) {
             int64_t cid = chen::TypeUtil::Atoi(i);
             auto cinfo = CategoryMgr::GetInstance()->get(cid);
-            if (!cinfo) {
+            if (!cinfo || cinfo->getUserId() != uid) {
+                WARN(logger) << "skip category not owned by user, user_id=" << uid << " category_id=" << cid;
                 continue;
             }
             auto acinfo = ArticleCategoryRelMgr::GetInstance()->getByArticleIdCategoryId(id, cid);
@@ -104,7 +105,8 @@ int32_t ArticleUpdateCategoryServlet::handle(
         for (auto& i : tmps) {
             int64_t cid = chen::TypeUtil::Atoi(i);
             auto cinfo = CategoryMgr::GetInstance()->get(cid);
-            if (!cinfo) {
+            if (!cinfo || cinfo->getUserId() != uid) {
+                WARN(logger) << "skip category not owned by user, user_id=" << uid << " category_id=" << cid;
                 continue;
             }
             auto acinfo = ArticleCategoryRelMgr::GetInstance()->getByArticleIdCategoryId(id, cid);

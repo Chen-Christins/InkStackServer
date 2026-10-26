@@ -3,6 +3,8 @@
 #include <chen/log/log.h>
 
 #include "../../manager/category_manager.h"
+#include "../../manager/user_manager.h"
+#include "../../permission.h"
 #include "../../util.h"
 #include "blog/data/category_info.h"
 
@@ -14,14 +16,42 @@ namespace servlet {
 static chen::Logger::ptr logger = LOG_ROOT();
 
 CategoryDeleteServlet::CategoryDeleteServlet()
-    : BlogAdminServlet("CategoryDeleteServlet")
+    : BlogLoginedServlet("CategoryDeleteServlet")
 {
 }
 
-void get_delete_values(std::map<int64_t, std::map<int64_t, data::CategoryInfo::ptr>> parent_map, int64_t id, std::set<data::CategoryInfo::ptr>& infos)
+bool CategoryDeleteServlet::handlePre(
+    chen::http::HttpRequest::ptr request,
+    chen::http::HttpResponse::ptr response,
+    chen::http::HttpSession::ptr session,
+    Result::ptr result)
 {
-    auto it = parent_map[0].find(id);
-    if (it == parent_map[0].end()) {
+    if (!BlogLoginedServlet::handlePre(request, response, session, result)) {
+        return false;
+    }
+    if (!isAdminRoute()) {
+        return true;
+    }
+    int64_t uid = getUserId(request);
+    data::UserInfo::ptr user;
+    if (uid) {
+        user = UserMgr::GetInstance()->get(uid);
+    }
+    int32_t rt = permission::CheckAdminRoute(uid, user);
+    if (rt) {
+        result->setErrno(rt);
+        return false;
+    }
+    return true;
+}
+
+void get_delete_values(
+    const std::map<int64_t, std::map<int64_t, data::CategoryInfo::ptr>>& parent_map,
+    int64_t id,
+    std::set<data::CategoryInfo::ptr>& infos)
+{
+    auto it = parent_map.at(0).find(id);
+    if (it == parent_map.at(0).end()) {
         return;
     }
     if (!infos.insert(it->second).second) {
@@ -49,14 +79,31 @@ int32_t CategoryDeleteServlet::handle(
         for (auto& i : tmp) {
             cat_ids.insert(chen::TypeUtil::Atoi(i));
         }
+        int64_t req_uid = request->getParamAs<int64_t>("user_id", 0);
 
         int64_t uid = getUserId(request);
         if (!uid) {
             result->setErrno(errcode::NOT_LOGIN);
             break;
         }
+        bool admin_route = isAdminRoute();
+
         std::vector<data::CategoryInfo::ptr> infos;
-        CategoryMgr::GetInstance()->listAll(infos);
+        if (admin_route) {
+            if (req_uid) {
+                if (!CategoryMgr::GetInstance()->listByUserId(infos, req_uid)) {
+                    result->setErrno(errcode::DB_OPERATION_FAILED);
+                    break;
+                }
+            } else {
+                CategoryMgr::GetInstance()->listAll(infos);
+            }
+        } else {
+            if (!CategoryMgr::GetInstance()->listByUserId(infos, uid)) {
+                result->setErrno(errcode::DB_OPERATION_FAILED);
+                break;
+            }
+        }
         if (infos.empty()) {
             result->setErrno(errcode::PARAM_MISSING, "no categories");
             break;
@@ -108,6 +155,7 @@ int32_t CategoryDeleteServlet::handle(
             for (auto& i : del_cats) {
                 Json::Value item;
                 item["id"] = i->getId();
+                item["user_id"] = i->getUserId();
                 item["name"] = i->getName();
                 item["color"] = i->getColor();
                 item["parent_id"] = i->getParentId();

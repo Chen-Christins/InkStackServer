@@ -158,12 +158,17 @@ int32_t ArticleUpdateServlet::syncCategoryRels(chen::http::HttpRequest::ptr requ
     std::vector<data::ArticleCategoryRelInfo::ptr> old_rels;
     ArticleCategoryRelMgr::GetInstance()->listByArticleId(old_rels, id, true);
 
+    int64_t uid = getUserId(request);
+    if (!uid) {
+        return 0;
+    }
+
     std::set<int64_t> new_cat_ids;
     auto cat_id_strs = chen::StringUtil::Split(category, ',');
     for (auto& s : cat_id_strs) {
         int64_t cid = chen::TypeUtil::Atoi(s);
         auto cinfo = CategoryMgr::GetInstance()->get(cid);
-        if (cinfo) {
+        if (cinfo && cinfo->getUserId() == uid) {
             new_cat_ids.insert(cid);
         }
     }
