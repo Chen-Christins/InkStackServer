@@ -36,8 +36,6 @@ auth:
   cookie_same_site: Lax
   # 会话绝对有效期（秒），<=0 表示不限制
   session_absolute_ttl: 604800
-  # 迁移期兼容 WebSocket 的旧 token query 认证
-  ws_legacy_token: true
 
 # WebAuthn / Passkey
 webauthn:

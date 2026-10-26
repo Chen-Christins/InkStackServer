@@ -11,7 +11,6 @@
 #include "error_codes.h"
 #include "i18n/i18n.h"
 #include "manager/error_code_manager.h"
-#include "manager/session_manager.h"
 #include "manager/user_manager.h"
 #include "util.h"
 
@@ -20,11 +19,8 @@ namespace blog {
 static chen::Logger::ptr logger = LOG_NAME("access");
 
 const std::string CookieKey::SESSION_KEY = "SESSIONID";
-const std::string CookieKey::USER_ID = "S_UID";
-const std::string CookieKey::TOKEN = "S_TOKEN";
-const std::string CookieKey::TOKEN_TIME = "S_TOKEN_TIME";
-const std::string CookieKey::IS_AUTH = "IS_AUTH";
-const std::string CookieKey::DEVICE_ID = "DEVICE_ID";
+const std::string SessionDataKey::USER_ID = "user_id";
+const std::string SessionDataKey::ANONYMOUS = "anonymous";
 
 std::string GetRemoteIP(chen::http::HttpRequest::ptr request, chen::http::HttpSession::ptr session)
 {
@@ -132,11 +128,10 @@ int32_t BlogServlet::handle(chen::http::HttpRequest::ptr request, chen::http::Ht
     return 0;
 }
 
-/// 请求是否携带登录相关 cookie（有才需要初始化/恢复 session）
-static bool HasLoginCookie(chen::http::HttpRequest::ptr request)
+/// 请求是否携带服务端会话 cookie（有才需要初始化/恢复 session）
+static bool HasSessionCookie(chen::http::HttpRequest::ptr request)
 {
-    return !request->getCookie(CookieKey::SESSION_KEY).empty() || !request->getCookie(CookieKey::USER_ID).empty()
-        || !request->getCookie(CookieKey::TOKEN).empty();
+    return !request->getCookie(CookieKey::SESSION_KEY).empty();
 }
 
 bool BlogServlet::handlePre(
@@ -145,8 +140,8 @@ bool BlogServlet::handlePre(
     chen::http::HttpSession::ptr session,
     Result::ptr result)
 {
-    if (allowAutoLogin() && HasLoginCookie(request)) {
-        initLogin(request, response, session);
+    if (allowAutoLogin() && HasSessionCookie(request)) {
+        initLogin(request, response);
     }
     return true;
 }
@@ -178,7 +173,7 @@ chen::http::SessionData::ptr BlogServlet::getSessionData(chen::http::HttpRequest
     if (!sid.empty()) {
         auto data = chen::http::SessionDataMgr::GetInstance()->get(sid);
         if (data) {
-            int64_t uid = data->getData<int64_t>(CookieKey::USER_ID);
+            int64_t uid = data->getData<int64_t>(SessionDataKey::USER_ID);
             if (!uid) {
                 // 匿名会话不参与认证
                 return data;
@@ -194,35 +189,26 @@ chen::http::SessionData::ptr BlogServlet::getSessionData(chen::http::HttpRequest
         SessionInfo info;
         if (SessionStore::Get(sid, info)) {
             AuthService::MirrorSessionData(sid, info.uid);
-            auto data = chen::http::SessionDataMgr::GetInstance()->get(sid);
-            if (data) {
-                return data;
+            auto session_data = chen::http::SessionDataMgr::GetInstance()->get(sid);
+            if (session_data) {
+                return session_data;
             }
-        }
-
-        // 旧版 Redis 会话仅保留给 2FA 临时数据等兼容逻辑
-        auto legacy = LoadSessionFromRedis(sid);
-        if (legacy) {
-            return legacy;
         }
     }
 
     // 没有就创建一个匿名会话
     chen::http::SessionData::ptr data(new chen::http::SessionData(true));
+    data->setData(SessionDataKey::ANONYMOUS, 1);
     chen::http::SessionDataMgr::GetInstance()->add(data);
     AuthService::SetSessionCookie(response, data->getId(), 0);
     request->setCookie(CookieKey::SESSION_KEY, data->getId());
     return data;
 }
 
-bool BlogServlet::initLogin(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response, chen::http::HttpSession::ptr session)
+bool BlogServlet::initLogin(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response)
 {
     AuthContext ctx = AuthService::Resolve(request, response, true);
-    if (ctx.valid()) {
-        return true;
-    }
-    // 迁移期兼容旧 S_UID / S_TOKEN Cookie
-    return AuthService::UpgradeLegacySession(request, response, session);
+    return ctx.valid();
 }
 
 chen::IDB::ptr BlogServlet::getDB()
@@ -241,11 +227,11 @@ bool BlogLoginedServlet::handlePre(
     chen::http::HttpSession::ptr session,
     Result::ptr result)
 {
-    if (!HasLoginCookie(request)) {
+    if (!HasSessionCookie(request)) {
         result->setErrno(errcode::NOT_LOGIN);
         return false;
     }
-    if (!initLogin(request, response, session)) {
+    if (!initLogin(request, response)) {
         result->setErrno(errcode::NOT_LOGIN);
         return false;
     }

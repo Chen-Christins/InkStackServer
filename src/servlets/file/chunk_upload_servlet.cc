@@ -105,7 +105,7 @@ int32_t ChunkUploadServlet::handleInit(
         std::string upload_id =
             chen::EncryptorUtil::MD5(std::to_string(now) + "|" + file_name + "|" + std::to_string(uid) + chen::RandomUtil::RandString(6));
 
-        auto session = ChunkUploadMgr::GetInstance()->createSession(
+        auto upload_session = ChunkUploadMgr::GetInstance()->createSession(
             upload_id, file_name, total_size, chunk_size, total_chunks, biz_type, chen::TypeUtil::Atoi(biz_id), dir_name);
 
         result->set("upload_id", upload_id);

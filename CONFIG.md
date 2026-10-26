@@ -138,7 +138,6 @@ auth:
   cookie_secure: ${AUTH_COOKIE_SECURE}
   cookie_same_site: Lax
   session_absolute_ttl: 604800
-  ws_legacy_token: true
 ```
 
 | 配置                        | 说明                                                                 |
@@ -146,7 +145,6 @@ auth:
 | `auth.cookie_secure`        | `SESSIONID` 是否带 `Secure`；生产必须为 `true`                       |
 | `auth.cookie_same_site`     | `Lax` / `Strict` / `None`；`None` 会自动强制 `Secure`                |
 | `auth.session_absolute_ttl` | 会话绝对有效期（秒），`<=0` 不限制；空闲有效期取系统设置里的会话时长 |
-| `auth.ws_legacy_token`      | 迁移期是否允许 WebSocket 使用旧 `uid/token/token_time` query 认证    |
 
 > 升级后已有 `prod.env` 需要补充 `AUTH_COOKIE_SECURE=true`，否则 `switch-env.sh` 会因缺少占位符而失败。
 

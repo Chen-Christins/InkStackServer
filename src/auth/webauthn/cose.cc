@@ -1,8 +1,8 @@
 #include "cose.h"
 
 #include <openssl/bn.h>
-#include <openssl/ec.h>
-#include <openssl/obj_mac.h>
+#include <openssl/core_names.h>
+#include <openssl/param_build.h>
 #include <openssl/rsa.h>
 
 #include "cbor.h"
@@ -22,6 +22,22 @@ constexpr int32_t kCoseAlgEdDsa = -8;
 constexpr int32_t kCoseAlgRs256 = -257;
 constexpr int32_t kCoseCrvP256 = 1;
 constexpr int32_t kCoseCrvEd25519 = 6;
+constexpr const char* kEcGroupName = "prime256v1";
+
+bool CheckPublicKey(EVP_PKEY* pkey)
+{
+    if (!pkey) {
+        return false;
+    }
+
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new_from_pkey(nullptr, pkey, nullptr);
+    if (!ctx) {
+        return false;
+    }
+    bool ok = EVP_PKEY_public_check(ctx) == 1;
+    EVP_PKEY_CTX_free(ctx);
+    return ok;
+}
 
 std::shared_ptr<EVP_PKEY> BuildEcP256Key(const std::string& x, const std::string& y)
 {
@@ -29,32 +45,44 @@ std::shared_ptr<EVP_PKEY> BuildEcP256Key(const std::string& x, const std::string
         return nullptr;
     }
 
-    EC_KEY* ec = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-    if (!ec) {
-        return nullptr;
+    // WebAuthn COSE EC2 公钥使用未压缩点格式：0x04 || x || y。
+    std::string point;
+    point.reserve(1 + x.size() + y.size());
+    point.push_back(static_cast<char>(0x04));
+    point.append(x);
+    point.append(y);
+
+    OSSL_PARAM_BLD* bld = OSSL_PARAM_BLD_new();
+    OSSL_PARAM* params = nullptr;
+    EVP_PKEY_CTX* ctx = nullptr;
+    EVP_PKEY* pkey = nullptr;
+    bool ok = bld != nullptr;
+
+    if (ok) {
+        ok = OSSL_PARAM_BLD_push_utf8_string(bld, OSSL_PKEY_PARAM_GROUP_NAME, kEcGroupName, 0) == 1
+            && OSSL_PARAM_BLD_push_octet_string(bld, OSSL_PKEY_PARAM_PUB_KEY, point.data(), point.size()) == 1;
+    }
+    if (ok) {
+        params = OSSL_PARAM_BLD_to_param(bld);
+        ok = params != nullptr;
+    }
+    if (ok) {
+        ctx = EVP_PKEY_CTX_new_from_name(nullptr, "EC", nullptr);
+        ok = ctx != nullptr;
+    }
+    if (ok) {
+        ok = EVP_PKEY_fromdata_init(ctx) == 1 && EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) == 1;
+    }
+    if (ok) {
+        ok = CheckPublicKey(pkey);
     }
 
-    const EC_GROUP* group = EC_KEY_get0_group(ec);
-    EC_POINT* point = group ? EC_POINT_new(group) : nullptr;
-    BIGNUM* x_bn = BN_bin2bn(reinterpret_cast<const unsigned char*>(x.data()), static_cast<int>(x.size()), nullptr);
-    BIGNUM* y_bn = BN_bin2bn(reinterpret_cast<const unsigned char*>(y.data()), static_cast<int>(y.size()), nullptr);
-
-    bool ok = group && point && x_bn && y_bn && EC_POINT_set_affine_coordinates(group, point, x_bn, y_bn, nullptr) == 1
-        && EC_POINT_is_on_curve(group, point, nullptr) == 1 && EC_KEY_set_public_key(ec, point) == 1;
-
-    BN_free(x_bn);
-    BN_free(y_bn);
-    EC_POINT_free(point);
+    OSSL_PARAM_free(params);
+    OSSL_PARAM_BLD_free(bld);
+    EVP_PKEY_CTX_free(ctx);
 
     if (!ok) {
-        EC_KEY_free(ec);
-        return nullptr;
-    }
-
-    EVP_PKEY* pkey = EVP_PKEY_new();
-    if (!pkey || EVP_PKEY_assign_EC_KEY(pkey, ec) != 1) {
         EVP_PKEY_free(pkey);
-        EC_KEY_free(ec);
         return nullptr;
     }
     return std::shared_ptr<EVP_PKEY>(pkey, EVP_PKEY_free);
@@ -66,24 +94,46 @@ std::shared_ptr<EVP_PKEY> BuildRsaKey(const std::string& n, const std::string& e
         return nullptr;
     }
 
-    RSA* rsa = RSA_new();
-    if (!rsa) {
-        return nullptr;
-    }
-
     BIGNUM* n_bn = BN_bin2bn(reinterpret_cast<const unsigned char*>(n.data()), static_cast<int>(n.size()), nullptr);
     BIGNUM* e_bn = BN_bin2bn(reinterpret_cast<const unsigned char*>(e.data()), static_cast<int>(e.size()), nullptr);
-    if (!n_bn || !e_bn || RSA_set0_key(rsa, n_bn, e_bn, nullptr) != 1) {
+    if (!n_bn || !e_bn) {
         BN_free(n_bn);
         BN_free(e_bn);
-        RSA_free(rsa);
         return nullptr;
     }
 
-    EVP_PKEY* pkey = EVP_PKEY_new();
-    if (!pkey || EVP_PKEY_assign_RSA(pkey, rsa) != 1) {
+    OSSL_PARAM_BLD* bld = OSSL_PARAM_BLD_new();
+    OSSL_PARAM* params = nullptr;
+    EVP_PKEY_CTX* ctx = nullptr;
+    EVP_PKEY* pkey = nullptr;
+    bool ok = bld != nullptr;
+
+    if (ok) {
+        ok = OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_N, n_bn) == 1 && OSSL_PARAM_BLD_push_BN(bld, OSSL_PKEY_PARAM_RSA_E, e_bn) == 1;
+    }
+    if (ok) {
+        params = OSSL_PARAM_BLD_to_param(bld);
+        ok = params != nullptr;
+    }
+    if (ok) {
+        ctx = EVP_PKEY_CTX_new_from_name(nullptr, "RSA", nullptr);
+        ok = ctx != nullptr;
+    }
+    if (ok) {
+        ok = EVP_PKEY_fromdata_init(ctx) == 1 && EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) == 1;
+    }
+    if (ok) {
+        ok = CheckPublicKey(pkey);
+    }
+
+    OSSL_PARAM_free(params);
+    OSSL_PARAM_BLD_free(bld);
+    EVP_PKEY_CTX_free(ctx);
+    BN_free(n_bn);
+    BN_free(e_bn);
+
+    if (!ok) {
         EVP_PKEY_free(pkey);
-        RSA_free(rsa);
         return nullptr;
     }
     return std::shared_ptr<EVP_PKEY>(pkey, EVP_PKEY_free);

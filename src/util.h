@@ -66,32 +66,6 @@ inline bool IsEmail(const std::string& str)
     return std::regex_match(str, pattern);
 }
 
-static const std::string s_uid_secret = "BlogServer!2025$%^UID#@!EncryptKey";
-
-inline std::string EncryptUserId(int64_t uid)
-{
-    std::string plain = std::to_string(uid);
-    for (size_t i = 0; i < plain.size(); i++) {
-        plain[i] ^= s_uid_secret[i % s_uid_secret.size()];
-    }
-    return chen::StringUtil::Base64Encode(plain);
-}
-
-inline int64_t DecryptUserId(const std::string& encrypted)
-{
-    if (encrypted.empty()) {
-        return 0;
-    }
-    std::string data = chen::StringUtil::Base64Decode(encrypted);
-    if (data.empty()) {
-        return 0;
-    }
-    for (size_t i = 0; i < data.size(); i++) {
-        data[i] ^= s_uid_secret[i % s_uid_secret.size()];
-    }
-    return chen::TypeUtil::Atoi(data);
-}
-
 inline bool IsValidAccount(const std::string& str)
 {
     static const std::regex s_account_regex("[A-Za-z][0-9A-Za-z\\-_\\.]{4,15}");

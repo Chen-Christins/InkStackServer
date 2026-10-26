@@ -1,6 +1,6 @@
 /**
  * @file auth_service.h
- * @brief 认证服务 — 统一处理会话签发、解析、撤销与旧 token 兼容
+ * @brief 认证服务 — 统一处理会话签发、解析与撤销
  * @author Christins
  * @date 2026-10-23
  * @copyright Apache 2.0
@@ -21,13 +21,10 @@ struct AuthConf {
     std::string cookie_same_site = "Lax";
     // 会话绝对有效期（秒），<=0 表示不限制
     int64_t session_absolute_ttl = 604800;
-    // 迁移期兼容 WebSocket 的旧 token query 认证
-    bool ws_legacy_token = false;
 
     bool operator==(const AuthConf& oth) const
     {
-        return cookie_secure == oth.cookie_secure && cookie_same_site == oth.cookie_same_site && session_absolute_ttl == oth.session_absolute_ttl
-            && ws_legacy_token == oth.ws_legacy_token;
+        return cookie_secure == oth.cookie_secure && cookie_same_site == oth.cookie_same_site && session_absolute_ttl == oth.session_absolute_ttl;
     }
 };
 
@@ -52,9 +49,6 @@ public:
         if (node["session_absolute_ttl"]) {
             conf.session_absolute_ttl = node["session_absolute_ttl"].as<int64_t>();
         }
-        if (node["ws_legacy_token"]) {
-            conf.ws_legacy_token = LexicalCast<std::string, bool>()(node["ws_legacy_token"].Scalar());
-        }
         return conf;
     }
 };
@@ -68,7 +62,6 @@ public:
         node["cookie_secure"] = cfg.cookie_secure;
         node["cookie_same_site"] = cfg.cookie_same_site;
         node["session_absolute_ttl"] = cfg.session_absolute_ttl;
-        node["ws_legacy_token"] = cfg.ws_legacy_token;
 
         std::stringstream ss;
         ss << node;
@@ -99,15 +92,6 @@ public:
     static AuthContext Resolve(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response = nullptr, bool touch = true);
 
     /**
-     * @brief 用旧版 S_UID / S_TOKEN Cookie 换取新的会话 Cookie
-     * @return 是否成功升级
-     */
-    static bool UpgradeLegacySession(
-        chen::http::HttpRequest::ptr request,
-        chen::http::HttpResponse::ptr response,
-        chen::http::HttpSession::ptr session);
-
-    /**
      * @brief 登录成功后签发会话
      * @return 0 成功，否则返回业务错误码
      */
@@ -129,7 +113,7 @@ public:
     static void RevokeAllSessions(int64_t uid);
 
     /**
-     * @brief WebSocket 握手认证：优先 Cookie 会话，兼容旧 query token
+     * @brief WebSocket 握手认证：仅使用握手 Cookie 中的服务端会话
      */
     static bool ResolveWs(chen::http::HttpRequest::ptr request, int64_t& uid, data::UserInfo::ptr& user);
 

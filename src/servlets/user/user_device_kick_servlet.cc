@@ -1,7 +1,6 @@
 #include "user_device_kick_servlet.h"
 
 #include "../../auth/session_store.h"
-#include "../../manager/user_login_device_manager.h"
 #include "../../util.h"
 
 namespace blog {
@@ -27,25 +26,9 @@ int32_t UserDeviceKickServlet::handle(
 
         DEFINE_AND_CHECK_STRING(result, device_id, "device_id");
 
-        // 新会话体系：device_id 实际是 SessionStore::HashId(SESSIONID)
-        if (SessionStore::DestroyForUser(uid, device_id)) {
-            result->setErrno(errcode::SUCCESS);
-            break;
-        }
-
-        // 迁移期兼容旧设备 token
-        auto device = UserLoginDeviceMgr::GetInstance()->getActiveByDevice(device_id);
-        if (!device) {
+        // device_id 是 SessionStore::HashId(SESSIONID)
+        if (!SessionStore::DestroyForUser(uid, device_id)) {
             result->setErrno(errcode::DEVICE_NOT_FOUND);
-            break;
-        }
-        if (device->getUserId() != uid) {
-            result->setErrno(errcode::ACCESS_DENIED);
-            break;
-        }
-
-        if (UserLoginDeviceMgr::GetInstance()->kick(device)) {
-            result->setErrno(errcode::DEVICE_KICK_FAILED);
             break;
         }
         result->setErrno(errcode::SUCCESS);

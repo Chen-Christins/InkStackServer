@@ -71,11 +71,11 @@ struct Result {
 
 struct CookieKey {
     static const std::string SESSION_KEY;
+};
+
+struct SessionDataKey {
     static const std::string USER_ID;
-    static const std::string TOKEN;
-    static const std::string TOKEN_TIME;
-    static const std::string IS_AUTH;
-    static const std::string DEVICE_ID;
+    static const std::string ANONYMOUS;
 };
 
 class BlogServlet : public chen::http::Servlet {
@@ -108,7 +108,7 @@ protected:
 protected:
     chen::http::SessionData::ptr getSessionData(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response);
 
-    bool initLogin(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response, chen::http::HttpSession::ptr session);
+    bool initLogin(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response);
 
     /**
      * @brief 是否允许公开接口自动解析登录态（登录接口可覆盖为 false）

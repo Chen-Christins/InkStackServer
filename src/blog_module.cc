@@ -322,7 +322,6 @@ void BlogModule::registerServlets()
         dp->addServlet("/api/v1/user/info", XX(UserInfoServlet));
         dp->addServlet("/api/v1/user/list", XX(UserListServlet));
         dp->addServlet("/api/v1/user/logout", XX(UserLogoutServlet));
-        dp->addServlet("/api/v1/user/refresh_token", XX(UserRefreshTokenServlet));
         dp->addServlet("/api/v1/user/device/list", XX(UserDeviceListServlet));
         dp->addServlet("/api/v1/user/device/kick", XX(UserDeviceKickServlet));
         dp->addServlet("/api/v1/user/forget_passwd", XX(UserResetPasswdServlet));

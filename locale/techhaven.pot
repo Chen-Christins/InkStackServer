@@ -967,14 +967,6 @@ msgstr ""
 msgid "GitHub OAuth 未配置"
 msgstr ""
 
-#: src/servlets/user/user_refresh_token_servlet.cc:60
-msgid "token is required"
-msgstr ""
-
-#: src/servlets/user/user_refresh_token_servlet.cc:66
-msgid "token mismatch, please re-login"
-msgstr ""
-
 #: src/servlets/user/user_update_servlet.cc:59
 msgid "old password required"
 msgstr ""
