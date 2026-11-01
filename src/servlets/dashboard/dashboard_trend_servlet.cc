@@ -151,7 +151,7 @@ int32_t DashboardTrendServlet::handle(
             list.append(item);
         }
 
-        result->jsondata["list"] = list;
+        result->set("list", list);
         result->set("total_visits", total_visits);
         result->set("avg_visits", num_buckets > 0 ? (double)total_visits / num_buckets : 0);
         result->set("max_visits", max_visits);

@@ -55,7 +55,9 @@ int32_t RdTaskServlet::handle(
                     break;
                 }
             }
-            rd::BuildTaskJson(result->jsondata, info);
+            Json::Value data;
+            rd::BuildTaskJson(data, info);
+            result->set("data", data);
             break;
         }
 

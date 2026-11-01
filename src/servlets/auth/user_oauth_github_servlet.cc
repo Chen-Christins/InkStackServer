@@ -71,7 +71,7 @@ int32_t UserOauthGithubServlet::handle(
             + "&scope=" + chen::StringUtil::UrlEncode("read:user user:email", false) + "&state=" + state;
         response->setRedirect(authorize_url);
     } while (0);
-    if (result->errno_ != 0) {
+    if (result->getErrno() != 0) {
         response->setBody(result->toJsonString());
     }
     return 0;

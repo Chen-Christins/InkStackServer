@@ -73,9 +73,9 @@ int32_t ArticleDeleteServlet::handle(
             break;
         }
         if (!infos.empty()) {
-            auto& jids = result->jsondata["ids"];
+            Json::Value json_ids;
             for (auto& i : infos) {
-                jids.append(i->getId());
+                json_ids.append(i->getId());
                 ArticleMgr::GetInstance()->del(i->getId());
                 // 从搜索索引中移除
                 IndexMgr::GetInstance()->removeArticle(i->getId());
@@ -86,6 +86,7 @@ int32_t ArticleDeleteServlet::handle(
                     ArticleMgr::GetInstance()->clearCalendarCache(i->getUserId(), i->getPublishTime());
                 }
             }
+            result->set("ids", json_ids);
         }
     } while (0);
     response->setBody(result->toJsonString());

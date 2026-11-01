@@ -37,7 +37,7 @@ int32_t UserAssignmentListServlet::handle(
         }
 
         // 获取所有作业-组织关系
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& org_rel : user_org_rels) {
             // 该组织下的所有作业关系
             std::vector<data::AssignmentOrganizationRelInfo::ptr> assignment_org_rels;
@@ -64,6 +64,7 @@ int32_t UserAssignmentListServlet::handle(
                 list.append(item);
             }
         }
+        result->set("list", list);
         result->set("total", list.size());
     } while (0);
     response->setBody(result->toJsonString());

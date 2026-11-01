@@ -81,7 +81,7 @@ int32_t PasskeyLoginBeginServlet::handle(
             break;
         }
 
-        result->jsondata = options;
+        result->setData(options);
         result->setErrno(errcode::SUCCESS);
     } while (0);
     response->setBody(result->toJsonString());

@@ -127,7 +127,7 @@ void Index::buildIdx(data::ArticleInfo::ptr info, uint32_t idx)
 {
     set((uint64_t)IndexType::USER_ID, info->getUserId(), idx, true);
     set((uint64_t)IndexType::STATE, info->getState(), idx, true);
-    set((uint64_t)IndexType::YEAR_MON, hash(chen::TimeUtil::Time2Str(info->getPublishTime(), "%Y年%m月"), true), idx, true);
+    set((uint64_t)IndexType::YEAR_MON, hash(chen::TimeUtil::Time2StrSec(info->getPublishTime(), "%Y年%m月"), true), idx, true);
     set((uint64_t)IndexType::CHANNEL, info->getChannel(), idx, true);
 
     // 中文分词全文索引（正文只取前 2000 字，长文不影响搜索命中且大幅减少分词耗时）

@@ -53,7 +53,7 @@ int32_t CommentUpdateServlet::handle(
         item["id"] = comment->getId();
         item["content"] = comment->getContent();
         item["user_id"] = comment->getUserId();
-        item["time"] = chen::TimeUtil::Time2Str(comment->getCreateTime());
+        item["time"] = chen::TimeUtil::Time2StrSec(comment->getCreateTime());
 
         auto user = UserMgr::GetInstance()->get(uid);
         if (user) {
@@ -70,7 +70,7 @@ int32_t CommentUpdateServlet::handle(
         item["replies"] = Json::Value(Json::arrayValue);
         item["reply_count"] = CommentMgr::GetInstance()->countReplies(id);
 
-        result->jsondata = item;
+        result->setData(item);
         result->setErrno(errcode::SUCCESS);
     } while (0);
 

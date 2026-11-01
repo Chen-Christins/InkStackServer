@@ -90,7 +90,10 @@ int32_t ConversationMessageServlet::handle(
                 break;
             }
 
-            BuildMessageJson(result->jsondata, msg, uid);
+            Json::Value data;
+            BuildMessageJson(data, msg, uid);
+            result->set("data", data);
+
             result->setErrno(errcode::SUCCESS);
 
             // HTTP 兜底发送也走聊天 WS 推送给接收方

@@ -30,14 +30,16 @@ int32_t FaqsServlet::handle(
             FaqMgr::GetInstance()->searchByKeyword(keyword, infos);
         }
 
+        Json::Value data;
         for (auto& i : infos) {
             Json::Value v;
             v["id"] = i->getId();
             v["cat"] = i->getCat();
             v["q"] = i->getQ();
             v["a"] = i->getA();
-            result->jsondata.append(v);
+            data.append(v);
         }
+        result->set("data", data);
     } while (0);
     DEBUG(logger) << "FaqsServlet handle result: " << result->toJsonString();
     response->setBody(result->toJsonString());

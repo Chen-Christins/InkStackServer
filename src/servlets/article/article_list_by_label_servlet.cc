@@ -31,7 +31,7 @@ int32_t ArticleListByLabelServlet::handle(
         std::vector<data::ArticleInfo::ptr> infos;
         auto total = ArticleMgr::GetInstance()->listByLabelPages(infos, label_id, offset, page_size, true);
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : infos) {
             Json::Value item;
             auto uinfo = UserMgr::GetInstance()->get(i->getUserId());
@@ -47,6 +47,7 @@ int32_t ArticleListByLabelServlet::handle(
             item["publish_time"] = i->getPublishTime();
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

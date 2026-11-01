@@ -33,7 +33,7 @@ int32_t PasskeyListServlet::handle(
 
         result->setErrno(errcode::SUCCESS);
         result->set("total", passkeys.size());
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (const auto& passkey : passkeys) {
             if (!passkey) {
                 continue;
@@ -50,6 +50,7 @@ int32_t PasskeyListServlet::handle(
             item["last_used_at"] = passkey->getLastUsedAt();
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

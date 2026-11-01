@@ -33,7 +33,7 @@ int32_t UserOrganizationListServlet::handle(
             return a->getCreateTime() < b->getCreateTime();
         });
 
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : orgs) {
             Json::Value item;
             auto org = OrganizationMgr::GetInstance()->get(i->getOrgId());
@@ -49,6 +49,7 @@ int32_t UserOrganizationListServlet::handle(
             item["count"] = OrganizationUserRelMgr::GetInstance()->getMemberCount(i->getOrgId(), status, true);
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

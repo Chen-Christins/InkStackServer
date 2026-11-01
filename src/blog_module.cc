@@ -11,7 +11,6 @@
 #include <chen/http/ws_server.h>
 #include <chen/http/ws_servlet.h>
 #include <chen/log/log.h>
-#include <chen/util/util.h>
 
 #include <exception>
 #include <memory>
@@ -100,17 +99,9 @@ bool BlogModule::onDeactivate()
 
 void BlogModule::onTick()
 {
-    static int s_pr_sync_tick = 0;
+    static uint32_t s_pr_sync_tick = 0;
 
     try {
-        if (chen::TimeUtil::IsZeroOfDay()) {
-            s_pr_sync_tick = 0;
-
-            OrganizationRepoMgr::GetInstance()->onTick();
-
-            OrganizationRepoPrMgr::GetInstance()->onTick();
-        }
-
         ArticleMgr::GetInstance()->onTick();
 
         NotificationMgr::GetInstance()->cleanupExpiredBroadcasts();

@@ -58,7 +58,7 @@ int32_t OrganizationUserListServlet::handle(
         });
 
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : rels) {
             auto user = blog::UserMgr::GetInstance()->get(i->getUserId());
             Json::Value item;
@@ -72,6 +72,7 @@ int32_t OrganizationUserListServlet::handle(
             item["join_time"] = i->getCreateTime();
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

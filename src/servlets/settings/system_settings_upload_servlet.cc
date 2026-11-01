@@ -99,7 +99,7 @@ int32_t SystemSettingsUploadServlet::handle(
             break;
         }
 
-        result->jsondata["url"] = url;
+        result->set("url", url);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

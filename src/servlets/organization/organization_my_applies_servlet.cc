@@ -37,7 +37,7 @@ int32_t OrganizationMyAppliesServlet::handle(
         int64_t total = OrganizationApplyMgr::GetInstance()->listByUserId(applies, uid, offset, page_size, true);
 
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : applies) {
             Json::Value item;
             item["id"] = i->getId();
@@ -55,6 +55,7 @@ int32_t OrganizationMyAppliesServlet::handle(
             item["reviewed_at"] = i->getReviewedAt();
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

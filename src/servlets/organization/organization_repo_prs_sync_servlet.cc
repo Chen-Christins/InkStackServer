@@ -156,7 +156,7 @@ int32_t OrganizationRepoPrsSyncServlet::handle(
             item["merged_at"] = updated->getMergedAt();
             item["created_at"] = updated->getCreateTime();
             item["updated_at"] = updated->getUpdateTime();
-            result->jsondata = item;
+            result->setData(item);
             break;
         }
 
