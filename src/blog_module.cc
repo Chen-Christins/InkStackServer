@@ -454,7 +454,7 @@ void BlogModule::registerServlets()
         dp->addServlet("/api/v1/admin/feedback/convert", XX(AdminFeedbackConvertServlet));
         // 统计
         dp->addServlet("/api/v1/stats", XX(StatsServlet));
-        dp->addServlet("/api/v1/admin/metrics", XX(MetricsServlet));
+        dp->addServlet("/api/v1/admin/metrics", XX(MetricsAdminServlet));
         // 文章标签相关
         dp->addServlet("/api/v1/label/create", XX(LabelCreateServlet));
         dp->addServlet("/api/v1/label/delete", XX(LabelDeleteServlet));

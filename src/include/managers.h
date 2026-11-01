@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../manager/article_category_rel_manager.h"        // IWYU pragma: keep
 #include "../manager/article_label_rel_manager.h"           // IWYU pragma: keep
 #include "../manager/article_manager.h"                     // IWYU pragma: keep
