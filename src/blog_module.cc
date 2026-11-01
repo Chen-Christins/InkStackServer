@@ -99,24 +99,28 @@ bool BlogModule::onDeactivate()
 
 void BlogModule::onTick()
 {
-    static uint32_t s_pr_sync_tick = 0;
+    static uint32_t s_sync_tick = 0;
 
     try {
+        s_sync_tick++;
+
         ArticleMgr::GetInstance()->onTick();
 
         NotificationMgr::GetInstance()->cleanupExpiredBroadcasts();
 
         ChunkUploadMgr::GetInstance()->cleanupExpiredSessions();
 
-        if (s_pr_sync_tick % 5 == 0) {
+        if (s_sync_tick % 5 == 0) {
             chen::http::SessionDataMgr::GetInstance()->check(3600);
         }
 
-        if (s_pr_sync_tick % 60 == 0) {
-            INFO(logger) << "module status: \n" << Module::statusString();
-        }
+        if (s_sync_tick % 86400 == 0) {
+            s_sync_tick = 0;
 
-        s_pr_sync_tick++;
+            OrganizationRepoMgr::GetInstance()->onTick();
+
+            OrganizationRepoPrMgr::GetInstance()->onTick();
+        }
     } catch (const std::exception& e) {
         ERROR(logger) << "onTick exception: " << e.what();
     } catch (...) {
@@ -448,8 +452,9 @@ void BlogModule::registerServlets()
         dp->addServlet("/api/v1/admin/feedback/list", XX(AdminFeedbackListServlet));
         dp->addServlet("/api/v1/admin/feedback/delete", XX(AdminFeedbackDeleteServlet));
         dp->addServlet("/api/v1/admin/feedback/convert", XX(AdminFeedbackConvertServlet));
-        // 首页统计（公开接口）
+        // 统计
         dp->addServlet("/api/v1/stats", XX(StatsServlet));
+        dp->addServlet("/api/v1/admin/metrics", XX(MetricsServlet));
         // 文章标签相关
         dp->addServlet("/api/v1/label/create", XX(LabelCreateServlet));
         dp->addServlet("/api/v1/label/delete", XX(LabelDeleteServlet));
