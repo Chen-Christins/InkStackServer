@@ -139,22 +139,25 @@ int32_t ArticleUpdateCategoryServlet::handle(
         IndexMgr::GetInstance()->updateArticle(ainfo);
 
         if (!update_add_infos.empty()) {
-            auto& v = result->jsondata["add_category_ids"];
+            Json::Value add_category_ids;
             for (auto& i : update_add_infos) {
-                v.append(i->getId());
+                add_category_ids.append(i->getId());
             }
+            result->set("add_category_ids", add_category_ids);
         }
         if (!new_infos.empty()) {
-            auto& v = result->jsondata["add_category_ids"];
+            Json::Value add_category_ids;
             for (auto& i : new_infos) {
-                v.append(i->getId());
+                add_category_ids.append(i->getId());
             }
+            result->set("add_category_ids", add_category_ids);
         }
         if (!update_del_infos.empty()) {
-            auto& v = result->jsondata["del_category_ids"];
+            Json::Value del_category_ids;
             for (auto& i : update_del_infos) {
-                v.append(i->getId());
+                del_category_ids.append(i->getId());
             }
+            result->set("del_category_ids", del_category_ids);
         }
     } while (0);
     response->setBody(result->toJsonString());

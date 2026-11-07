@@ -59,7 +59,9 @@ int32_t RdRequirementDetailServlet::handle(
             }
         }
 
-        rd::BuildRequirementJson(result->jsondata, info);
+        Json::Value data;
+        rd::BuildRequirementJson(data, info);
+        result->set("data", data);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

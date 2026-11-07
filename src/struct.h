@@ -24,49 +24,47 @@ std::string GetRemoteIP(chen::http::HttpRequest::ptr request, chen::http::HttpSe
 
 struct Result {
     typedef std::shared_ptr<Result> ptr;
-    Result(int32_t ec = 0, const std::string& msg = "ok");
 
-    int32_t errno_; // 统一业务错误码（默认 0 = 成功）
-    int64_t used;
-    std::string msg;
-    std::string lang;
-    Json::Value jsondata;
+    Result(int32_t ec = 0, const std::string& msg = "ok");
 
     template <class T>
     void set(const std::string& key, const T& v)
     {
-        jsondata[key] = v;
+        jsondata_[key] = v;
     }
-    void set(const std::string& key, const char* v) { jsondata[key] = v; }
-    void set(const std::string& key, const std::string& v) { jsondata[key] = v; }
 
     template <class T>
     void append(const std::string& key, const T& v)
     {
-        jsondata[key].append(v);
+        jsondata_[key].append(v);
     }
 
-    /**
-     * @brief 设置错误码并自动填充默认消息
-     * @param ec 业务错误码（errcode::NOT_LOGIN 等）
-     */
+    void set(const std::string& key, const char* v) { jsondata_[key] = v; }
+    void set(const std::string& key, const std::string& v) { jsondata_[key] = v; }
+
     void setErrno(int32_t ec);
 
-    /**
-     * @brief 设置错误码和自定义消息
-     * @param ec 业务错误码
-     * @param customMsg 自定义消息
-     */
     void setErrno(int32_t ec, const std::string& customMsg);
+    int32_t getErrno() const { return errno_; }
+
+    const std::string& getMessage() const { return msg_; }
 
     void setErrnoFmt(int32_t ec, const char* fmt, ...);
 
-    /**
-     * @brief 设置 data 为原始 JSON 字符串（用于下发配置等场景）
-     */
     void setDataJson(const std::string& jsonStr);
 
+    void setData(Json::Value& json_data);
+
+    void setLanguage(const std::string& lang);
+
     std::string toJsonString() const;
+
+private:
+    int32_t errno_;
+    int64_t used_;
+    std::string msg_;
+    std::string lang_;
+    Json::Value jsondata_;
 };
 
 struct CookieKey {

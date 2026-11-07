@@ -126,7 +126,9 @@ int32_t RdRequirementEditServlet::handle(
             break;
         }
 
-        rd::BuildRequirementJson(result->jsondata, info);
+        Json::Value data;
+        rd::BuildRequirementJson(data, info);
+        result->setData(data);
 
         notifyAssignee(assignee_id, info);
     } while (0);

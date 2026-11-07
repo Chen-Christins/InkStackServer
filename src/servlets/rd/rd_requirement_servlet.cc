@@ -55,7 +55,9 @@ int32_t RdRequirementServlet::handle(
                     break;
                 }
             }
-            rd::BuildRequirementJson(result->jsondata, info);
+            Json::Value data;
+            rd::BuildRequirementJson(data, info);
+            result->set("data", data);
             break;
         }
 

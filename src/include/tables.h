@@ -1,3 +1,5 @@
+#pragma once
+
 #include "blog/data/article_category_rel_info.h"        // IWYU pragma: keep
 #include "blog/data/article_info.h"                     // IWYU pragma: keep
 #include "blog/data/article_label_rel_info.h"           // IWYU pragma: keep

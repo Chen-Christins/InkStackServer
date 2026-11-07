@@ -151,7 +151,7 @@ int32_t CategoryDeleteServlet::handle(
         }
         if (!del_cats.empty()) {
             result->set("total", del_cats.size());
-            auto& jids = result->jsondata["list"];
+            Json::Value list;
             for (auto& i : del_cats) {
                 Json::Value item;
                 item["id"] = i->getId();
@@ -163,8 +163,9 @@ int32_t CategoryDeleteServlet::handle(
                 item["icon"] = i->getIcon();
                 item["desc"] = i->getDescription();
                 item["status"] = i->getStatus();
-                jids.append(item);
+                list.append(item);
             }
+            result->set("list", list);
         }
     } while (0);
     response->setBody(result->toJsonString());

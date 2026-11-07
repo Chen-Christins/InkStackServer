@@ -131,7 +131,9 @@ int32_t RdBugEditServlet::handle(
             result->setErrno(errcode::RD_UPDATE_FAILED);
             break;
         }
-        rd::BuildBugJson(result->jsondata, info);
+        Json::Value data;
+        rd::BuildBugJson(data, info);
+        result->setData(data);
 
         notifyAssignee(assignee_id, info);
     } while (0);

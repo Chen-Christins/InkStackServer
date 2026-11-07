@@ -66,7 +66,7 @@ int32_t PasskeyRegisterBeginServlet::handle(
             break;
         }
 
-        result->jsondata = options;
+        result->setData(options);
         result->set("name", passkey_name);
         result->setErrno(errcode::SUCCESS);
     } while (0);

@@ -89,7 +89,7 @@ int32_t OrganizationRepoPrsListServlet::handle(
         result->set("total", total);
         result->set("page", page);
         result->set("page_size", page_size);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (const auto& pr : prs) {
             Json::Value item;
             item["id"] = pr->getId();
@@ -114,6 +114,7 @@ int32_t OrganizationRepoPrsListServlet::handle(
             item["updated_at"] = pr->getUpdateTime();
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

@@ -1,6 +1,5 @@
 #include "organization_repos_sync_servlet.h"
 
-#include <chen/iomanager/worker.h>
 #include <chen/log/log.h>
 
 #include "../../manager/organization_manager.h"

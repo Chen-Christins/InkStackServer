@@ -48,7 +48,7 @@ int32_t AssignmentSubmissionListServlet::handle(
             std::vector<data::ResourceInfo::ptr> resources;
             ResourceMgr::GetInstance()->getByBizUid(resources, biz_type, assign_id, uid);
 
-            auto& list = result->jsondata["list"];
+            Json::Value list;
             for (auto& res : resources) {
                 Json::Value item;
                 item["id"] = res->getId();
@@ -57,6 +57,7 @@ int32_t AssignmentSubmissionListServlet::handle(
                 item["file_size"] = res->getSize();
                 list.append(item);
             }
+            result->set("list", list);
             result->set("total", resources.size());
         }
     } while (0);

@@ -73,7 +73,7 @@ int32_t UserAdminListsServlet::handle(
         }
 
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (const auto& user : users) {
             Json::Value item;
             item["id"] = user->getId();
@@ -88,6 +88,7 @@ int32_t UserAdminListsServlet::handle(
             item["comment_count"] = comment_counts[user->getId()];
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

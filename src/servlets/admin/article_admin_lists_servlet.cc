@@ -48,7 +48,8 @@ int32_t ArticleAdminListsServlet::handle(
         uint64_t total = ArticleMgr::GetInstance()->listByPages(articles, offset, state, category, rrole, days, page_size, true);
 
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+
+        Json::Value list;
         for (const auto& atc : articles) {
             const auto& user = UserMgr::GetInstance()->get(atc->getUserId());
             Json::Value item;
@@ -69,6 +70,7 @@ int32_t ArticleAdminListsServlet::handle(
             item["comment_count"] = CommentMgr::GetInstance()->countByArticle(atc->getId());
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

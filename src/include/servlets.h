@@ -193,6 +193,7 @@
 #include "../servlets/settings/system_settings_upload_servlet.h"
 
 // 统计信息部分
+#include "../servlets/stats/metrics_servlet.h"
 #include "../servlets/stats/stats_servlet.h"
 
 // 用户部分

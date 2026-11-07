@@ -76,7 +76,10 @@ int32_t ConversationServlet::handle(
                 break;
             }
 
-            BuildConversationJson(result->jsondata, conv, uid);
+            Json::Value data;
+            BuildConversationJson(data, conv, uid);
+            result->set("data", data);
+
             result->setErrno(errcode::SUCCESS);
             break;
         }

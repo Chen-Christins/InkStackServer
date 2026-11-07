@@ -66,7 +66,7 @@ int32_t CommentCreateServlet::handle(
         item["id"] = info->getId();
         item["content"] = info->getContent();
         item["user_id"] = info->getUserId();
-        item["time"] = chen::TimeUtil::Time2Str(info->getCreateTime());
+        item["time"] = chen::TimeUtil::Time2StrSec(info->getCreateTime());
 
         auto user = UserMgr::GetInstance()->get(uid);
         if (user) {
@@ -82,7 +82,7 @@ int32_t CommentCreateServlet::handle(
         item["replies"] = Json::Value(Json::arrayValue);
         item["reply_count"] = 0;
 
-        result->jsondata = item;
+        result->setData(item);
         result->setErrno(errcode::SUCCESS);
 
         // Notify article author and parent comment author asynchronously

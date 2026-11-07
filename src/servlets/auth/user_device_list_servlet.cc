@@ -35,7 +35,7 @@ int32_t UserDeviceListServlet::handle(
 
         result->setErrno(errcode::SUCCESS);
         result->set("total", sessions.size());
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (const auto& s : sessions) {
             Json::Value item;
             item["id"] = s.id;
@@ -49,6 +49,7 @@ int32_t UserDeviceListServlet::handle(
             item["last_active_time"] = s.last_seen;
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

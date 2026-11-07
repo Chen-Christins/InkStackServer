@@ -79,7 +79,9 @@ int32_t SystemSettingsServlet::handle(
                 result->setErrno(errcode::SETTINGS_NOT_LOADED);
                 break;
             }
-            BuildSettingsJson(result->jsondata, settings);
+            Json::Value data;
+            BuildSettingsJson(data, settings);
+            result->setData(data);
         } else if (method == chen::http::HttpMethod::PUT) {
             auto info = SystemSettingsMgr::GetInstance()->get();
             if (!info) {
@@ -202,8 +204,9 @@ int32_t SystemSettingsServlet::handle(
                 result->setErrno(errcode::SETTINGS_SAVE_FAILED);
                 break;
             }
-
-            BuildSettingsJson(result->jsondata, info);
+            Json::Value data;
+            BuildSettingsJson(data, info);
+            result->setData(data);
         } else {
             result->setErrno(errcode::METHOD_NOT_ALLOWED);
         }

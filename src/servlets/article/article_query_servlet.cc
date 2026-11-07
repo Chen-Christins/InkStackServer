@@ -34,7 +34,7 @@ int32_t ArticleQueryServlet::handle(
         std::vector<data::ArticleInfo::ptr> infos;
         auto total = ArticleMgr::GetInstance()->listByUserIdPages(infos, user_id, offset, page_size, true, state);
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : infos) {
             Json::Value item;
             auto uinfo = UserMgr::GetInstance()->get(i->getUserId());
@@ -67,6 +67,7 @@ int32_t ArticleQueryServlet::handle(
             }
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

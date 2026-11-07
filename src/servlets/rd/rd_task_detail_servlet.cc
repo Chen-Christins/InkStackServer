@@ -60,7 +60,9 @@ int32_t RdTaskDetailServlet::handle(
             }
         }
 
-        rd::BuildTaskJson(result->jsondata, info);
+        Json::Value data;
+        rd::BuildTaskJson(data, info);
+        result->set("data", data);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

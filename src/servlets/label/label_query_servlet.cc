@@ -73,6 +73,7 @@ int32_t LabelQueryServlet::handle(
             }
         }
 
+        Json::Value data;
         for (auto& i : infos) {
             Json::Value v;
             v["id"] = i->getId();
@@ -81,8 +82,9 @@ int32_t LabelQueryServlet::handle(
             v["desc"] = i->getDescription();
             v["create_time"] = i->getCreateTime();
             v["article_count"] = article_counts[i->getId()];
-            result->jsondata.append(v);
+            data.append(v);
         }
+        result->set("data", data);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

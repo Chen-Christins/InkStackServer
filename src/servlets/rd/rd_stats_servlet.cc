@@ -96,12 +96,12 @@ int32_t RdStatsServlet::handle(
             }
         }
 
-        result->jsondata["total_requirements"] = total_reqs;
-        result->jsondata["open_requirements"] = open_reqs;
-        result->jsondata["total_bugs"] = total_bugs;
-        result->jsondata["unresolved_bugs"] = unresolved_bugs;
-        result->jsondata["total_tasks"] = total_tasks;
-        result->jsondata["overdue_tasks"] = overdue_tasks;
+        result->set("total_requirements", total_reqs);
+        result->set("open_requirements", open_reqs);
+        result->set("total_bugs", total_bugs);
+        result->set("unresolved_bugs", unresolved_bugs);
+        result->set("total_tasks", total_tasks);
+        result->set("overdue_tasks", overdue_tasks);
 
     } while (0);
     response->setBody(result->toJsonString());

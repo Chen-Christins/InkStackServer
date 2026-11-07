@@ -28,7 +28,7 @@ int32_t OrganizationListServlet::handle(
         int64_t total = OrganizationMgr::GetInstance()->listByPages(orgs, 0, INT32_MAX, status, true);
 
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : orgs) {
             Json::Value item;
             item["id"] = i->getId();
@@ -41,6 +41,7 @@ int32_t OrganizationListServlet::handle(
             item["count"] = OrganizationUserRelMgr::GetInstance()->getMemberCount(i->getId(), status, true);
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

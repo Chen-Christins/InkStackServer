@@ -79,10 +79,11 @@ int32_t LabelDeleteServlet::handle(
             LabelMgr::GetInstance()->add(i);
         }
         if (!del_labels.empty()) {
-            auto& jids = result->jsondata["ids"];
+            Json::Value json_ids;
             for (auto& i : del_labels) {
-                jids.append(i->getId());
+                json_ids.append(i->getId());
             }
+            result->set("ids", json_ids);
         }
     } while (0);
     response->setBody(result->toJsonString());

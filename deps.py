@@ -17,6 +17,7 @@ import re
 import shutil
 import sys
 import tempfile
+import time
 import urllib.error
 import urllib.request
 import zipfile
@@ -38,6 +39,10 @@ LIMONP_INCLUDE = DEPS_DIR / "include" / "limonp"
 
 VERSION_RE = re.compile(r"^chen-sdk-(\d[\w.\-]*?)(?:-(arm64|amd64))?$")
 ASSET_RE = re.compile(r"^chen-sdk-(\d[\w.\-]*?)-(arm64|amd64)\.zip$")
+
+DOWNLOAD_ATTEMPTS = 3
+DOWNLOAD_CHUNK = 65536
+RETRYABLE_HTTP_STATUS = {408, 429, 500, 502, 503, 504}
 
 
 class DepsError(Exception):
@@ -205,42 +210,115 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def download(url, dest, ui):
-    req = urllib.request.Request(url, headers={"User-Agent": "techhaven-deps"})
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    tmp = dest.with_suffix(dest.suffix + ".part")
+def cached_zip_ok(path):
+    path = Path(path)
+    if not path.is_file() or path.stat().st_size <= 0:
+        return False
     try:
-        with urllib.request.urlopen(req, timeout=60) as resp, tmp.open("wb") as fh:
-            total = int(resp.headers.get("Content-Length") or 0)
+        return zipfile.is_zipfile(path)
+    except OSError:
+        return False
+
+
+def discard_cached(path):
+    """Delete a corrupt file inside .deps-cache/. Never touches local archives."""
+    path = Path(path)
+    try:
+        if path.parent.resolve() != CACHE_DIR.resolve():
+            return False
+        path.unlink(missing_ok=True)
+        return True
+    except OSError:
+        return False
+
+
+def _download_once(url, part, ui):
+    resume_from = part.stat().st_size if part.is_file() else 0
+    headers = {"User-Agent": "techhaven-deps"}
+    if resume_from:
+        headers["Range"] = f"bytes={resume_from}-"
+    req = urllib.request.Request(url, headers=headers)
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        status = getattr(resp, "status", None) or resp.getcode()
+        length = int(resp.headers.get("Content-Length") or 0)
+        if status == 206 and resume_from:
+            mode = "ab"
+            done = resume_from
+            expected = resume_from + length if length else None
+        elif status == 200:
+            mode = "wb"
             done = 0
+            expected = length or None
+        else:
+            raise DepsError(f"意外的 HTTP 状态 {status}: {url}")
+        total = expected or 0
+        with part.open(mode) as fh:
             while True:
-                chunk = resp.read(65536)
+                chunk = resp.read(DOWNLOAD_CHUNK)
                 if not chunk:
                     break
                 fh.write(chunk)
                 done += len(chunk)
                 ui.progress(done, total)
-        ui.progress_end()
-        tmp.replace(dest)
-    except urllib.error.HTTPError as exc:
-        tmp.unlink(missing_ok=True)
-        raise DepsError(f"下载失败 HTTP {exc.code}: {url}") from exc
-    except Exception as exc:
-        tmp.unlink(missing_ok=True)
-        raise DepsError(f"下载失败: {exc}") from exc
+        actual = part.stat().st_size
+        if expected is not None and actual != expected:
+            raise DepsError(f"下载不完整: {human(actual)} / {human(expected)}")
+
+
+def download(url, dest, ui, attempts=DOWNLOAD_ATTEMPTS):
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    part = dest.with_suffix(dest.suffix + ".part")
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            _download_once(url, part, ui)
+            ui.progress_end()
+            part.replace(dest)
+            return dest
+        except urllib.error.HTTPError as exc:
+            ui.progress_end()
+            if exc.code == 416:
+                part.unlink(missing_ok=True)
+                last_error = exc
+                if attempt < attempts:
+                    ui.warn(f"续传位置无效，从头重新下载 {dest.name}")
+                    continue
+                break
+            if exc.code not in RETRYABLE_HTTP_STATUS:
+                raise DepsError(f"下载失败 HTTP {exc.code}: {url}") from exc
+            last_error = exc
+        except Exception as exc:
+            ui.progress_end()
+            last_error = exc
+        if attempt < attempts:
+            delay = attempt
+            ui.warn(f"下载中断，{delay} 秒后重试 ({attempt}/{attempts}): {last_error}")
+            time.sleep(delay)
+    hint = "，已保留断点文件，重新运行可续传" if part.is_file() else ""
+    raise DepsError(f"下载失败（已尝试 {attempts} 次）: {last_error}{hint}") from last_error
+
+
+def ensure_cached(url, asset, ui):
+    cache = CACHE_DIR / asset
+    if cache.is_file() and cache.stat().st_size > 0:
+        if cached_zip_ok(cache):
+            ui.ok(f"📦 命中缓存 {ui.path(cache.name)}")
+            return cache
+        ui.warn(f"缓存已损坏，重新下载 {ui.path(cache.name)}")
+        discard_cached(cache)
+    ui.step("📦", f"下载 {asset}")
+    ui.info(url)
+    download(url, cache, ui)
+    if not cached_zip_ok(cache):
+        discard_cached(cache)
+        raise DepsError(f"{asset} 下载内容不是有效的 zip，请重新运行 ./deps.py sync")
+    return cache
 
 
 def ensure_download(repo, version, arch, ui):
     asset = asset_name(version, arch)
-    cache = CACHE_DIR / asset
-    if cache.is_file() and cache.stat().st_size > 0:
-        ui.ok(f"📦 命中缓存 {ui.path(cache.name)}")
-        return cache
     url = f"https://github.com/{repo}/releases/download/v{version}/{asset}"
-    ui.step("📦", f"下载 {asset}")
-    ui.info(url)
-    download(url, cache, ui)
-    return cache
+    return ensure_cached(url, asset, ui)
 
 
 def fetch_digest(repo, version, asset, ui):
@@ -281,7 +359,13 @@ def verify_zip(zip_path, repo, version, asset, ui, local=False):
         return
     actual = sha256_file(zip_path)
     if actual != expected:
-        raise DepsError(f"sha256 校验失败\n  期望: {expected}\n  实际: {actual}")
+        removed = discard_cached(zip_path)
+        hint = (
+            "已删除损坏缓存，重新运行 ./deps.py sync 即可重新下载"
+            if removed
+            else "本地包可能已损坏，请更换后重试"
+        )
+        raise DepsError(f"sha256 校验失败\n  期望: {expected}\n  实际: {actual}\n  {hint}")
     ui.ok("sha256 校验通过")
 
 
@@ -315,8 +399,14 @@ def install_zip(zip_path, version, ui):
     tmp = Path(tempfile.mkdtemp(prefix=".sdk-tmp-", dir=ROOT))
     try:
         ui.step("📂", f"解压到 {ui.path(dest.name + '/')}")
-        with zipfile.ZipFile(zip_path) as zf:
-            extract_zip_restore(zf, tmp)
+        try:
+            with zipfile.ZipFile(zip_path) as zf:
+                extract_zip_restore(zf, tmp)
+        except zipfile.BadZipFile as exc:
+            discard_cached(zip_path)
+            raise DepsError(
+                f"{Path(zip_path).name} 不是有效的 zip（可能下载不完整），请重新运行 ./deps.py sync"
+            ) from exc
         sdk_root = locate_sdk_root(tmp)
         if sdk_root is None:
             raise DepsError(f"{Path(zip_path).name} 内未找到 lib/libchen.so")
@@ -421,27 +511,13 @@ def cppjieba_ready():
 
 
 def ensure_asset(repo, tag, asset, ui):
-    cache = CACHE_DIR / asset
-    if cache.is_file() and cache.stat().st_size > 0:
-        ui.ok(f"📦 命中缓存 {ui.path(cache.name)}")
-        return cache
     url = f"https://github.com/{repo}/releases/download/{tag}/{asset}"
-    ui.step("📦", f"下载 {asset}")
-    ui.info(url)
-    download(url, cache, ui)
-    return cache
+    return ensure_cached(url, asset, ui)
 
 
 def ensure_source_archive(repo, ref, asset, ui):
-    cache = CACHE_DIR / asset
-    if cache.is_file() and cache.stat().st_size > 0:
-        ui.ok(f"📦 命中缓存 {ui.path(cache.name)}")
-        return cache
     url = f"https://github.com/{repo}/archive/{ref}.zip"
-    ui.step("📦", f"下载 {asset}")
-    ui.info(url)
-    download(url, cache, ui)
-    return cache
+    return ensure_cached(url, asset, ui)
 
 
 def source_asset_name(prefix, ref):
@@ -484,7 +560,13 @@ def verify_asset(zip_path, repo, tag, asset, ui, local=False):
         return
     actual = sha256_file(zip_path)
     if actual != expected:
-        raise DepsError(f"sha256 校验失败\n  期望: {expected}\n  实际: {actual}")
+        removed = discard_cached(zip_path)
+        hint = (
+            "已删除损坏缓存，重新运行 ./deps.py sync 即可重新下载"
+            if removed
+            else "本地包可能已损坏，请更换后重试"
+        )
+        raise DepsError(f"sha256 校验失败\n  期望: {expected}\n  实际: {actual}\n  {hint}")
     ui.ok("sha256 校验通过")
 
 
@@ -519,8 +601,15 @@ def valid_deps_dir(path):
 def install_thirdparty(zip_path, ui):
     tmp = Path(tempfile.mkdtemp(prefix=".deps-tmp-", dir=ROOT))
     try:
-        with zipfile.ZipFile(zip_path) as zf:
-            extract_zip_restore(zf, tmp)
+        try:
+            with zipfile.ZipFile(zip_path) as zf:
+                extract_zip_restore(zf, tmp)
+        except zipfile.BadZipFile as exc:
+            discard_cached(zip_path)
+            raise DepsError(
+                f"{Path(zip_path).name} 不是有效的 zip（可能下载不完整），"
+                "请重新运行 ./deps.py sync 或 ./deps.py thirdparty"
+            ) from exc
         src = tmp / "deps"
         if not src.is_dir():
             raise DepsError(f"{Path(zip_path).name} 内未找到顶层 deps/ 目录")
@@ -541,10 +630,18 @@ def install_cppjieba_headers(cpp_zip, limonp_zip, ui):
         limonp_dir = tmp / "limonp"
         cpp_dir.mkdir()
         limonp_dir.mkdir()
-        with zipfile.ZipFile(cpp_zip) as zf:
-            extract_zip_restore(zf, cpp_dir)
-        with zipfile.ZipFile(limonp_zip) as zf:
-            extract_zip_restore(zf, limonp_dir)
+        try:
+            with zipfile.ZipFile(cpp_zip) as zf:
+                extract_zip_restore(zf, cpp_dir)
+            with zipfile.ZipFile(limonp_zip) as zf:
+                extract_zip_restore(zf, limonp_dir)
+        except zipfile.BadZipFile as exc:
+            discard_cached(cpp_zip)
+            discard_cached(limonp_zip)
+            raise DepsError(
+                "cppjieba/limonp 源码包不是有效的 zip（可能下载不完整），"
+                "请重新运行 ./deps.py sync"
+            ) from exc
 
         cpp_header = next(cpp_dir.rglob("include/cppjieba/Jieba.hpp"), None)
         limonp_header = next(limonp_dir.rglob("include/limonp/StringUtil.hpp"), None)

@@ -49,7 +49,7 @@ inline time_t ParseDate(const std::string& date_str)
 
 inline std::string FormatDate(time_t t)
 {
-    return chen::TimeUtil::Time2Str(t, "%Y-%m-%d");
+    return chen::TimeUtil::Time2StrSec(t, "%Y-%m-%d");
 }
 
 inline std::string FormatGroupKey(time_t t, const std::string& granularity)
@@ -58,7 +58,7 @@ inline std::string FormatGroupKey(time_t t, const std::string& granularity)
         return FormatDate(chen::TimeUtil::GetWeekStart(t));
     }
     if (granularity == "month") {
-        return chen::TimeUtil::Time2Str(chen::TimeUtil::GetMonthStart(t), "%Y-%m");
+        return chen::TimeUtil::Time2StrSec(chen::TimeUtil::GetMonthStart(t), "%Y-%m");
     }
     return FormatDate(t);
 }
