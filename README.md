@@ -194,6 +194,8 @@ CI 生产配置由 **GitHub Secrets/Variables** 注入（见 workflow 的 `Prepa
 说明：
 
 - 资产缓存在 `.deps-cache/`，用 GitHub Release 的 `digest` 做 sha256 校验（离线时仅告警）；cppjieba/limonp 的源码包按 tag/commit 缓存。
+- 下载失败会自动重试（最多 3 次）并利用 `.part` 断点续传；校验失败或缓存 zip 损坏时会自动删除坏缓存，重新运行
+  `./deps.py sync` 即可重新下载。
 - 三方依赖与 cppjieba 头文件只用于**编译**（`deps/include`）。模块**不**静态链接三方库，运行时符号由预编译 `bin/server` 提供，避免与 server 内的静态副本重复；部署机也无需安装这些库。cppjieba 为 header-only，不存在需要额外链接的 `.a`。
 - 架构按主机自动识别（`dependencies.json` 的 `arch=auto`）：mac(arm64) / Linux(amd64) 各自 `./deps.py sync` 即可，无需软链；如需固定，用 `./deps.py use <version> --arch <arch>` 改配置。
 
