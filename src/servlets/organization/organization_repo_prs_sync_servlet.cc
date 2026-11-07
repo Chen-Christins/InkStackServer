@@ -7,7 +7,6 @@
  */
 #include "organization_repo_prs_sync_servlet.h"
 
-#include <chen/iomanager/worker.h>
 #include <chen/log/log.h>
 
 #include "../../manager/organization_manager.h"
