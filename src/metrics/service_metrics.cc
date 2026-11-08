@@ -89,7 +89,7 @@ void Init(
     });
 
     registry->getGaugeFunc("blog_fibers", "Current fiber count", {}, []() -> int64_t {
-        return static_cast<int64_t>(chen::Fiber::TotalFibers());
+        return chen::Fiber::TotalFibers();
     });
 
     registry->getGaugeFunc("blog_http_active_connections", "Active HTTP connections", {}, []() -> int64_t {
