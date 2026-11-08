@@ -1,14 +1,10 @@
 #include "metrics_servlet.h"
 
-#include "../../manager/article_manager.h"
-#include "../../manager/notification_manager.h"
-
-#include <chen/log/log.h>
+#include <chen/metrics/metrics.h>
+#include <chen/util/json_util.h>
 
 namespace blog {
 namespace servlet {
-
-static chen::Logger::ptr logger = LOG_ROOT();
 
 MetricsAdminServlet::MetricsAdminServlet()
     : BlogAdminServlet("MetricsAdminServlet")
@@ -22,7 +18,20 @@ int32_t MetricsAdminServlet::handle(
     Result::ptr result)
 {
     do {
-        // TODO: to expose the details of current service, like every api qps, the server ram info etc.
+        auto* registry = chen::metrics::RegistryMgr::GetInstance();
+        if (!registry) {
+            result->setErrno(errcode::INTERNAL_ERROR);
+            break;
+        }
+
+        Json::Value data;
+        if (!chen::JsonUtil::FromString(data, registry->RenderJson())) {
+            result->setErrno(errcode::INTERNAL_ERROR);
+            break;
+        }
+
+        result->setData(data);
+        result->setErrno(errcode::SUCCESS);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

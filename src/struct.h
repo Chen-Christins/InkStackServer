@@ -13,6 +13,7 @@
 #include <chen/db/db.h>
 #include <chen/http/servlet.h>
 #include <chen/http/session_data.h>
+#include <chen/metrics/metrics.h>
 #include <json/json.h>
 
 #include "error_codes.h" // IWYU pragma: keep
@@ -84,6 +85,12 @@ public:
 
     int64_t getUserId(chen::http::HttpRequest::ptr request);
 
+    /**
+     * @brief 设置注册路由，用于指标标签
+     * @param route 路由模板（如 /api/v1/messages/conversations/:id）
+     */
+    void setRoute(const std::string& route);
+
 protected:
     virtual bool handlePre(
         chen::http::HttpRequest::ptr request,
@@ -108,13 +115,14 @@ protected:
 
     bool initLogin(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response);
 
-    /**
-     * @brief 是否允许公开接口自动解析登录态（登录接口可覆盖为 false）
-     */
     virtual bool allowAutoLogin() const;
 
-protected:
     chen::IDB::ptr getDB();
+
+private:
+    chen::metrics::Counter* m_requests_metric = nullptr;
+    chen::metrics::Counter* m_errors_metric = nullptr;
+    chen::metrics::Histogram* m_duration_metric = nullptr;
 };
 
 class BlogLoginedServlet : public BlogServlet {

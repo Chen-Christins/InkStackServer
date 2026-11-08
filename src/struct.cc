@@ -5,13 +5,14 @@
 
 #include <chen/log/log.h>
 
-#include "blog/data/user_info.h"
 #include "auth/auth_service.h"
 #include "auth/session_store.h"
+#include "blog/data/user_info.h"
 #include "error_codes.h"
 #include "i18n/i18n.h"
 #include "manager/error_code_manager.h"
 #include "manager/user_manager.h"
+#include "metrics/service_metrics.h"
 #include "util.h"
 
 namespace blog {
@@ -103,11 +104,20 @@ BlogServlet::BlogServlet(const std::string& name)
 {
 }
 
+void BlogServlet::setRoute(const std::string& route)
+{
+    const metrics::RouteMetrics route_metrics = metrics::GetRouteMetrics(route);
+    m_requests_metric = route_metrics.requests;
+    m_errors_metric = route_metrics.errors;
+    m_duration_metric = route_metrics.duration;
+}
+
 int32_t BlogServlet::handle(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response, chen::http::HttpSession::ptr session)
 {
     Result::ptr result = std::make_shared<Result>();
+    uint64_t ts = chen::TimeUtil::GetCurrentUs();
+    uint64_t used = 0;
     try {
-        uint64_t ts = chen::TimeUtil::GetCurrentUs();
         result->setLanguage(I18n::ResolveLanguage(request));
         // response->setHeader("Access-Control-Allow-Origin", "*");
         // response->setHeader("Access-Control-Allow-Credentials", "true");
@@ -119,22 +129,26 @@ int32_t BlogServlet::handle(chen::http::HttpRequest::ptr request, chen::http::Ht
         } else {
             response->setBody(result->toJsonString());
         }
-        uint64_t used = chen::TimeUtil::GetCurrentUs() - ts;
+        used = chen::TimeUtil::GetCurrentUs() - ts;
         handlePost(request, response, session, result);
         response->setHeader("used", std::to_string((used * 1.0 / 1000)) + "ms");
     } catch (const std::exception& e) {
+        used = chen::TimeUtil::GetCurrentUs() - ts;
         ERROR(logger) << "servlet exception path=" << (request ? request->getPath() : "-") << " what=" << e.what();
         result->setErrno(errcode::INTERNAL_ERROR);
         if (response) {
             response->setBody(result->toJsonString());
         }
     } catch (...) {
+        used = chen::TimeUtil::GetCurrentUs() - ts;
         ERROR(logger) << "servlet unknown exception path=" << (request ? request->getPath() : "-");
         result->setErrno(errcode::INTERNAL_ERROR);
         if (response) {
             response->setBody(result->toJsonString());
         }
     }
+    const metrics::RouteMetrics route_metrics = {m_requests_metric, m_errors_metric, m_duration_metric};
+    metrics::RecordRequest(route_metrics, used, result->getErrno());
     return 0;
 }
 
