@@ -84,7 +84,7 @@ int32_t LabelQueryServlet::handle(
             v["article_count"] = article_counts[i->getId()];
             data.append(v);
         }
-        result->set("data", data);
+        result->setData(data);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;
