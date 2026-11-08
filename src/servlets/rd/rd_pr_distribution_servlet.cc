@@ -232,13 +232,16 @@ int32_t RdPrDistributionServlet::handle(
         double merge_rate = total_sum > 0 ? (double)merged_sum * 100.0 / (double)total_sum : 0.0;
         merge_rate = std::round(merge_rate * 10.0) / 10.0;
 
-        result->jsondata["range"] = range;
-        result->jsondata["granularity"] = granularity;
-        auto& summary = result->jsondata["summary"];
+        result->set("range", range);
+        result->set("granularity", granularity);
+
+        Json::Value summary;
         summary["total"] = total_sum;
         summary["merged"] = merged_sum;
         summary["merge_rate"] = merge_rate;
-        result->jsondata["points"] = points;
+        result->set("summary", summary);
+
+        result->set("points", points);
     } while (0);
 
     response->setBody(result->toJsonString());

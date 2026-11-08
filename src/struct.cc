@@ -5,13 +5,14 @@
 
 #include <chen/log/log.h>
 
-#include "blog/data/user_info.h"
 #include "auth/auth_service.h"
 #include "auth/session_store.h"
+#include "blog/data/user_info.h"
 #include "error_codes.h"
 #include "i18n/i18n.h"
 #include "manager/error_code_manager.h"
 #include "manager/user_manager.h"
+#include "metrics/service_metrics.h"
 #include "util.h"
 
 namespace blog {
@@ -35,36 +36,36 @@ std::string GetRemoteIP(chen::http::HttpRequest::ptr request, chen::http::HttpSe
 
 Result::Result(int32_t ec, const std::string& m)
     : errno_(ec)
-    , used(chen::TimeUtil::GetCurrentUs())
-    , msg(m)
-    , lang(I18n::DefaultLanguage())
+    , used_(chen::TimeUtil::GetCurrentUs())
+    , msg_(m)
+    , lang_(I18n::DefaultLanguage())
 {
 }
 
 void Result::setErrno(int32_t ec)
 {
     errno_ = ec;
-    msg = ErrorCodeMgr::GetInstance()->getMessage(ec, lang);
+    msg_ = ErrorCodeMgr::GetInstance()->getMessage(ec, lang_);
 }
 
 void Result::setErrno(int32_t ec, const std::string& customMsg)
 {
     errno_ = ec;
-    msg = I18n::Translate(customMsg, lang);
+    msg_ = I18n::Translate(customMsg, lang_);
 }
 
 void Result::setErrnoFmt(int32_t ec, const char* fmt, ...)
 {
     errno_ = ec;
     if (!fmt) {
-        msg.clear();
+        msg_.clear();
         return;
     }
 
-    const std::string localized = I18n::Translate(fmt, lang);
+    const std::string localized = I18n::Translate(fmt, lang_);
     va_list ap;
     va_start(ap, fmt);
-    msg = chen::StringUtil::Formatv(localized.c_str(), ap);
+    msg_ = chen::StringUtil::Formatv(localized.c_str(), ap);
     va_end(ap);
 }
 
@@ -72,18 +73,28 @@ void Result::setDataJson(const std::string& jsonStr)
 {
     Json::Value v;
     if (chen::JsonUtil::FromString(v, jsonStr)) {
-        jsondata = v;
+        jsondata_ = v;
     }
+}
+
+void Result::setData(Json::Value& json_data)
+{
+    jsondata_ = json_data;
+}
+
+void Result::setLanguage(const std::string& lang)
+{
+    this->lang_ = lang;
 }
 
 std::string Result::toJsonString() const
 {
     Json::Value v;
     v["errno"] = errno_;
-    v["msg"] = msg;
-    v["used"] = ((chen::TimeUtil::GetCurrentUs() - used) / 1000.0);
-    if (!jsondata.isNull()) {
-        v["data"] = jsondata;
+    v["msg"] = msg_;
+    v["used"] = ((chen::TimeUtil::GetCurrentUs() - used_) / 1000.0);
+    if (!jsondata_.isNull()) {
+        v["data"] = jsondata_;
     }
     return chen::JsonUtil::ToString(v);
 }
@@ -93,12 +104,21 @@ BlogServlet::BlogServlet(const std::string& name)
 {
 }
 
+void BlogServlet::setRoute(const std::string& route)
+{
+    const metrics::RouteMetrics route_metrics = metrics::GetRouteMetrics(route);
+    m_requests_metric = route_metrics.requests;
+    m_errors_metric = route_metrics.errors;
+    m_duration_metric = route_metrics.duration;
+}
+
 int32_t BlogServlet::handle(chen::http::HttpRequest::ptr request, chen::http::HttpResponse::ptr response, chen::http::HttpSession::ptr session)
 {
     Result::ptr result = std::make_shared<Result>();
+    uint64_t ts = chen::TimeUtil::GetCurrentUs();
+    uint64_t used = 0;
     try {
-        uint64_t ts = chen::TimeUtil::GetCurrentUs();
-        result->lang = I18n::ResolveLanguage(request);
+        result->setLanguage(I18n::ResolveLanguage(request));
         // response->setHeader("Access-Control-Allow-Origin", "*");
         // response->setHeader("Access-Control-Allow-Credentials", "true");
 
@@ -109,22 +129,26 @@ int32_t BlogServlet::handle(chen::http::HttpRequest::ptr request, chen::http::Ht
         } else {
             response->setBody(result->toJsonString());
         }
-        uint64_t used = chen::TimeUtil::GetCurrentUs() - ts;
+        used = chen::TimeUtil::GetCurrentUs() - ts;
         handlePost(request, response, session, result);
         response->setHeader("used", std::to_string((used * 1.0 / 1000)) + "ms");
     } catch (const std::exception& e) {
+        used = chen::TimeUtil::GetCurrentUs() - ts;
         ERROR(logger) << "servlet exception path=" << (request ? request->getPath() : "-") << " what=" << e.what();
         result->setErrno(errcode::INTERNAL_ERROR);
         if (response) {
             response->setBody(result->toJsonString());
         }
     } catch (...) {
+        used = chen::TimeUtil::GetCurrentUs() - ts;
         ERROR(logger) << "servlet unknown exception path=" << (request ? request->getPath() : "-");
         result->setErrno(errcode::INTERNAL_ERROR);
         if (response) {
             response->setBody(result->toJsonString());
         }
     }
+    const metrics::RouteMetrics route_metrics = {m_requests_metric, m_errors_metric, m_duration_metric};
+    metrics::RecordRequest(route_metrics, used, result->getErrno());
     return 0;
 }
 
@@ -162,7 +186,7 @@ bool BlogServlet::handlePost(
         response->setHeader("Content-Type", val);
     }
     INFO(logger) << GetRemoteIP(request, session) << "\t" << request->getCookie(CookieKey::SESSION_KEY, "-") << "\t" << getUserId(request) << "\t"
-                 << result->errno_ << "\t" << result->msg << "\t" << request->getPath() << "\t"
+                 << result->getErrno() << "\t" << result->getMessage() << "\t" << request->getPath() << "\t"
                  << (!request->getQuery().empty() ? request->getQuery() : "-");
     return true;
 }

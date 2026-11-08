@@ -35,13 +35,15 @@ int32_t UserQueryServlet::handle(
             }
         }
 
+        Json::Value data;
         for (auto& i : infos) {
             Json::Value v;
             v["id"] = i->getId();
             v["name"] = i->getName();
-            result->jsondata.append(v);
+            data.append(v);
         }
-        INFO(logger) << "infos.size=" << infos.size() << " - " << chen::JsonUtil::ToString(result->jsondata);
+        result->set("data", data);
+        INFO(logger) << "infos.size=" << infos.size() << " - " << chen::JsonUtil::ToString(data);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

@@ -321,7 +321,7 @@ int32_t RdTrendServlet::handle(
         }
 
         // ====== Summary ======
-        auto& summary = result->jsondata["summary"];
+        Json::Value summary;
         summary["completed_total"] = ctx.total_completed;
         summary["bug_total"] = ctx.bug_total;
         summary["avg_review_pass_rate"] = ctx.review_pass_rate;
@@ -329,11 +329,12 @@ int32_t RdTrendServlet::handle(
         summary["task_delta"] = ctx.task_delta;
         summary["cycle_delta"] = std::round(ctx.cycle_delta * 10.0) / 10.0;
 
-        result->jsondata["series"] = series_arr;
+        result->set("summary", summary);
+        result->set("series", series_arr);
 
         // ====== 工作分布 ======
         int64_t total_items = ctx.new_req + ctx.bug_total + ctx.new_task;
-        auto& dist = result->jsondata["work_distribution"];
+        Json::Value dist;
         {
             auto qb = data::OrganizationRepoPrsInfoDao::newQuery("prs");
             qb->join("INNER", "organization_repos repos", "prs.repo_id = repos.id");
@@ -358,9 +359,10 @@ int32_t RdTrendServlet::handle(
                 dist["code_review"] = 0;
             }
         }
+        result->set("work_distribution", dist);
 
         // ====== 团队健康度 ======
-        auto& health = result->jsondata["team_health"];
+        Json::Value health;
         health["throughput"] = std::min((int64_t)100, ctx.total_completed);
         if (total_items > 0) {
             health["bug_pressure"] = 100 - std::min(ctx.bug_total * 100 / total_items, (int64_t)80);
@@ -369,10 +371,10 @@ int32_t RdTrendServlet::handle(
         }
         health["review_efficiency"] = ctx.review_pass_rate;
         health["rework_risk"] = 0;
+        result->set("team_health", health);
 
         // ====== 洞察文案 ======
-        result->jsondata["insights"] = Json::Value(Json::arrayValue);
-
+        result->set("insights", Json::Value(Json::arrayValue));
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

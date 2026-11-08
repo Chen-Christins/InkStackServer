@@ -1,7 +1,5 @@
 #include "sse_stream_parser.h"
 
-#include <chen/util/json_util.h>
-
 #include "../util.h"
 
 namespace blog {

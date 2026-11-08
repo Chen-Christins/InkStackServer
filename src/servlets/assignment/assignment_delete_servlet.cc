@@ -92,10 +92,11 @@ int32_t AssignmentDeleteServlet::handle(
             AssignmentMgr::GetInstance()->add(i);
         }
         if (!del_assignments.empty()) {
-            auto& jids = result->jsondata["ids"];
+            Json::Value json_ids;
             for (auto& i : del_assignments) {
-                jids.append(i->getId());
+                json_ids.append(i->getId());
             }
+            result->set("ids", json_ids);
 
             // Notify submitters
             for (auto& assign : del_assignments) {

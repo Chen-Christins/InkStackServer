@@ -16,26 +16,11 @@
 #include "manager/article_manager.h"
 #include "manager/category_manager.h"
 #include "manager/label_manager.h"
+#include "util.h"
 
 namespace blog {
 
 static chen::Logger::ptr logger = LOG_ROOT();
-
-/// 读取当前进程 RSS（KB），用于观察词典加载的内存变化
-static long RssKb()
-{
-    std::string status = chen::FSUtil::ReadFileToString("/proc/self/status");
-    size_t pos = status.find("VmRSS:");
-    if (pos == std::string::npos) {
-        return -1;
-    }
-    size_t end = status.find('\n', pos);
-    std::string line = status.substr(pos, end == std::string::npos ? std::string::npos : end - pos);
-    if (line.size() <= 6) {
-        return -1;
-    }
-    return chen::TypeUtil::Atoi(line.substr(6));
-}
 
 static chen::ConfigVar<std::string>::ptr g_jieba_dict_path =
     chen::Config::Lookup("search.jieba_dict_path", std::string(""), "jieba dict directory path");
@@ -83,9 +68,10 @@ void Index::initJieba()
     try {
         // Index 只使用 Cut，不需要 KeywordExtractor 的 idf/stop_words；
         // 直接使用 MixSegment 可避免加载 25 万条 IDF 词典。
-        long rss_before = RssKb();
+        long rss_before = GetProcessMemoryInfo().rss_kb;
         m_jieba.reset(new cppjieba::MixSegment(dict_path + "/jieba.dict.utf8", dict_path + "/hmm_model.utf8", dict_path + "/user.dict.utf8"));
-        INFO(logger) << "jieba initialized (MixSegment), RSS " << rss_before << " -> " << RssKb() << " KB, dict_path=" << dict_path;
+        INFO(logger) << "jieba initialized (MixSegment), RSS " << rss_before << " -> " << GetProcessMemoryInfo().rss_kb
+                     << " KB, dict_path=" << dict_path;
     } catch (const std::exception& e) {
         ERROR(logger) << "jieba init failed: " << e.what();
     }
@@ -127,7 +113,7 @@ void Index::buildIdx(data::ArticleInfo::ptr info, uint32_t idx)
 {
     set((uint64_t)IndexType::USER_ID, info->getUserId(), idx, true);
     set((uint64_t)IndexType::STATE, info->getState(), idx, true);
-    set((uint64_t)IndexType::YEAR_MON, hash(chen::TimeUtil::Time2Str(info->getPublishTime(), "%Y年%m月"), true), idx, true);
+    set((uint64_t)IndexType::YEAR_MON, hash(chen::TimeUtil::Time2StrSec(info->getPublishTime(), "%Y年%m月"), true), idx, true);
     set((uint64_t)IndexType::CHANNEL, info->getChannel(), idx, true);
 
     // 中文分词全文索引（正文只取前 2000 字，长文不影响搜索命中且大幅减少分词耗时）

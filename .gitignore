@@ -8,6 +8,7 @@ lib*.so
 bin/conf/prod.env
 bin/conf/*.yml
 *.log
+/backups
 /dist
 *.tar.gz
 /thirdpart

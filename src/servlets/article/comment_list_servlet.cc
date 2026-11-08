@@ -26,7 +26,7 @@ static Json::Value buildCommentItem(
     item["id"] = c->getId();
     item["content"] = c->getContent();
     item["user_id"] = c->getUserId();
-    item["time"] = chen::TimeUtil::Time2Str(c->getCreateTime());
+    item["time"] = chen::TimeUtil::Time2StrSec(c->getCreateTime());
 
     auto user = UserMgr::GetInstance()->get(c->getUserId());
     if (user) {

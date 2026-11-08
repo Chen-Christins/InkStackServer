@@ -61,7 +61,7 @@ int32_t OrganizationReposListServlet::handle(
         result->set("total", total);
         result->set("page", page);
         result->set("page_size", page_size);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (const auto& repo : repos) {
             Json::Value item;
             item["id"] = repo->getId();
@@ -80,6 +80,7 @@ int32_t OrganizationReposListServlet::handle(
             item["pr_synced_at"] = repo->getPrSyncedAt();
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

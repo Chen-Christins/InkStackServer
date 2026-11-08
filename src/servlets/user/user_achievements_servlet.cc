@@ -80,7 +80,7 @@ int32_t UserAchievementsServlet::handle(
 
                 // 使用 publish_time 计算贡献日期
                 time_t pt = a->getCreateTime();
-                std::string dateKey = chen::TimeUtil::Time2Str(pt, "%Y-%m-%d");
+                std::string dateKey = chen::TimeUtil::Time2StrSec(pt, "%Y-%m-%d");
                 dateContributions[dateKey]++;
             }
         }
@@ -91,7 +91,7 @@ int32_t UserAchievementsServlet::handle(
             if (db) {
                 time_t now = time(0);
                 time_t cutoff = now - 371 * 86400;
-                std::string cutoffStr = chen::TimeUtil::Time2Str(cutoff, "%Y-%m-%d");
+                std::string cutoffStr = chen::TimeUtil::Time2StrSec(cutoff, "%Y-%m-%d");
 
                 auto qb = data::CommentInfoDao::newQuery();
                 qb->where("user_id", "=", uid);
@@ -101,7 +101,7 @@ int32_t UserAchievementsServlet::handle(
                 std::vector<int64_t> timestamps;
                 if (qb->queryColumn<int64_t>(timestamps, db, "create_time") == 0) {
                     for (auto ts : timestamps) {
-                        std::string dateKey = chen::TimeUtil::Time2Str((time_t)ts, "%Y-%m-%d");
+                        std::string dateKey = chen::TimeUtil::Time2StrSec(ts, "%Y-%m-%d");
                         dateContributions[dateKey]++;
                     }
                 }
@@ -124,7 +124,7 @@ int32_t UserAchievementsServlet::handle(
             for (int32_t d = 0; d < 7; d++) {
                 int32_t offset = w * 7 + d;
                 time_t day = startDate + offset * 86400;
-                std::string key = chen::TimeUtil::Time2Str(day, "%Y-%m-%d");
+                std::string key = chen::TimeUtil::Time2StrSec(day, "%Y-%m-%d");
                 int32_t count = dateContributions[key];
                 int32_t level = countToLevel(count);
                 total_contributions += level;
@@ -191,9 +191,9 @@ int32_t UserAchievementsServlet::handle(
         stats["unlocked_badges"] = unlocked_count;
         stats["total_badges"] = static_cast<int64_t>(badges.size());
 
-        result->jsondata["stats"] = stats;
-        result->jsondata["badges"] = badgesJson;
-        result->jsondata["heatmap"] = heatmap;
+        result->set("stats", stats);
+        result->set("badges", badgesJson);
+        result->set("heatmap", heatmap);
         result->setErrno(errcode::SUCCESS);
     } while (0);
 

@@ -82,7 +82,7 @@ int32_t ArticleSearchServlet::handle(
 
         if (total < 0) {
             result->set("total", 0);
-            result->jsondata["list"] = Json::Value(Json::arrayValue);
+            result->set("list", Json::Value(Json::arrayValue));
             break;
         }
 
@@ -110,7 +110,7 @@ int32_t ArticleSearchServlet::handle(
             item["publish_time"] = info->getPublishTime();
             list.append(item);
         }
-        result->jsondata["list"] = list;
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

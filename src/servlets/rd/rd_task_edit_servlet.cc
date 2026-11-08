@@ -123,7 +123,9 @@ int32_t RdTaskEditServlet::handle(
             result->setErrno(errcode::RD_UPDATE_FAILED);
             break;
         }
-        rd::BuildTaskJson(result->jsondata, info);
+        Json::Value data;
+        rd::BuildTaskJson(data, info);
+        result->setData(data);
 
         notifyAssignee(assignee_id, info);
     } while (0);

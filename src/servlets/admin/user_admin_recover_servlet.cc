@@ -72,10 +72,11 @@ int32_t UserAdminRecoverServlet::handle(
             UserMgr::GetInstance()->update(i);
         }
         if (!infos.empty()) {
-            auto& jids = result->jsondata["ids"];
+            Json::Value json_ids;
             for (auto& i : infos) {
-                jids.append(i->getId());
+                json_ids.append(i->getId());
             }
+            result->set("ids", json_ids);
 
             // Notify recovered users
             for (auto& u : infos) {

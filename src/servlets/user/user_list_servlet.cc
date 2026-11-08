@@ -28,9 +28,11 @@ int32_t UserListServlet::handle(
 
         std::sort(ids.begin(), ids.end(), std::less<>());
 
+        Json::Value json_ids;
         for (size_t i = 0; i < ids.size(); ++i) {
-            result->jsondata["ids"].append(ids[i]);
+            json_ids.append(ids[i]);
         }
+        result->set("ids", json_ids);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

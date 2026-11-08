@@ -109,10 +109,11 @@ int32_t OrganizationDeleteServlet::handle(
             OrganizationUserRelMgr::GetInstance()->add(rel);
         }
         if (!del_organizations.empty()) {
-            auto& jids = result->jsondata["ids"];
+            Json::Value json_ids;
             for (auto& i : del_organizations) {
-                jids.append(i->getId());
+                json_ids.append(i->getId());
             }
+            result->set("ids", json_ids);
 
             // Notify all org members
             for (auto& org : del_organizations) {

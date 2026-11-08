@@ -50,7 +50,8 @@ int32_t AssignmentAdminListsServlet::handle(
         uint64_t total = AssignmentMgr::GetInstance()->listByPages(infos, offset, page_size, state, true);
 
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+
+        Json::Value list;
         for (const auto& i : infos) {
             Json::Value item;
             item["id"] = i->getId();
@@ -74,9 +75,9 @@ int32_t AssignmentAdminListsServlet::handle(
                 }
                 item["assigned_by"] = org_rels[0]->getAssignedBy();
             }
-
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

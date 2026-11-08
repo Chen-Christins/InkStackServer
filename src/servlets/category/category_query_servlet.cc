@@ -71,7 +71,7 @@ int32_t CategoryQueryServlet::handle(
         }
 
         result->set("total", infos.size());
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (const auto& cat : infos) {
             Json::Value item;
             item["id"] = cat->getId();
@@ -104,6 +104,7 @@ int32_t CategoryQueryServlet::handle(
 
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

@@ -2,6 +2,8 @@
 
 #include <chen/config/config.h>
 #include <chen/log/log.h>
+#include <chen/util/fs_util.h>
+#include <chen/util/string_util.h>
 
 namespace blog {
 
@@ -9,6 +11,50 @@ static chen::Logger::ptr g_logger = LOG_ROOT();
 
 static chen::ConfigVar<std::map<std::string, std::map<std::string, std::string>>>::ptr g_mysql_dbs =
     chen::Config::Lookup("mysql.dbs", std::map<std::string, std::map<std::string, std::string>>(), "mysql dbs");
+
+/// 解析 /proc 文件中形如 `Key:  12345 kB` 的整数值
+static int64_t ParseProcValue(const std::string& content, const std::string& key)
+{
+    const auto lines = chen::StringUtil::Split(content, '\n');
+    for (const auto& line : lines) {
+        if (line.compare(0, key.size(), key) != 0) {
+            continue;
+        }
+        const std::string value = line.substr(key.size());
+        const size_t begin = value.find_first_of("0123456789");
+        if (begin == std::string::npos) {
+            return -1;
+        }
+        const size_t end = value.find_first_not_of("0123456789", begin);
+        return chen::TypeUtil::Atoi(value.substr(begin, end == std::string::npos ? std::string::npos : end - begin));
+    }
+    return -1;
+}
+
+ProcessMemoryInfo GetProcessMemoryInfo()
+{
+    ProcessMemoryInfo info;
+    const std::string status = chen::FSUtil::ReadFileToString("/proc/self/status");
+    if (status.empty()) {
+        return info;
+    }
+    info.rss_kb = ParseProcValue(status, "VmRSS:");
+    info.vm_kb = ParseProcValue(status, "VmSize:");
+    info.threads = ParseProcValue(status, "Threads:");
+    return info;
+}
+
+SystemMemoryInfo GetSystemMemoryInfo()
+{
+    SystemMemoryInfo info;
+    const std::string meminfo = chen::FSUtil::ReadFileToString("/proc/meminfo");
+    if (meminfo.empty()) {
+        return info;
+    }
+    info.total_kb = ParseProcValue(meminfo, "MemTotal:");
+    info.available_kb = ParseProcValue(meminfo, "MemAvailable:");
+    return info;
+}
 
 chen::IDB::ptr GetDB()
 {

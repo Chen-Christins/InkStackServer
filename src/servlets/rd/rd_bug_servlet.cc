@@ -54,7 +54,9 @@ int32_t RdBugServlet::handle(
                     break;
                 }
             }
-            rd::BuildBugJson(result->jsondata, info);
+            Json::Value data;
+            rd::BuildBugJson(data, info);
+            result->set("data", data);
             break;
         }
 

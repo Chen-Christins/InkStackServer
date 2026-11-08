@@ -11,11 +11,11 @@
 #include <chen/http/ws_server.h>
 #include <chen/http/ws_servlet.h>
 #include <chen/log/log.h>
-#include <chen/util/util.h>
 
 #include <exception>
 #include <memory>
 #include <ranges>
+#include <utility>
 
 #include "./chunk_upload.h"
 #include "./crash_handler.h"
@@ -26,6 +26,8 @@
 #include "./include/tables.h"
 #include "./index.h"
 #include "./logic/BlogMsgFromBot.h"
+#include "./metrics/service_metrics.h"
+#include "./struct.h"
 
 namespace blog {
 
@@ -35,6 +37,39 @@ static chen::ConfigVar<std::map<std::string, std::map<std::string, std::string>>
     chen::Config::Lookup("mysql.dbs", std::map<std::string, std::map<std::string, std::string>>(), "mysql dbs");
 
 static chen::ConfigVar<std::string>::ptr g_work_path = chen::Config::Lookup<std::string>("server.work_path", std::string(""), "server work path");
+
+namespace {
+
+/**
+ * @brief ServletDispatch 代理
+ * @details 注册路由时把路由模板注入 BlogServlet，用于指标标签；现有注册代码无需改动
+ */
+class ServletRegistrar {
+public:
+    explicit ServletRegistrar(chen::http::ServletDispatch::ptr dispatch)
+        : m_dispatch(std::move(dispatch))
+    {
+    }
+
+    ServletRegistrar* operator->() { return this; }
+
+    void addServlet(const std::string& uri, chen::http::Servlet::ptr servlet)
+    {
+        if (!m_dispatch || !servlet) {
+            return;
+        }
+        auto blog_servlet = std::dynamic_pointer_cast<BlogServlet>(servlet);
+        if (blog_servlet) {
+            blog_servlet->setRoute(uri);
+        }
+        m_dispatch->addServlet(uri, servlet);
+    }
+
+private:
+    chen::http::ServletDispatch::ptr m_dispatch;
+};
+
+} // namespace
 
 BlogModule::BlogModule()
     : Module("Blog", "1.0.8", "blog_module")
@@ -100,16 +135,12 @@ bool BlogModule::onDeactivate()
 
 void BlogModule::onTick()
 {
-    static int s_pr_sync_tick = 0;
+    static uint32_t s_sync_tick = 0;
 
     try {
-        if (chen::TimeUtil::IsZeroOfDay()) {
-            s_pr_sync_tick = 0;
+        metrics::SampleRates();
 
-            OrganizationRepoMgr::GetInstance()->onTick();
-
-            OrganizationRepoPrMgr::GetInstance()->onTick();
-        }
+        s_sync_tick++;
 
         ArticleMgr::GetInstance()->onTick();
 
@@ -117,15 +148,18 @@ void BlogModule::onTick()
 
         ChunkUploadMgr::GetInstance()->cleanupExpiredSessions();
 
-        if (s_pr_sync_tick % 5 == 0) {
+        if (s_sync_tick % 5 == 0) {
             chen::http::SessionDataMgr::GetInstance()->check(3600);
         }
 
-        if (s_pr_sync_tick % 60 == 0) {
-            INFO(logger) << "module status: \n" << Module::statusString();
-        }
+        // 1 day = 24 * 60 min
+        if (s_sync_tick % 1440 == 0) {
+            s_sync_tick = 0;
 
-        s_pr_sync_tick++;
+            OrganizationRepoMgr::GetInstance()->onTick();
+
+            OrganizationRepoPrMgr::GetInstance()->onTick();
+        }
     } catch (const std::exception& e) {
         ERROR(logger) << "onTick exception: " << e.what();
     } catch (...) {
@@ -166,6 +200,12 @@ bool BlogModule::onServerReady()
     registerServlets();
 
     registerWSServlets();
+
+    std::vector<chen::http::HttpServer::ptr> http_servers;
+    getAllHttpServer(http_servers);
+    std::vector<chen::http::WSServer::ptr> ws_servers;
+    getAllWSServer(ws_servers);
+    metrics::Init(getName(), getVersion(), http_servers, ws_servers);
 
     registerRPCMethods();
 
@@ -311,8 +351,11 @@ void BlogModule::registerServlets()
         const auto hs = std::dynamic_pointer_cast<chen::http::HttpServer>(i);
         ASSERT_RET(hs != nullptr);
 
-        const auto dp = hs->getServletDispatch();
-        ASSERT_RET(hs != nullptr);
+        const auto dispatch = hs->getServletDispatch();
+        ASSERT_RET(dispatch != nullptr);
+
+        // 代理 addServlet：注册路由时自动注入指标标签
+        ServletRegistrar dp(dispatch);
 
 #define XX(clazz) std::make_shared<servlet::clazz>()
         // 用户相关
@@ -457,8 +500,9 @@ void BlogModule::registerServlets()
         dp->addServlet("/api/v1/admin/feedback/list", XX(AdminFeedbackListServlet));
         dp->addServlet("/api/v1/admin/feedback/delete", XX(AdminFeedbackDeleteServlet));
         dp->addServlet("/api/v1/admin/feedback/convert", XX(AdminFeedbackConvertServlet));
-        // 首页统计（公开接口）
+        // 统计
         dp->addServlet("/api/v1/stats", XX(StatsServlet));
+        dp->addServlet("/api/v1/admin/metrics", XX(MetricsAdminServlet));
         // 文章标签相关
         dp->addServlet("/api/v1/label/create", XX(LabelCreateServlet));
         dp->addServlet("/api/v1/label/delete", XX(LabelDeleteServlet));

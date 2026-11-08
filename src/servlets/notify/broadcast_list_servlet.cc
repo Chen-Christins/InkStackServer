@@ -66,7 +66,7 @@ int32_t BroadcastListServlet::handle(
             item["create_time"] = info->getCreateTime();
             list.append(item);
         }
-        result->jsondata["list"] = list;
+        result->set("list", list);
         result->setErrno(errcode::SUCCESS);
     } while (0);
     response->setBody(result->toJsonString());

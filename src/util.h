@@ -9,8 +9,6 @@
 
 #include <chen/db/mysql.h>
 #include <chen/http/sse_session.h>
-#include <chen/util/encryptor_util.h>
-#include <chen/util/type_util.h>
 #include <chen/util/util.h>
 
 #include <regex>
@@ -47,6 +45,35 @@ struct DiskUsage {
     int64_t usedSize;
     int64_t availableSize;
 };
+
+/**
+ * @brief 当前进程内存与线程信息（读取 /proc/self/status）
+ * @note 非 Linux 平台或读取失败时字段为 -1
+ */
+struct ProcessMemoryInfo {
+    int64_t rss_kb = -1;
+    int64_t vm_kb = -1;
+    int64_t threads = -1;
+};
+
+/**
+ * @brief 系统内存信息（读取 /proc/meminfo）
+ * @note 非 Linux 平台或读取失败时字段为 -1
+ */
+struct SystemMemoryInfo {
+    int64_t total_kb = -1;
+    int64_t available_kb = -1;
+};
+
+/**
+ * @brief 读取当前进程内存与线程信息
+ */
+ProcessMemoryInfo GetProcessMemoryInfo();
+
+/**
+ * @brief 读取系统内存信息
+ */
+SystemMemoryInfo GetSystemMemoryInfo();
 
 inline DiskUsage GetDiskUsage(const std::string& path = ".")
 {

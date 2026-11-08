@@ -106,10 +106,11 @@ int32_t RdRequirementDeleteServlet::handle(chen::http::HttpRequest::ptr request,
         }
 
         if (!delItems.empty()) {
-            auto& jids = result->jsondata["ids"];
+            Json::Value json_ids;
             for (auto& i : delItems) {
-                jids.append(i->getId());
+                json_ids.append(i->getId());
             }
+            result->set("ids", json_ids);
         }
     } while (0);
     response->setBody(result->toJsonString());

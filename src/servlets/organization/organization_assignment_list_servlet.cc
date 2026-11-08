@@ -64,7 +64,7 @@ int32_t OrganizationAssignmentListServlet::handle(
         std::vector<data::AssignmentOrganizationRelInfo::ptr> assign_rels;
         int64_t total = AssignmentOrganizationRelMgr::GetInstance()->getByPages(assign_rels, org_id, offset, page_size, status, true);
 
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : assign_rels) {
             Json::Value item;
             auto assign = AssignmentMgr::GetInstance()->get(i->getAssignmentId());
@@ -85,6 +85,7 @@ int32_t OrganizationAssignmentListServlet::handle(
             item["description"] = assign->getDescription();
             list.append(item);
         }
+        result->set("list", list);
         result->set("total", std::min(total, static_cast<int64_t>(list.size())));
     } while (0);
     response->setBody(result->toJsonString());

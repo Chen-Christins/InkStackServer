@@ -49,7 +49,7 @@ int32_t OrganizationAdminListsServlet::handle(
         uint64_t total = OrganizationMgr::GetInstance()->listByPages(orgs, offset, page_size, status, true);
 
         result->set("total", total);
-        auto& list = result->jsondata["list"];
+        Json::Value list;
         for (auto& i : orgs) {
             Json::Value item;
             item["id"] = i->getId();
@@ -58,10 +58,11 @@ int32_t OrganizationAdminListsServlet::handle(
             item["status"] = i->getStatus();
             item["description"] = i->getDescription();
             item["create_time"] = i->getCreateTime();
-            int32_t status = OrganizationUserRelManager::Status::APPROVED;
-            item["count"] = OrganizationUserRelMgr::GetInstance()->getMemberCount(i->getId(), status, true);
+            int32_t sts = OrganizationUserRelManager::Status::APPROVED;
+            item["count"] = OrganizationUserRelMgr::GetInstance()->getMemberCount(i->getId(), sts, true);
             list.append(item);
         }
+        result->set("list", list);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

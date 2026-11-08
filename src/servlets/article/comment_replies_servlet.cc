@@ -47,7 +47,7 @@ int32_t CommentRepliesServlet::handle(
             item["id"] = r->getId();
             item["content"] = r->getContent();
             item["user_id"] = r->getUserId();
-            item["time"] = chen::TimeUtil::Time2Str(r->getCreateTime());
+            item["time"] = chen::TimeUtil::Time2StrSec(r->getCreateTime());
 
             auto user = UserMgr::GetInstance()->get(r->getUserId());
             if (user) {
