@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## 未发布
+
+### 新增
+
+- 新增统一 WebSocket 入口 `/ws/v1/session`，一个设备一条长连接，复用通知、在线人数、私信和系统消息通道。
+- 新增 `channel` 下行字段（`system` / `notification` / `presence` / `chat`），客户端按通道分发。
+- 新增 `WSConnectionManager`：按 `device_id` 管理连接、按用户索引、在线人数去重、连接级发送串行化。
+- 新增 `blog_ws_online_devices` 指标，统计 WebSocket 连接数。
+
+### 变更
+
+- **不兼容变更**：移除 `/ws/v1/notification`、`/ws/v1/presence`、`/ws/v1/messages`，统一改为 `/ws/v1/session`。
+- **不兼容变更**：所有 WebSocket 下行 JSON 顶层新增 `channel` 字段。
+- **不兼容变更**：同一 `device_id`（`SHA256(SESSIONID)`）只保留一条连接，后连接顶掉前连接并返回 `replaced` 帧。
+- 私信 `message_ack` 只回发起设备；消息与已读回执推送给对端所有设备。
+- 普通用户可连接统一网关接收通知与在线人数，但私信帧返回 `ACCESS_DENIED`。
+- 登出、踢设备、撤销单会话、撤销全部会话、重新签发会话时联动关闭对应 WebSocket。
+- `blog_online_users` 改为按 `uid` 去重的在线用户数。
+
+### 移除
+
+- 移除旧 WebSocket 端点、旧通知/在线状态/私信连接表及相关管理方法。
+
+### 升级注意
+
+- 前端需要切换到 `/ws/v1/session`，并按 `channel` 字段分发下行消息。
+- 同设备多标签页不再各自保留连接，后打开的标签页会导致前一个连接收到 `replaced`。
+
 ## v1.1.0 (2026-10-26)
 
 本版本完成认证体系升级：登录态统一为服务端会话 + HttpOnly `SESSIONID` Cookie，新增 Passkey / WebAuthn、邮箱验证码恢复与恢复码流程，并移除旧

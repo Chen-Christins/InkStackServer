@@ -1,11 +1,11 @@
 #pragma once
 
 #include <chen/db/query_builder.h>
-#include <chen/http/ws_session.h>
 #include <chen/util/singleton.h>
 
-#include <shared_mutex>
-#include <unordered_map>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 #include "blog/data/notification_info.h"
 
@@ -27,31 +27,12 @@ struct NotificationData {
 
 class NotificationManager {
 public:
-    // WS connection management
-    void addConnection(int64_t user_id, chen::http::WSSession::ptr session);
-
-    void removeConnection(int64_t user_id);
-
-    void closeAllConnections();
-
+    // WS 推送（连接统一由 WSMgr 管理）
     int32_t sendToUser(int64_t user_id, const std::string& message);
 
     void broadcast(const std::string& message);
 
-    bool isConnected(int64_t user_id);
-
     int32_t getOnlineCount();
-
-    // Presence WS connection management
-    void addPresenceConnection(int64_t user_id, chen::http::WSSession::ptr session);
-
-    void removePresenceConnection(int64_t user_id);
-
-    void broadcastPresence(const std::string& message);
-
-    int32_t getPresenceOnlineCount();
-
-    bool isPresenceConnected(int64_t user_id);
 
     // DB persistence
     data::NotificationInfo::ptr get(int64_t id);
@@ -78,14 +59,6 @@ public:
 
 private:
     static data::NotificationInfo::ptr parseRow(chen::ISQLData::ptr rt);
-
-    // WS connections (notification)
-    std::unordered_map<int64_t, chen::http::WSSession::ptr> m_connections;
-    std::shared_mutex m_connMutex;
-
-    // WS connections (presence)
-    std::unordered_map<int64_t, chen::http::WSSession::ptr> m_presenceConnections;
-    std::shared_mutex m_presenceMutex;
 };
 
 typedef chen::Singleton<NotificationManager> NotificationMgr;

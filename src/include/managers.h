@@ -34,3 +34,4 @@
 #include "../manager/user_follow_rel_manager.h"             // IWYU pragma: keep
 #include "../manager/user_manager.h"                        // IWYU pragma: keep
 #include "../manager/user_oauth_manager.h"                  // IWYU pragma: keep
+#include "../manager/ws_connection_manager.h"               // IWYU pragma: keep

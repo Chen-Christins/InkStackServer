@@ -73,6 +73,7 @@ auth:
 
 - 只接受 `SESSIONID` Cookie，不再读取或清理 `S_UID` / `S_TOKEN` / `S_TOKEN_TIME`。
 - WebSocket 握手只使用 Cookie 中的服务端会话，不再接受 `uid/token/token_time` query。
+- WebSocket 统一入口为 `/ws/v1/session`，协议见 `docs/websocket-session.md`。
 - `user_device_list` / `user_device_kick` 只操作 `SessionStore` 中的会话。
 - `user_refresh_token` 接口已移除；会话过期后重新登录即可。
 

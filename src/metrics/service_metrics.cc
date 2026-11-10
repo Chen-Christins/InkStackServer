@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "../manager/notification_manager.h"
+#include "../manager/ws_connection_manager.h"
 #include "../util.h"
 
 namespace blog {
@@ -45,7 +46,7 @@ void Init(
     const std::vector<chen::http::HttpServer::ptr>& http_servers,
     const std::vector<chen::http::WSServer::ptr>& ws_servers)
 {
-    std::lock_guard<std::mutex> lock(s_mutex);
+    std::lock_guard lock(s_mutex);
     if (s_inited) {
         return;
     }
@@ -59,8 +60,10 @@ void Init(
         return;
     }
 
-    if (auto* info =
-            registry->getGauge("blog_info", "Blog service information", {{"name", name}, {"version", version}, {"pid", std::to_string(getpid())}})) {
+    chen::metrics::Labels labels = {{"name", name}, {"version", version}, {"pid", std::to_string(getpid())}};
+
+    auto info = registry->getGauge("blog_info", "Blog service information", labels);
+    if (info) {
         info->set(1);
     }
 
@@ -112,12 +115,20 @@ void Init(
         return total;
     });
 
-    registry->getGaugeFunc("blog_online_users", "Online notification users", {}, []() -> int64_t {
+    registry->getGaugeFunc("blog_online_users", "Online users (deduplicated)", {}, []() -> int64_t {
         auto* manager = NotificationMgr::GetInstance();
         if (!manager) {
             return 0;
         }
         return manager->getOnlineCount();
+    });
+
+    registry->getGaugeFunc("blog_ws_online_devices", "Online WebSocket devices", {}, []() -> int64_t {
+        auto* manager = WSMgr::GetInstance();
+        if (!manager) {
+            return 0;
+        }
+        return manager->connectionCount();
     });
 }
 
@@ -127,7 +138,7 @@ RouteMetrics GetRouteMetrics(const std::string& route)
         return {};
     }
 
-    std::lock_guard<std::mutex> lock(s_mutex);
+    std::lock_guard lock(s_mutex);
     auto it = s_routes.find(route);
     if (it != s_routes.end()) {
         return it->second->metrics;
@@ -168,6 +179,7 @@ RouteMetrics GetRouteMetrics(const std::string& route)
 
     const RouteMetrics result = state->metrics;
     s_routes.emplace(route, std::move(state));
+
     return result;
 }
 
@@ -188,7 +200,7 @@ void SampleRates()
 {
     const uint64_t now = chen::TimeUtil::GetCurrentMs();
 
-    std::lock_guard<std::mutex> lock(s_mutex);
+    std::lock_guard lock(s_mutex);
     for (auto& item : s_routes) {
         auto& state = item.second;
         if (!state->metrics.requests) {
