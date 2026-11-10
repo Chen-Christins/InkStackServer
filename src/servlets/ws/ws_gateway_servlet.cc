@@ -10,8 +10,6 @@
 #include <chen/log/log.h>
 #include <chen/util/json_util.h>
 
-#include <json/json.h>
-
 namespace blog {
 namespace servlet {
 
@@ -136,7 +134,10 @@ int32_t WSGatewayServlet::handle(chen::http::HttpRequest::ptr header, chen::http
 
     std::string type = root.get("type", "").asString();
     if (type == "ping") {
-        SendFrame(session, "{\"channel\":\"system\",\"type\":\"pong\"}");
+        Json::Value rsp;
+        rsp["channel"] = "system";
+        rsp["type"] = "pong";
+        SendFrame(session, chen::JsonUtil::ToString(rsp));
         return 0;
     }
 
