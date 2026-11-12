@@ -144,7 +144,7 @@ public:
     void broadcastPresence();
 
     /**
-     * @brief 关闭所有连接（模块停用/热重载）
+     * @brief 关闭所有连接（worker drain / 热重载）
      * @param notify_message 关闭前发送的消息，为空则不发送
      * @return 关闭的连接数
      */

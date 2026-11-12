@@ -87,7 +87,7 @@ AuthContext AuthService::Resolve(chen::http::HttpRequest::ptr request, chen::htt
     if (sdata && sdata->getData<int64_t>(SessionDataKey::ANONYMOUS) == 1) {
         return ctx;
     }
-    // 内存 SessionData 可能来自旧模块，需以 SessionStore 为准再判断匿名。
+    // 内存 SessionData 可能落后于 Redis 中的 SessionStore，需以 SessionStore 为准再判断匿名。
     SessionInfo info;
     bool info_loaded = false;
     if (sdata && sdata->getData<int64_t>(SessionDataKey::USER_ID) == 0) {
