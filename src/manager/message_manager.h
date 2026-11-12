@@ -7,15 +7,14 @@
  */
 #pragma once
 
-#include <chen/http/ws_session.h>
 #include <chen/util/singleton.h>
 
 #include "blog/data/conversation_info.h"
 #include "blog/data/conversation_message_info.h"
 
+#include <cstdint>
 #include <mutex>
-#include <shared_mutex>
-#include <unordered_map>
+#include <string>
 #include <vector>
 
 namespace blog {
@@ -44,19 +43,10 @@ public:
     /// 在本端隐藏会话（不影响对方与消息数据）
     bool deleteForUser(int64_t conversation_id, int64_t uid);
 
-    /// 聊天 WS 连接管理（标准双向通道，连接即在线；支持多标签页/多设备）
-    void addChatConnection(int64_t user_id, chen::http::WSSession::ptr session);
-
-    void removeChatConnection(int64_t user_id, chen::http::WSSession::ptr session);
-
+    /// 聊天 WS 推送（连接统一由 WSMgr 管理）
     bool isChatConnected(int64_t user_id);
 
     int32_t sendToUser(int64_t user_id, const std::string& message);
-
-    void closeAllChatConnections();
-
-    /// 通过连接反查用户（每帧消息需要知道发送者身份）
-    int64_t getUidBySession(chen::http::WSSession::ptr session);
 
     /// 参与者归一化：user_a_id 恒为较小值
     static int64_t NormalizeUserA(int64_t uid_a, int64_t uid_b) { return uid_a < uid_b ? uid_a : uid_b; }
@@ -66,10 +56,6 @@ public:
 private:
     /// 会话状态读改写锁（未读数、隐藏标志），避免 Redis 反序列化后并发丢更新
     std::mutex m_convMutex;
-
-    /// 聊天 WS 连接: user_id -> 该用户的所有在线连接
-    std::unordered_map<int64_t, std::vector<chen::http::WSSession::ptr>> m_chatConnections;
-    std::shared_mutex m_chatMutex;
 };
 
 typedef chen::Singleton<MessageManager> MessageMgr;

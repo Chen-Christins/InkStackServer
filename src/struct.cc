@@ -100,7 +100,7 @@ std::string Result::toJsonString() const
 }
 
 BlogServlet::BlogServlet(const std::string& name)
-    : chen::http::Servlet(name)
+    : Servlet(name)
 {
 }
 

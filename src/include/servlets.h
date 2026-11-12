@@ -125,7 +125,6 @@
 #include "../servlets/message/conversation_message_servlet.h"
 #include "../servlets/message/conversation_read_servlet.h"
 #include "../servlets/message/conversation_servlet.h"
-#include "../servlets/message/message_ws_servlet.h"
 
 // 广播，通知部分
 #include "../servlets/notify/broadcast_close_servlet.h"
@@ -135,8 +134,9 @@
 #include "../servlets/notify/notification_read_servlet.h"
 #include "../servlets/notify/notification_send_servlet.h"
 #include "../servlets/notify/notification_unread_count_servlet.h"
-#include "../servlets/notify/notify_servlet.h"
-#include "../servlets/notify/presence_servlet.h"
+
+// WebSocket 统一入口
+#include "../servlets/ws/ws_gateway_servlet.h"
 
 // 组织部分
 #include "../servlets/organization/organization_apply_create_servlet.h"

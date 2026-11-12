@@ -126,9 +126,7 @@ bool BlogModule::onDeactivate()
 
     ArticleMgr::GetInstance()->stop();
 
-    NotificationMgr::GetInstance()->closeAllConnections();
-
-    MessageMgr::GetInstance()->closeAllChatConnections();
+    WSMgr::GetInstance()->closeAllConnections();
 
     return true;
 }
@@ -595,9 +593,7 @@ void BlogModule::registerWSServlets()
         ASSERT_RET(dp != nullptr);
 
 #define XX(clazz) std::make_shared<servlet::clazz>()
-        dp->addServlet("/ws/v1/notification", XX(NotifyServlet));
-        dp->addServlet("/ws/v1/presence", XX(PresenceServlet));
-        dp->addServlet("/ws/v1/messages", XX(MessageWSServlet));
+        dp->addServlet("/ws/v1/session", XX(WSGatewayServlet));
 #undef XX
     }
 }
