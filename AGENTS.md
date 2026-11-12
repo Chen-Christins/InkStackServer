@@ -2,7 +2,54 @@
 
 This file provides mandatory rules for AI agents working in this repository. Violating these rules may cause segfaults or security issues.
 
+**Before building, check your own OS (§0.1). On non-Linux hosts, all compilation and run verification must be handed off
+to the user's Linux machine.**
+
+**Before writing code, read the SDK docs in `chen-sdk-*/docs/` and `chen-sdk-*/AGENTS.md`, then the module README you
+are going to use (§0.2).**
+
 **When writing or modifying any C++ code, invoke the `/cpp-code-style` skill first for complete coding conventions.**
+
+## 0. 环境与必读资料（MANDATORY）
+
+### 0.1 编译与验证环境
+
+**动手前先确认 AI 自己跑在什么系统上**（`uname -s`）。本项目只在 Linux（x86_64 / arm64）上构建与运行，见 README 与 CI（
+`.github/workflows/build.yml`）。
+
+- **Linux 环境**：可以自行执行构建与验证。
+- **非 Linux 环境（macOS / Windows 等）**：**禁止**执行任何编译和运行操作，包括但不限于
+  `make`、`make build`、直接调用 `cmake` / `ninja`、`make dist`、启动 `bin/server`（含 `-s` / `-d`）。
+  - 非 Linux 上的编译结果没有参考价值，还会污染 `build/`、`dist/`。
+  - 正确做法：改完代码后，把需要在 Linux 开发机上执行的命令、预期输出、需要重点观察的日志/报错整理给用户，由用户在 Linux
+    开发机上验证，**等用户回报结果后再继续**。
+  - 允许：静态检查（读代码、grep、`git diff`）、以及不涉及编译的依赖/代码生成步骤（`./deps.py sync`、`make deps`、`make orm`
+    ）。若这些步骤本身因缺工具跑不通，直接告知用户，不要强行绕开。
+  - 不得把“本地没报错”当作验证通过；最终以用户 Linux 侧编译结果为准。
+  - 用户回报编译错误时，依据日志修改代码，再重新给出验证命令。
+
+### 0.2 SDK 文档必读
+
+**写任何业务代码前，必须先读 SDK 自带文档。** SDK 目录形如 `chen-sdk-<version>/`（如 `chen-sdk-1.7.0-rc4/`），由
+`./deps.py sync` 下载、版本号会变，用通配路径引用：
+
+1. `chen-sdk-*/docs/framework-first.md` — 框架优先：能力对照表、分领域规则、反模式自查、Review 清单
+2. `chen-sdk-*/AGENTS.md` — SDK 硬性要求
+3. `chen-sdk-*/include/chen/<module>/README.md` — 用到的模块 API（log / config / util / http / rpc / db / orm ...）
+4. `chen-sdk-*/include/chen/` 下的公开头文件（以此为准，不要凭记忆猜 API）
+
+硬性要求（与 SDK 文档冲突时取更严格的一方）：
+
+- 基础设施先用框架封装，再考虑标准库，最后才自己写：日志 `INFO(logger)`、配置 `Config::Lookup<T>`、时间 `TimeUtil`、文件
+  `FSUtil`、字符串 `StringUtil`、随机 `RandomUtil`、加密 `EncryptorUtil`、DB `*Mgr` + `QueryBuilder` + ORM Dao、并发
+  `IOManager::schedule/addTimer` + `FiberSemaphore`、缓存 `LruCache`、事件 `EventBusMgr`。
+- 禁止在业务代码出现：`printf` / `std::cout`、`std::thread` / `pthread_create`、`std::this_thread::sleep_for`、
+  `std::filesystem` / `fopen`、`rand()`、裸 `hiredis` / `mysql_real_connect`、字符串拼 SQL、`node.as<bool>()`、自建连接池 /
+  自建 LRU。
+- 只 include `<chen/...>` 并链接 `lib/libchen.so`；yaml-cpp / tinyxml2 / jsoncpp / hiredis-vip / protobuf 已静态进
+  `libchen.so`，不要再链接或新增第三方依赖。
+- 不要复制 SDK 框架源码进业务目录（升级 SDK 会失配）；框架确实缺能力时，先按 `framework-first.md` 的流程确认，再决定是否补框架。
+- 模块在 `onUnload` 里注销 `registerMethod` / servlet / EventBus 回调。
 
 ## 1. Null Pointer Safety (MANDATORY)
 
