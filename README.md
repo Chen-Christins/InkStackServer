@@ -8,57 +8,53 @@ Web 后台设计，注重性能、可扩展性和易维护性。
 ## 技术栈
 
 - C++20
-- CMake 构建系统
-- SQLite3 数据库（可扩展至 MySQL/PostgreSQL）
+- CMake + Ninja 构建系统
+- MySQL（业务数据）+ Redis（会话、对象缓存、锁等）
 - 自研 ORM（XML 配置，自动生成 C++ 数据访问层）
 - chen-sdk 基础库
-- 多线程/协程支持
+- master/worker 多进程 + 多线程/协程
 - GNU gettext 国际化
-- Docker 部署支持
 
 ## 主要功能
 - 用户注册、登录、权限管理
 - 组织（社群/团队）管理及成员关系
 - 文章发布、编辑、分类、标签
 - 作业（Assignment）分发与提交
-- API 文档自动生成（见 API_DOCS.md）
 - 日志、配置、定时任务、邮件通知等基础服务
 
 ## 目录结构
 ```
-├── bin/                # 前端静态资源与可执行文件
+├── bin/                # server 可执行文件、module/*.so、conf/ 运行配置
+├── chen-sdk-<ver>/     # chen 框架 SDK（头文件、libchen.so、模块文档）
+├── cmake/              # 构建辅助脚本
+├── dbproxy/            # ORM 表结构 XML（xml/）与生成数据访问层（data/）
+├── deps/               # 三方依赖（构建期使用）
+├── dict/               # jieba 分词词典
+├── docs/               # 功能与流程文档
+├── locale/             # gettext 翻译
+├── protocol/           # 协议定义
+├── scripts/            # 部署脚本
+├── src/                # 业务代码（Manager/Servlets 等）
+├── tools/              # 运维/诊断工具
 ├── build/              # 构建输出
-├── chen/               # 基础库与通用模块
-├── conf/               # 系统配置文件
-├── generator/          # ORM 代码生成器
-├── logs/               # 日志文件
-├── module/             # 业务模块动态库
-├── orm_config/         # ORM XML 配置（表结构）
-├── orm_out/            # ORM 生成代码
-├── src/                # 业务代码（Manager/Servlets等）
-├── tests/db/           # 测试用 SQL 数据
-├── CMakeLists.txt      # 构建脚本
-├── Dockerfile          # Docker 部署
-└── README.md           # 项目说明
+└── Makefile            # 构建入口（make / make orm / make dist）
 ```
 
 ## 快速开始
 
-1. 安装依赖（C++20 编译器、CMake、SQLite3）
-2. 编译项目：
+1. 安装依赖：C++20 编译器、CMake、Ninja、Python 3，以及 MySQL/Redis 客户端库。
+2. 首次拉取 SDK 与三方依赖：
    ```sh
-   mkdir build && cd build
-   cmake ..
-   make -j
+   ./deps.py sync
    ```
-3. 运行服务：
+3. 构建：
    ```sh
-   ./bin/main -s/-d
+   make
    ```
-4. 可选：使用 Docker 部署
+4. 运行（在仓库根目录，配置位于 `bin/conf/`）：
    ```sh
-   docker build -t blog-backend .
-   docker run -p 8080:8080 blog-backend
+   ./bin/server -s    # 前台运行
+   ./bin/server -d    # 守护进程
    ```
 
 ## 配置切换（开发/生产）
@@ -142,11 +138,11 @@ CI 生产配置由 **GitHub Secrets/Variables** 注入（见 workflow 的 `Prepa
 
 部署服务器为 **amd64**；**手动触发** `.github/workflows/deploy.yml`（可选择**分支或 tag** 运行），只需选 `mode`：
 
-| 模式 | 行为 |
-|------|------|
-| `cold`（冷启动） | 停服 → 清空运行目录 → 解压产物 → 用 `CONFIG_DIR` 覆盖 `conf/` → `LD_LIBRARY_PATH=./lib ./server -d` |
-| `hot`（热启动） | 解压产物到临时目录 → 拷贝 `module/*.so` 到运行目录 → `./server -s reload`（热重载模块） |
-| `stop`（停服） | 进入运行目录执行 `./server -s stop`（SIGTERM 优雅关闭） |
+| 模式             | 行为                                                                                                                                                                      |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `cold`（冷启动） | 停服 → 清空运行目录 → 解压产物 → 用 `CONFIG_DIR` 覆盖 `conf/` → `LD_LIBRARY_PATH=./lib ./server -d`                                                                       |
+| `hot`（热启动）  | 解压产物到临时目录 → 同步 `conf/`（设置 `CONFIG_DIR` 时）→ 替换 `module/*.so`、`errors.json`、`locale/` → 向 master 发 `SIGHUP`（fork 新 worker，旧 worker drain 后退出） |
+| `stop`（停服）   | 进入运行目录执行 `./server -s stop`（SIGTERM 优雅关闭）                                                                                                                   |
 
 产物来源按所选 ref 自动判定：
 - **tag** → 取该 tag 的 GitHub Release 资产 `techhaven-server-<tag>-amd64.tar.gz`；
@@ -157,7 +153,9 @@ CI 生产配置由 **GitHub Secrets/Variables** 注入（见 workflow 的 `Prepa
 **Secrets**：`SSH_HOST`、`SSH_USER`、`SSH_PORT`、`SSH_PRIVATE_KEY`（免密私钥）
 **Variables**：`DEPLOY_PATH`（运行目录）、`CONFIG_DIR`（冷启动覆盖用的配置目录）
 
-> 注意：`CONFIG_DIR` 内 `system.yml` 的 `server.work_path`（及日志/字典路径）必须指向 `DEPLOY_PATH`。cold 会清空运行目录（含日志）；hot 仅替换模块，若同时改了 `server`/`libchen.so` 需走 cold。
+> 注意：`CONFIG_DIR` 内 `system.yml` 的 `server.work_path`（及日志/字典路径）必须指向 `DEPLOY_PATH`。cold 会清空运行目录（含日志）；hot
+> 只替换模块、`errors.json` 和 `locale/`，如果改了 `server`、`libchen.so` 或端口/监听地址等启动期配置，必须走 cold。`SIGHUP`
+> 只是在 master 下 fork 新 worker，不会让 master 重新绑定端口。
 
 ## 依赖管理
 
@@ -165,7 +163,7 @@ CI 生产配置由 **GitHub Secrets/Variables** 注入（见 workflow 的 `Prepa
 
 ```json
 {
-  "chen-sdk": { "repo": "Chen-Christins/chen", "version": "1.5.4", "arch": "arm64" },
+  "chen-sdk": { "repo": "Chen-Christins/chen", "version": "1.7.0-rc3", "arch": "auto" },
   "thirdparty": { "repo": "Chen-Christins/chen", "tag": "v1.0.0", "asset": "deps-{arch}.zip" },
   "cppjieba": {
     "repo": "yanyiwu/cppjieba",
@@ -180,16 +178,16 @@ CI 生产配置由 **GitHub Secrets/Variables** 注入（见 workflow 的 `Prepa
 - `thirdparty`：三方依赖包（protobuf / yaml-cpp / tinyxml2 / jsoncpp / hiredis-vip 的头文件 + 静态库），解压到 `deps/`。
 - `cppjieba`：中文分词头文件（`deps/include/cppjieba`）及其 `limonp` 依赖（`deps/include/limonp`）。两者均为 header-only，编译时直接进入 `libblog.so`。
 
-| 命令 | 说明 |
-|------|------|
-| `./deps.py sync` | 下载 chen-sdk + thirdparty + cppjieba（默认全部） |
-| `./deps.py sync --sdk-only` | 只下载 chen-sdk |
-| `./deps.py thirdparty` | 只下载三方依赖与 cppjieba 到 `deps/` |
-| `./deps.py use 1.5.4 --arch amd64` | 切换 SDK 版本/架构 |
-| `./deps.py use --archive /tmp/chen-sdk.zip` | 使用本地临时 SDK 包 |
-| `./deps.py current` | 查看已安装 SDK 与 `deps/` 状态 |
-| `./deps.py list` | 列出远端可用资产 |
-| `./deps.py clean` | 删除 SDK、`deps/` 与缓存 |
+| 命令                                        | 说明                                              |
+|---------------------------------------------|---------------------------------------------------|
+| `./deps.py sync`                            | 下载 chen-sdk + thirdparty + cppjieba（默认全部） |
+| `./deps.py sync --sdk-only`                 | 只下载 chen-sdk                                   |
+| `./deps.py thirdparty`                      | 只下载三方依赖与 cppjieba 到 `deps/`              |
+| `./deps.py use <version> --arch amd64`      | 切换 SDK 版本/架构                                |
+| `./deps.py use --archive /tmp/chen-sdk.zip` | 使用本地临时 SDK 包                               |
+| `./deps.py current`                         | 查看已安装 SDK 与 `deps/` 状态                    |
+| `./deps.py list`                            | 列出远端可用资产                                  |
+| `./deps.py clean`                           | 删除 SDK、`deps/` 与缓存                          |
 
 说明：
 
@@ -231,9 +229,11 @@ curl 'http://127.0.0.1:8090/api/v1/error-codes?lang=en'
 ```
 
 ## 相关文档
-- [API_DOCS.md](API_DOCS.md) 详细接口说明
-- `orm_config/` 下 XML 文件定义所有表结构
-- `tests/db/` 下 SQL 文件可用于测试数据导入
+
+- `src/servlets/` 下的 servlet 注册即接口定义
+- `dbproxy/xml/` 下的 XML 文件定义所有表结构，`dbproxy/data/` 为生成的数据访问层
+- `docs/` 下按功能划分的流程与接口说明
+- [CONFIG.md](CONFIG.md) 配置项与热重载机制
 
 ## 贡献与交流
 欢迎提交 Issue 或 PR，或通过邮件与作者联系。

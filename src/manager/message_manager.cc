@@ -2,6 +2,7 @@
 
 #include "../util.h"
 #include "cache_util.h"
+#include "ws_connection_manager.h"
 
 #include <chen/log/log.h>
 #include <chen/util/json_util.h>
@@ -360,100 +361,14 @@ bool MessageManager::deleteForUser(int64_t conversation_id, int64_t uid)
     return true;
 }
 
-void MessageManager::addChatConnection(int64_t user_id, chen::http::WSSession::ptr session)
-{
-    if (!session) {
-        ERROR(logger) << "addChatConnection: session is null, user_id=" << user_id;
-        return;
-    }
-    std::unique_lock lock(m_chatMutex);
-    auto& conns = m_chatConnections[user_id];
-    for (auto& s : conns) {
-        if (s == session) {
-            return;
-        }
-    }
-    conns.push_back(session);
-    INFO(logger) << "Chat WS connected: user_id=" << user_id << " sessions=" << conns.size();
-}
-
-void MessageManager::removeChatConnection(int64_t user_id, chen::http::WSSession::ptr session)
-{
-    std::unique_lock lock(m_chatMutex);
-    auto it = m_chatConnections.find(user_id);
-    if (it == m_chatConnections.end()) {
-        return;
-    }
-    auto& conns = it->second;
-    for (auto cit = conns.begin(); cit != conns.end();) {
-        if (*cit == session) {
-            cit = conns.erase(cit);
-        } else {
-            ++cit;
-        }
-    }
-    if (conns.empty()) {
-        m_chatConnections.erase(it);
-    }
-    INFO(logger) << "Chat WS disconnected: user_id=" << user_id;
-}
-
 bool MessageManager::isChatConnected(int64_t user_id)
 {
-    std::shared_lock lock(m_chatMutex);
-    auto it = m_chatConnections.find(user_id);
-    return it != m_chatConnections.end() && !it->second.empty();
+    return WSMgr::GetInstance()->isUserOnline(user_id);
 }
 
 int32_t MessageManager::sendToUser(int64_t user_id, const std::string& message)
 {
-    std::shared_lock lock(m_chatMutex);
-    auto it = m_chatConnections.find(user_id);
-    if (it == m_chatConnections.end()) {
-        return -1;
-    }
-    for (auto& s : it->second) {
-        if (!s || !s->isConnected()) {
-            continue;
-        }
-        s->sendMessage(message);
-    }
-    return 0;
-}
-
-void MessageManager::closeAllChatConnections()
-{
-    std::unique_lock lock(m_chatMutex);
-    for (auto& [user_id, conns] : m_chatConnections) {
-        for (auto& s : conns) {
-            if (s) {
-                s->close();
-            }
-            INFO(logger) << "Chat WS closed: user_id=" << user_id;
-        }
-    }
-    m_chatConnections.clear();
-    INFO(logger) << "All Chat WS connections closed";
-}
-
-int64_t MessageManager::getUidBySession(chen::http::WSSession::ptr session)
-{
-    if (!session) {
-        return 0;
-    }
-    std::shared_lock lock(m_chatMutex);
-    auto sock = session->getSocket();
-    for (auto& [user_id, conns] : m_chatConnections) {
-        for (auto& s : conns) {
-            if (!s) {
-                continue;
-            }
-            if (s == session || s->getSocket() == sock) {
-                return user_id;
-            }
-        }
-    }
-    return 0;
+    return WSMgr::GetInstance()->sendToUser(user_id, BuildChannelMessage(message, "chat"));
 }
 
 } // namespace blog

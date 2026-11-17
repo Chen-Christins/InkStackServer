@@ -26,7 +26,9 @@ public:
     bool onLoad() override;
 
     /**
-     * @brief 模块卸载
+     * @brief 模块卸载：worker 退出前最后调用（热重载/关机）
+     * @details 在 onDeactivate 之后、_exit 之前执行；用于释放本进程资源。
+     *          正常热重载不会在本进程内 dlclose 模块，进程退出后地址空间由内核回收。
      * @return bool
      */
     bool onUnload() override;
@@ -55,9 +57,10 @@ public:
     bool onServerUp() override;
 
     /**
-     * @brief 模块停用：旧模块被替换时调用（热重载）
-     * @details 新模块已接管，旧模块停止接收新请求。
-     *          用于关闭 WebSocket 连接等长连接。默认实现返回 true。
+     * @brief 模块停用：worker 进入 drain 时调用（热重载/关机）
+     * @details 热重载场景下新 worker 已接管监听，当前 worker 已停止 accept。
+     *          用于 flush 数据、关闭本进程的长连接等收尾工作。
+     *          这是多进程模型：本方法只影响当前 worker，不会操作新 worker 中的模块。
      * @return bool
      */
     bool onDeactivate() override;

@@ -3,11 +3,15 @@
 #include <chen/config/config.h>
 #include <chen/http/session_data.h>
 #include <chen/log/log.h>
+#include <chen/util/json_util.h>
 #include <chen/util/time_util.h>
+
+#include <json/json.h>
 
 #include "../error_codes.h"
 #include "../manager/session_manager.h"
 #include "../manager/user_manager.h"
+#include "../manager/ws_connection_manager.h"
 #include "../struct.h"
 #include "../util.h"
 #include "session_store.h"
@@ -32,6 +36,21 @@ static bool UseSecureCookie()
 {
     const AuthConf& conf = g_auth_conf->getValue();
     return conf.cookie_secure || NormalizeSameSite() == "None";
+}
+
+static void CloseWsForSession(const std::string& session_id, const char* reason)
+{
+    if (session_id.empty()) {
+        return;
+    }
+    std::string device_id = SessionStore::HashId(session_id);
+    if (device_id.empty()) {
+        return;
+    }
+    Json::Value msg;
+    msg["channel"] = "system";
+    msg["type"] = reason;
+    WSMgr::GetInstance()->closeDevice(device_id, chen::JsonUtil::ToString(msg));
 }
 
 void AuthService::MirrorSessionData(const std::string& session_id, int64_t uid)
@@ -68,11 +87,12 @@ AuthContext AuthService::Resolve(chen::http::HttpRequest::ptr request, chen::htt
     if (sdata && sdata->getData<int64_t>(SessionDataKey::ANONYMOUS) == 1) {
         return ctx;
     }
-    // 内存 SessionData 可能来自旧模块，需以 SessionStore 为准再判断匿名。
+    // 内存 SessionData 可能落后于 Redis 中的 SessionStore，需以 SessionStore 为准再判断匿名。
     SessionInfo info;
     bool info_loaded = false;
     if (sdata && sdata->getData<int64_t>(SessionDataKey::USER_ID) == 0) {
         if (!SessionStore::Get(session_id, info)) {
+            CloseWsForSession(session_id, "session_expired");
             sdata->setData(SessionDataKey::ANONYMOUS, 1);
             return ctx;
         }
@@ -80,6 +100,7 @@ AuthContext AuthService::Resolve(chen::http::HttpRequest::ptr request, chen::htt
     }
 
     if (!info_loaded && !SessionStore::Get(session_id, info)) {
+        CloseWsForSession(session_id, "session_expired");
         chen::http::SessionDataMgr::GetInstance()->del(session_id);
         if (response) {
             ClearSessionCookie(response);
@@ -89,6 +110,7 @@ AuthContext AuthService::Resolve(chen::http::HttpRequest::ptr request, chen::htt
 
     auto user = UserMgr::GetInstance()->get(info.uid);
     if (!user || user->getState() != UserManager::Status::ACTIVE || user->getIsDeleted()) {
+        CloseWsForSession(session_id, "session_revoked");
         SessionStore::Destroy(session_id);
         chen::http::SessionDataMgr::GetInstance()->del(session_id);
         if (response) {
@@ -102,6 +124,7 @@ AuthContext AuthService::Resolve(chen::http::HttpRequest::ptr request, chen::htt
     int64_t now = chen::TimeUtil::GetCurrentSec();
     if (touch && now - info.last_seen >= 60) {
         if (!SessionStore::Touch(session_id, info, GetSessionTTL(), conf.session_absolute_ttl)) {
+            CloseWsForSession(session_id, "session_expired");
             chen::http::SessionDataMgr::GetInstance()->del(session_id);
             if (response) {
                 ClearSessionCookie(response);
@@ -151,6 +174,7 @@ int32_t AuthService::IssueSession(
     }
 
     if (!old_session_id.empty() && old_session_id != session_id) {
+        CloseWsForSession(old_session_id, "session_refreshed");
         SessionStore::Destroy(old_session_id);
         chen::http::SessionDataMgr::GetInstance()->del(old_session_id);
     }
@@ -182,6 +206,7 @@ void AuthService::RevokeSession(chen::http::HttpRequest::ptr request, chen::http
     }
 
     if (!session_id.empty()) {
+        CloseWsForSession(session_id, "session_revoked");
         SessionStore::Destroy(session_id);
         chen::http::SessionDataMgr::GetInstance()->del(session_id);
     }
@@ -196,6 +221,10 @@ void AuthService::RevokeAllSessions(int64_t uid)
     }
 
     SessionStore::DestroyAll(uid);
+    Json::Value msg;
+    msg["channel"] = "system";
+    msg["type"] = "session_revoked";
+    WSMgr::GetInstance()->closeUser(uid, chen::JsonUtil::ToString(msg));
     INFO(logger) << "revoked all sessions uid=" << uid;
 }
 

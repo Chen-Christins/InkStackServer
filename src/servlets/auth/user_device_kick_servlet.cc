@@ -1,7 +1,12 @@
 #include "user_device_kick_servlet.h"
 
 #include "../../auth/session_store.h"
+#include "../../manager/ws_connection_manager.h"
 #include "../../util.h"
+
+#include <chen/util/json_util.h>
+
+#include <json/json.h>
 
 namespace blog {
 namespace servlet {
@@ -31,6 +36,12 @@ int32_t UserDeviceKickServlet::handle(
             result->setErrno(errcode::DEVICE_NOT_FOUND);
             break;
         }
+
+        Json::Value msg;
+        msg["channel"] = "system";
+        msg["type"] = "device_kicked";
+        WSMgr::GetInstance()->closeDevice(device_id, chen::JsonUtil::ToString(msg));
+
         result->setErrno(errcode::SUCCESS);
     } while (0);
     response->setBody(result->toJsonString());

@@ -36,7 +36,8 @@ cp bin/conf/prod.env.example bin/conf/prod.env   # 填写真实值后
 - 根据仓库根目录自动推导 `WORK_PATH`，无需按机器手动修改绝对路径。
 - 优先使用 `envsubst` 渲染，未安装时自动回退到 `sed`。
 - 渲染后校验是否残留未替换的 `${...}`，存在则报错并提示缺哪个变量。
-- **只切换配置，不重启服务**。切完后需自行重启或发送 `SIGHUP` 触发热重载。
+- **只切换配置，不重启服务**。运行中的 worker 通过 inotify 监听 `conf/`，文件变更后会重新加载配置并触发 `ConfigVar`
+  listener；如需同时替换模块 `.so`，发送 `SIGHUP` 让 master fork 新 worker（旧 worker drain 后退出）。
 
 ## 3. 新增一个配置项
 
@@ -106,13 +107,23 @@ std::string dir = g_upload_dir->getValue();
 
 ### 4.2 配置变更监听（热重载）
 
-框架通过 `SIGHUP` 重载配置，`ConfigVar` 支持注册回调以响应变更：
+运行中的 worker 通过 inotify 监听 `conf/` 目录；配置文件变化时会调用
+`Config::LoadFromFile` 重新加载，值发生变化的 `ConfigVar` 会触发已注册的 listener：
 
 ```cpp
 uint64_t id = g_upload_dir->addListener([](const std::string& old_val, const std::string& new_val) {
     // 处理配置变更
 });
 ```
+
+注意：
+
+- listener 在 **每个 worker 进程内**各注册、各回调一次；master 不加载业务模块，也不注册业务 listener。
+- 模块退出前用 `delListener(id)` 注销；多进程模型下旧 worker 退出不会影响新 worker，但保持清理习惯。
+- 端口、监听地址、`server.work_path` 等启动期配置由 master 在启动时使用，修改后需要冷重启；`SIGHUP` 只会 fork 新 worker，不会让
+  master 重新绑定端口。
+- `SIGHUP` 的语义是“换 worker”：master fork 新 worker，重新加载配置和磁盘上的 `.so`；旧 worker drain 后退出，不是在当前
+  worker 内原地重载。
 
 ## 5. Redis 对象缓存
 

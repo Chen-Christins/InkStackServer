@@ -22,8 +22,8 @@ bool InstallCrashHandler(const std::string& log_path);
 
 /**
  * @brief 恢复默认信号处理
- * @note 仅在进程退出路径（onUnload）调用；热重载时不要调用，
- *       否则会覆盖新模块安装的处理器。
+ * @note 在 onUnload（worker 退出前）调用，只影响当前进程；
+ *       热重载时新旧 worker 进程隔离，不会覆盖新 worker 安装的处理器。
  */
 void UninstallCrashHandler();
 
