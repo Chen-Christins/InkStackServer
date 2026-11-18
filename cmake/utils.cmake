@@ -145,3 +145,30 @@ function(create_server_module module_name source_dir module_output_dir server_ou
     # chen_add_executable(${module_name}_server "servers/${module_name}.cc" "" "${libs}")
     # chen_set_target_output_dir(${module_name}_server "${server_output_dir}")
 endfunction()
+
+# 创建独立服务模块（阶段 1：链接 blog_common 静态库）
+# 参数：
+#   module_name       目标名，同时作为 .so 文件名（如 user -> user.so）
+#   source_dir        服务源码目录（递归收集 .cc）
+#   module_output_dir 输出目录
+#   common_lib        公共服务静态库目标（blog_common）
+function(create_service_module module_name source_dir module_output_dir common_lib)
+    # manager / logic 阶段 1 统一编入 blog_common，服务模块只编 frame + servlets
+    chen_set_sources(${source_dir} MODULE_SOURCES manager logic)
+    if (NOT MODULE_SOURCES)
+        message(FATAL_ERROR "service ${module_name}: no sources under ${source_dir}")
+    endif ()
+
+    add_library(${module_name} SHARED ${MODULE_SOURCES})
+    target_link_libraries(${module_name} PRIVATE ${common_lib})
+
+    # 产物命名为 <service>.so，放入各服务自己的 module 目录
+    set_target_properties(${module_name} PROPERTIES PREFIX "")
+
+    force_redefine_file_macro_for_sources(${module_name})
+    chen_set_target_output_dir(${module_name} "${module_output_dir}")
+
+    if (TARGET i18n)
+        add_dependencies(${module_name} i18n)
+    endif ()
+endfunction()

@@ -1,0 +1,5 @@
+add_subdirectory(common)
+add_subdirectory(user)
+add_subdirectory(article)
+add_subdirectory(comment)
+add_subdirectory(platform)

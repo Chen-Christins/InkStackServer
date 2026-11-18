@@ -11,7 +11,10 @@ endef
 # ---- 构建 ----
 #   make               → 全量构建（默认）
 #   make build         → 全量构建
-#   make blog          → 构建 blog .so 模块目标
+#   make user          → 构建 user 服务模块
+#   make article       → 构建 article 服务模块
+#   make comment       → 构建 comment 服务模块
+#   make platform      → 构建 platform 服务模块
 #   make clean         → 清理并删除 build/ 目录
 #   make -j4           → 手动控制并行数（默认留一核）
 

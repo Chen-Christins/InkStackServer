@@ -17,7 +17,7 @@ DOMAIN_PREFIX = "techhaven"
 LANGUAGES = {"en": "en", "zh_CN": "zh"}
 KEY_RE = re.compile(r"^[A-Z0-9_]+$")
 PRINTF_RE = re.compile(r"%(?:[-+ #0]*\d*(?:\.\d+)?[diouxXeEfFgGaAcspn%])")
-SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".h"}
+SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".h", ".hpp"}
 SOURCE_KEYWORDS = ("setErrno:2", "setErrnoFmt:2")
 
 

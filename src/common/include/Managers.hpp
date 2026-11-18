@@ -1,0 +1,37 @@
+#pragma once
+
+#include "article/manager/ArticleCategoryRelManager.hpp"         // IWYU pragma: keep
+#include "article/manager/ArticleLabelRelManager.hpp"            // IWYU pragma: keep
+#include "article/manager/ArticleManager.hpp"                    // IWYU pragma: keep
+#include "article/manager/ArticlePraiseRelManager.hpp"           // IWYU pragma: keep
+#include "article/manager/CategoryManager.hpp"                   // IWYU pragma: keep
+#include "article/manager/LabelManager.hpp"                      // IWYU pragma: keep
+#include "comment/manager/CommentManager.hpp"                    // IWYU pragma: keep
+#include "comment/manager/CommentPraiseRelManager.hpp"           // IWYU pragma: keep
+#include "common/manager/ErrorCodeManager.hpp"                   // IWYU pragma: keep
+#include "platform/manager/AssignmentManager.hpp"                // IWYU pragma: keep
+#include "platform/manager/AssignmentOrganizationRelManager.hpp" // IWYU pragma: keep
+#include "platform/manager/AssignmentUserRelManager.hpp"         // IWYU pragma: keep
+#include "platform/manager/BackupRecordManager.hpp"              // IWYU pragma: keep
+#include "platform/manager/BugManager.hpp"                       // IWYU pragma: keep
+#include "platform/manager/ExportRecordManager.hpp"              // IWYU pragma: keep
+#include "platform/manager/FaqManager.hpp"                       // IWYU pragma: keep
+#include "platform/manager/FeedbackManager.hpp"                  // IWYU pragma: keep
+#include "platform/manager/MessageManager.hpp"                   // IWYU pragma: keep
+#include "platform/manager/NotificationManager.hpp"              // IWYU pragma: keep
+#include "platform/manager/OrganizationApplyManager.hpp"         // IWYU pragma: keep
+#include "platform/manager/OrganizationManager.hpp"              // IWYU pragma: keep
+#include "platform/manager/OrganizationRepoManager.hpp"          // IWYU pragma: keep
+#include "platform/manager/OrganizationRepoPrManager.hpp"        // IWYU pragma: keep
+#include "platform/manager/OrganizationUserRelManager.hpp"       // IWYU pragma: keep
+#include "platform/manager/RequirementManager.hpp"               // IWYU pragma: keep
+#include "platform/manager/ResourceManager.hpp"                  // IWYU pragma: keep
+#include "platform/manager/SystemSettingsManager.hpp"            // IWYU pragma: keep
+#include "platform/manager/TaskManager.hpp"                      // IWYU pragma: keep
+#include "platform/manager/WSConnectionManager.hpp"              // IWYU pragma: keep
+#include "user/manager/BadgeManager.hpp"                         // IWYU pragma: keep
+#include "user/manager/PasskeyManager.hpp"                       // IWYU pragma: keep
+#include "user/manager/UserAIConfigManager.hpp"                  // IWYU pragma: keep
+#include "user/manager/UserFollowRelManager.hpp"                 // IWYU pragma: keep
+#include "user/manager/UserManager.hpp"                          // IWYU pragma: keep
+#include "user/manager/UserOAuthManager.hpp"                     // IWYU pragma: keep
