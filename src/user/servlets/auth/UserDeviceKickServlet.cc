@@ -1,7 +1,7 @@
 #include "user/servlets/auth/UserDeviceKickServlet.hpp"
 
 #include "common/auth/SessionStore.hpp"
-#include "platform/manager/WSConnectionManager.hpp"
+#include "user/client/PlatformClient.hpp"
 #include "common/Util.hpp"
 
 #include <chen/util/json_util.h>
@@ -40,7 +40,7 @@ int32_t UserDeviceKickServlet::handle(
         Json::Value msg;
         msg["channel"] = "system";
         msg["type"] = "device_kicked";
-        WSMgr::GetInstance()->closeDevice(device_id, chen::JsonUtil::ToString(msg));
+        client::PlatformClientMgr::GetInstance()->kickDevice(device_id, chen::JsonUtil::ToString(msg));
 
         result->setErrno(errcode::SUCCESS);
     } while (0);

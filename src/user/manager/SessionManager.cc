@@ -1,6 +1,6 @@
 #include "user/manager/SessionManager.hpp"
 
-#include "platform/manager/SystemSettingsManager.hpp"
+#include "user/client/PlatformClient.hpp"
 
 namespace blog {
 
@@ -9,9 +9,9 @@ static const int64_t kDefaultSessionTTL = 24 * 3600;
 
 int64_t GetSessionTTL()
 {
-    auto settings = SystemSettingsMgr::GetInstance()->get();
-    if (settings && settings->getSessionTimeout() > 0) {
-        return static_cast<int64_t>(settings->getSessionTimeout()) * 3600;
+    tagSystemSettings settings;
+    if (client::PlatformClientMgr::GetInstance()->tryGetSettings(settings) && settings.SessionTimeout > 0) {
+        return static_cast<int64_t>(settings.SessionTimeout) * 3600;
     }
     return kDefaultSessionTTL;
 }

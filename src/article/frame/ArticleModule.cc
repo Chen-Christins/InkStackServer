@@ -9,11 +9,15 @@
 #include "article/include/Servlets.hpp"
 #include "article/logic/Index.hpp"
 #include "article/manager/ArticleManager.hpp"
+#include "article/rpc/ArticleRpcService.hpp"
+#include "blog/data/label_info.h"
 #include "common/event/Events.hpp"
 #include "common/frame/ServiceBootstrap.hpp"
 #include "common/frame/ServletRegistrar.hpp"
 #include "common/include/Tables.hpp"
 #include "common/metrics/ServiceMetrics.hpp"
+#include "common/rpc/RpcEndpoint.hpp"
+#include "common/rpc/RpcHubClient.hpp"
 
 namespace blog {
 
@@ -32,6 +36,7 @@ bool ArticleModule::onLoad()
 bool ArticleModule::onUnload()
 {
     INFO(logger) << "onUnload";
+    rpc::RpcHubClientMgr::GetInstance()->stop();
     ArticleMgr::GetInstance()->stop();
     BootstrapOnUnload();
     return true;
@@ -50,6 +55,8 @@ void ArticleModule::onTick()
 
     try {
         metrics::SampleRates();
+
+        rpc::RpcHubClientMgr::GetInstance()->ensureConnected();
 
         ArticleMgr::GetInstance()->onTick();
 
@@ -101,6 +108,8 @@ bool ArticleModule::onServerReady()
 
     registerServlets();
 
+    rpc::RegisterArticleRpcMethods();
+
     if (!EventMsgsInit()) {
         ERROR(logger) << "EventMsgsInit failed";
         return false;
@@ -112,6 +121,8 @@ bool ArticleModule::onServerReady()
 bool ArticleModule::onServerUp()
 {
     INFO(logger) << "onServerUp";
+
+    rpc::RpcHubClientMgr::GetInstance()->start(rpc::FUNC_ARTICLE);
     return true;
 }
 

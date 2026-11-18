@@ -12,6 +12,9 @@
 #include "common/frame/ServletRegistrar.hpp"
 #include "common/include/Tables.hpp"
 #include "common/metrics/ServiceMetrics.hpp"
+#include "common/rpc/RpcEndpoint.hpp"
+#include "common/rpc/RpcHubClient.hpp"
+#include "comment/rpc/CommentRpcService.hpp"
 
 namespace blog {
 
@@ -30,6 +33,7 @@ bool CommentModule::onLoad()
 bool CommentModule::onUnload()
 {
     INFO(logger) << "onUnload";
+    rpc::RpcHubClientMgr::GetInstance()->stop();
     BootstrapOnUnload();
     return true;
 }
@@ -46,6 +50,8 @@ void CommentModule::onTick()
 
     try {
         metrics::SampleRates();
+
+        rpc::RpcHubClientMgr::GetInstance()->ensureConnected();
 
         s_sync_tick++;
         if (s_sync_tick % 5 == 0) {
@@ -89,6 +95,8 @@ bool CommentModule::onServerReady()
 
     registerServlets();
 
+    rpc::RegisterCommentRpcMethods();
+
     if (!EventMsgsInit()) {
         ERROR(logger) << "EventMsgsInit failed";
         return false;
@@ -100,6 +108,8 @@ bool CommentModule::onServerReady()
 bool CommentModule::onServerUp()
 {
     INFO(logger) << "onServerUp";
+
+    rpc::RpcHubClientMgr::GetInstance()->start(rpc::FUNC_COMMENT);
     return true;
 }
 

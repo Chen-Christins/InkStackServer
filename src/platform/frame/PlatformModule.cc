@@ -11,6 +11,9 @@
 #include "common/frame/ServletRegistrar.hpp"
 #include "common/include/Tables.hpp"
 #include "common/metrics/ServiceMetrics.hpp"
+#include "common/rpc/RpcEndpoint.hpp"
+#include "common/rpc/RpcHubClient.hpp"
+#include "platform/rpc/PlatformRpcService.hpp"
 #include "platform/include/Servlets.hpp"
 #include "platform/logic/BlogMsgFromBot.hpp"
 #include "platform/logic/ChunkUpload.hpp"
@@ -36,6 +39,7 @@ bool PlatformModule::onLoad()
 bool PlatformModule::onUnload()
 {
     INFO(logger) << "onUnload";
+    rpc::RpcHubClientMgr::GetInstance()->stop();
     BootstrapOnUnload();
     return true;
 }
@@ -53,6 +57,8 @@ void PlatformModule::onTick()
 
     try {
         metrics::SampleRates();
+
+        rpc::RpcHubClientMgr::GetInstance()->ensureConnected();
 
         s_sync_tick++;
 
@@ -106,6 +112,8 @@ bool PlatformModule::onServerReady()
     registerWSServlets();
     registerRPCMethods();
 
+    rpc::RegisterPlatformRpcMethods();
+
     if (!EventMsgsInit()) {
         ERROR(logger) << "EventMsgsInit failed";
         return false;
@@ -117,6 +125,8 @@ bool PlatformModule::onServerReady()
 bool PlatformModule::onServerUp()
 {
     INFO(logger) << "onServerUp";
+
+    rpc::RpcHubClientMgr::GetInstance()->start(rpc::FUNC_PLATFORM);
     return true;
 }
 

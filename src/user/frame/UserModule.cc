@@ -11,6 +11,9 @@
 #include "common/frame/ServletRegistrar.hpp"
 #include "common/include/Tables.hpp"
 #include "common/metrics/ServiceMetrics.hpp"
+#include "common/rpc/RpcEndpoint.hpp"
+#include "common/rpc/RpcHubClient.hpp"
+#include "user/rpc/UserRpcService.hpp"
 #include "user/include/Servlets.hpp"
 #include "user/manager/BadgeManager.hpp"
 #include "user/manager/UserManager.hpp"
@@ -32,6 +35,7 @@ bool UserModule::onLoad()
 bool UserModule::onUnload()
 {
     INFO(logger) << "onUnload";
+    rpc::RpcHubClientMgr::GetInstance()->stop();
     BootstrapOnUnload();
     return true;
 }
@@ -48,6 +52,8 @@ void UserModule::onTick()
 
     try {
         metrics::SampleRates();
+
+        rpc::RpcHubClientMgr::GetInstance()->ensureConnected();
 
         s_sync_tick++;
         if (s_sync_tick % 5 == 0) {
@@ -91,6 +97,8 @@ bool UserModule::onServerReady()
 
     registerServlets();
 
+    rpc::RegisterUserRpcMethods();
+
     if (!EventMsgsInit()) {
         ERROR(logger) << "EventMsgsInit failed";
         return false;
@@ -102,6 +110,8 @@ bool UserModule::onServerReady()
 bool UserModule::onServerUp()
 {
     INFO(logger) << "onServerUp";
+
+    rpc::RpcHubClientMgr::GetInstance()->start(rpc::FUNC_USER);
 
     UserMgr::GetInstance()->ensureSuperAdmin();
     BadgeMgr::GetInstance()->ensureDefaults();

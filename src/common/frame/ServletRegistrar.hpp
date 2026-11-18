@@ -12,7 +12,6 @@
 #include <utility>
 
 #include <chen/http/servlet.h>
-#include <chen/http/servlet_dispatch.h>
 
 #include "common/frame/Struct.hpp"
 

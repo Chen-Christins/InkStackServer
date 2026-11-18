@@ -2,10 +2,7 @@
 
 #include <chen/log/log.h>
 
-#include <algorithm>
-
-#include "platform/manager/OrganizationManager.hpp"
-#include "platform/manager/OrganizationUserRelManager.hpp"
+#include "user/client/PlatformClient.hpp"
 
 namespace blog {
 namespace servlet {
@@ -26,27 +23,19 @@ int32_t UserOrganizationListServlet::handle(
     do {
         int64_t uid = getUserId(request);
 
-        std::vector<data::OrganizationUserRelInfo::ptr> orgs;
-        OrganizationUserRelMgr::GetInstance()->getOrgByUserId(orgs, uid, -1, true);
-
-        std::sort(orgs.begin(), orgs.end(), [](const auto& a, const auto& b) {
-            return a->getCreateTime() < b->getCreateTime();
-        });
+        auto orgs = client::PlatformClientMgr::GetInstance()->listUserOrgs(uid);
 
         Json::Value list;
-        for (auto& i : orgs) {
+        for (auto& org : orgs) {
             Json::Value item;
-            auto org = OrganizationMgr::GetInstance()->get(i->getOrgId());
-            item["id"] = i->getId();
-            item["org_id"] = i->getOrgId();
-            item["org_name"] = org->getName();
-            item["org_description"] = org->getDescription();
-            item["type"] = org->getType();
-            item["role"] = i->getRole();
-            item["join_time"] = i->getCreateTime();
-            // 成员数
-            int32_t status = OrganizationUserRelManager::Status::APPROVED;
-            item["count"] = OrganizationUserRelMgr::GetInstance()->getMemberCount(i->getOrgId(), status, true);
+            item["id"] = org.RelId;
+            item["org_id"] = org.OrgId;
+            item["org_name"] = org.OrgName;
+            item["org_description"] = org.OrgDescription;
+            item["type"] = org.Type;
+            item["role"] = org.Role;
+            item["join_time"] = org.JoinTime;
+            item["count"] = org.MemberCount;
             list.append(item);
         }
         result->set("list", list);

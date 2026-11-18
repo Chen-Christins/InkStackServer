@@ -5,7 +5,7 @@
 #include <chen/log/log.h>
 
 #include "common/event/EventDefine.hpp"
-#include "platform/manager/SystemSettingsManager.hpp"
+#include "user/client/PlatformClient.hpp"
 #include "user/manager/UserManager.hpp"
 #include "common/Util.hpp"
 
@@ -79,8 +79,8 @@ int32_t UserSendCodeServlet::handle(
         }
 
         // 检查 SMTP 配置（在写 DB 之前校验，避免产生无效验证码）
-        auto sys_settings = SystemSettingsMgr::GetInstance()->get();
-        if (!sys_settings || sys_settings->getSmtpHost().empty()) {
+        tagSystemSettings sys_settings;
+        if (!client::PlatformClientMgr::GetInstance()->tryGetSettings(sys_settings) || sys_settings.SmtpHost.empty()) {
             result->setErrno(errcode::SMTP_NOT_CONFIGURED);
             break;
         }
@@ -95,7 +95,7 @@ int32_t UserSendCodeServlet::handle(
 
         INFO(logger) << "email=" << email << " type=" << type << " code=" << code;
 
-        std::string site_name = sys_settings->getSiteName();
+        std::string site_name = sys_settings.SiteName;
 
         // 异步发送邮件，不阻塞请求响应
         // type: 1-注册, 3-重置密码, 5-账号恢复
@@ -117,10 +117,9 @@ int32_t UserSendCodeServlet::handle(
             + "</span>" + "</div>" + "<p style=\"margin:0;font-size:13px;color:#999\">验证码 10 分钟内有效，请勿转发给他人。</p>" + "</div>"
             + "<div style=\"padding-top:16px;border-top:1px solid #f0f0f0;text-align:center\">"
             + "<p style=\"margin:0;font-size:12px;color:#bbb\">此邮件由系统自动发送，请勿回复。</p>" + "</div>" + "</div>";
-        auto mail = chen::EMail::Create(
-            sys_settings->getSmtpUsername(), sys_settings->getSmtpPassword(), title, code_html, {email}, {}, {sys_settings->getFromEmail()});
-        std::string smtp_host = sys_settings->getSmtpHost();
-        int32_t smtp_port = sys_settings->getSmtpPort();
+        auto mail = chen::EMail::Create(sys_settings.SmtpUsername, sys_settings.SmtpPassword, title, code_html, {email}, {}, {sys_settings.FromEmail});
+        std::string smtp_host = sys_settings.SmtpHost;
+        int32_t smtp_port = sys_settings.SmtpPort;
 
         // 异步触发事件，发送邮件
         {

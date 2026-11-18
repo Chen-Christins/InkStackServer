@@ -5,7 +5,7 @@
 #include <chen/log/log.h>
 
 #include "common/Util.hpp"
-#include "platform/manager/SystemSettingsManager.hpp"
+#include "user/client/PlatformClient.hpp"
 #include "user/manager/UserManager.hpp"
 
 namespace blog {
@@ -60,12 +60,10 @@ int32_t UserCreateServlet::handle(
             break;
         }
 
-        // 根据系统设置决定是否需要校验邮箱验证码
-        auto sys_settings = SystemSettingsMgr::GetInstance()->get();
-        bool require_verification = true;
-        if (sys_settings) {
-            require_verification = sys_settings->getRequireEmailVerification() != 0;
-        }
+        // 根据系统设置决定是否需要校验邮箱验证码；设置不可用时按需要校验处理（安全优先）
+        tagSystemSettings sys_settings;
+        const bool has_settings = client::PlatformClientMgr::GetInstance()->tryGetSettings(sys_settings);
+        const bool require_verification = has_settings ? sys_settings.RequireEmailVerification != 0 : true;
         if (require_verification) {
             if (!verificationEmailCode(email, auth_code)) {
                 result->setErrno(errcode::AUTH_CODE_INVALID);

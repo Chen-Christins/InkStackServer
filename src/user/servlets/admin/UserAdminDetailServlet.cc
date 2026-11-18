@@ -1,6 +1,6 @@
 #include "user/servlets/admin/UserAdminDetailServlet.hpp"
 
-#include "article/manager/ArticleManager.hpp"
+#include "user/client/ArticleClient.hpp"
 #include "user/manager/UserManager.hpp"
 #include "common/Util.hpp"
 #include "blog/data/comment_info.h"
@@ -28,9 +28,7 @@ int32_t UserAdminDetailServlet::handle(
             break;
         }
 
-        std::vector<data::ArticleInfo::ptr> articles;
-        ArticleMgr::GetInstance()->listByUserId(articles, user_id, false);
-        int64_t article_count = articles.size();
+        int64_t article_count = client::ArticleClientMgr::GetInstance()->countByUser(user_id, true);
 
         std::vector<data::CommentInfo::ptr> comments;
         auto db = getDB();
