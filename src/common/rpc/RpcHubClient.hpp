@@ -114,9 +114,9 @@ public:
         }
         try {
             if constexpr (std::is_void_v<R>) {
-                client->callRouted<R>(RouteTo(func_id), cmd, args...);
+                client->callRoutedWithTimeout<R>(GetCallTimeoutMs(), RouteTo(func_id), cmd, args...);
             } else {
-                out = client->callRouted<R>(RouteTo(func_id), cmd, args...);
+                out = client->callRoutedWithTimeout<R>(GetCallTimeoutMs(), RouteTo(func_id), cmd, args...);
             }
             return true;
         } catch (const std::exception& e) {

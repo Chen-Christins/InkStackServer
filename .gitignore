@@ -39,3 +39,8 @@ tools
 *.sql*
 dbproxy/data
 *upload*
+
+# runenv 生成物（模板与脚本在 runenv/template、runenv/*.sh，保留跟踪）
+/runenv/*/conf/
+/runenv/*/module/
+/runenv/*/server

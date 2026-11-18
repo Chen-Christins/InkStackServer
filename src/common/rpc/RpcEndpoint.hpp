@@ -32,6 +32,18 @@ enum FuncId : uint32_t {
 const std::string& GetHubAddress();
 
 /**
+ * @brief 获取跨服务调用超时
+ * @return 毫秒，来自配置 rpc.hub.call_timeout_ms，默认 3000
+ */
+uint64_t GetCallTimeoutMs();
+
+/**
+ * @brief 获取 hub 断线重连间隔
+ * @return 毫秒，来自配置 rpc.hub.reconnect_interval_ms，默认 5000
+ */
+uint64_t GetReconnectIntervalMs();
+
+/**
  * @brief 生成本进程唯一的 peer_id
  * @param func_id 功能类型
  * @return peer_id

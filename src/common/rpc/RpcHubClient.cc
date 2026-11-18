@@ -12,9 +12,6 @@ static chen::Logger::ptr logger = LOG_NAME("system");
 
 namespace {
 
-/// 重连间隔（毫秒）
-constexpr uint64_t kReconnectIntervalMs = 5000;
-
 /// 每个服务功能类型下只跑一个实例，实例号固定为 1
 constexpr uint32_t kInstanceId = 1;
 
@@ -76,7 +73,7 @@ bool RpcHubClient::ensureConnected()
     }
 
     const uint64_t now = chen::TimeUtil::GetCurrentMs();
-    if (now - m_last_connect_ms < kReconnectIntervalMs) {
+    if (now - m_last_connect_ms < GetReconnectIntervalMs()) {
         return false;
     }
     m_last_connect_ms = now;
