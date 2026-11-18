@@ -1,9 +1,9 @@
 #include "article/servlets/category/CategoryCreateServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/CategoryManager.hpp"
-#include "user/manager/UserManager.hpp"
 #include "common/Permission.hpp"
-#include "common/Util.hpp"
+#include "user/manager/UserManager.hpp"
 
 #include <chen/log/log.h>
 

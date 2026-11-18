@@ -4,10 +4,10 @@
 #include <chen/log/log.h>
 #include <chen/util/util.h>
 
-#include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
+#include "../../../common/util/Util.hpp"
 #include "blog/data/backup_record_info.h"
 #include "blog/data/export_record_info.h"
+#include "user/manager/UserManager.hpp"
 
 namespace blog {
 namespace servlet {

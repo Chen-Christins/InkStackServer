@@ -7,8 +7,8 @@
 #include <chen/log/log.h>
 #include <chen/util/string_util.h>
 
+#include "../../../common/util/Util.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

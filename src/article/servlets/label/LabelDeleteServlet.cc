@@ -2,8 +2,8 @@
 
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/LabelManager.hpp"
-#include "common/Util.hpp"
 #include "blog/data/label_info.h"
 
 #include <set>

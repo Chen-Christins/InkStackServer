@@ -11,12 +11,12 @@
 
 #include <chen/util/fs_util.h>
 
+#include "../../common/util/Util.hpp"
 #include "article/manager/ArticleCategoryRelManager.hpp"
 #include "article/manager/ArticleLabelRelManager.hpp"
 #include "article/manager/ArticleManager.hpp"
 #include "article/manager/CategoryManager.hpp"
 #include "article/manager/LabelManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 

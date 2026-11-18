@@ -2,9 +2,9 @@
 
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/ArticleManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

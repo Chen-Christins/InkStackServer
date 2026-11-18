@@ -3,10 +3,10 @@
 #include <chen/log/log.h>
 #include <chen/util/time_util.h>
 
+#include "../../../common/util/Util.hpp"
 #include "common/auth/AuthService.hpp"
 #include "common/event/EventDefine.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

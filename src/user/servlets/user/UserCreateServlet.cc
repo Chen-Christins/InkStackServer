@@ -4,7 +4,7 @@
 #include <chen/db/redis.h>
 #include <chen/log/log.h>
 
-#include "common/Util.hpp"
+#include "../../../common/util/Util.hpp"
 #include "user/client/PlatformClient.hpp"
 #include "user/manager/UserManager.hpp"
 

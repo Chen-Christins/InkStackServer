@@ -4,11 +4,11 @@
 #include <chen/log/log.h>
 #include <json/json.h>
 
-#include "common/event/EventDefine.hpp"
+#include "../../../common/util/Util.hpp"
 #include "article/logic/Index.hpp"
 #include "article/manager/ArticleManager.hpp"
+#include "common/event/EventDefine.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

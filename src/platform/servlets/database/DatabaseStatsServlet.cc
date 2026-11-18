@@ -1,12 +1,12 @@
 #include "platform/servlets/database/DatabaseStatsServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/ArticleManager.hpp"
-#include "platform/manager/BackupRecordManager.hpp"
 #include "article/manager/CategoryManager.hpp"
-#include "comment/manager/CommentManager.hpp"
-#include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 #include "blog/data/label_info.h"
+#include "comment/manager/CommentManager.hpp"
+#include "platform/manager/BackupRecordManager.hpp"
+#include "user/manager/UserManager.hpp"
 
 namespace blog {
 namespace servlet {

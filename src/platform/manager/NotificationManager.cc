@@ -1,6 +1,6 @@
 #include "platform/manager/NotificationManager.hpp"
 
-#include "common/Util.hpp"
+#include "../../common/util/Util.hpp"
 #include "common/manager/CacheUtil.hpp"
 #include "platform/manager/WSConnectionManager.hpp"
 

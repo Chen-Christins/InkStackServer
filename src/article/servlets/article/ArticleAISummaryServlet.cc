@@ -1,11 +1,11 @@
 #include "article/servlets/article/ArticleAISummaryServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
+#include "article/manager/ArticleManager.hpp"
 #include "common/ai/AIProvider.hpp"
 #include "common/ai/SSEStreamParser.hpp"
 #include "common/auth/AuthService.hpp"
-#include "article/manager/ArticleManager.hpp"
 #include "user/manager/UserAIConfigManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/config/config.h>
 #include <chen/http/http_connection.h>

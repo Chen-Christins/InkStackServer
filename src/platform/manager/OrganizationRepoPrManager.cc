@@ -1,6 +1,6 @@
 #include "platform/manager/OrganizationRepoPrManager.hpp"
 
-#include "common/Util.hpp"
+#include "../../common/util/Util.hpp"
 #include "common/manager/CacheUtil.hpp"
 #include "platform/manager/OrganizationRepoManager.hpp"
 #include "platform/manager/OrganizationUserRelManager.hpp"

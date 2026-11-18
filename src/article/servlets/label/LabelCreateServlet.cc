@@ -1,7 +1,7 @@
 #include "article/servlets/label/LabelCreateServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/LabelManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/log/log.h>
 

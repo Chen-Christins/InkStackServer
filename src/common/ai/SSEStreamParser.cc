@@ -1,6 +1,6 @@
 #include "common/ai/SSEStreamParser.hpp"
 
-#include "common/Util.hpp"
+#include "../util/Util.hpp"
 
 namespace blog {
 namespace ai {

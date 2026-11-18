@@ -1,6 +1,6 @@
 #include "platform/manager/FaqManager.hpp"
 
-#include "common/Util.hpp"
+#include "../../common/util/Util.hpp"
 
 #include <chen/log/log.h>
 

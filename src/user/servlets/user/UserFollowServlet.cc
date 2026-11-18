@@ -1,9 +1,9 @@
 #include "user/servlets/user/UserFollowServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "common/event/EventDefine.hpp"
 #include "user/manager/UserFollowRelManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <json/json.h>
 

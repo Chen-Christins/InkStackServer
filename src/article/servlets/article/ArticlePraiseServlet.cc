@@ -1,10 +1,10 @@
 #include "article/servlets/article/ArticlePraiseServlet.hpp"
 
-#include "common/event/EventDefine.hpp"
+#include "../../../common/util/Util.hpp"
 #include "article/manager/ArticleManager.hpp"
 #include "article/manager/ArticlePraiseRelManager.hpp"
+#include "common/event/EventDefine.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <json/json.h>
 

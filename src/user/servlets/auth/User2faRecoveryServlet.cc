@@ -4,11 +4,11 @@
 #include <chen/db/redis.h>
 #include <chen/log/log.h>
 
-#include "common/auth/AuthService.hpp"
-#include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
-#include "common/util/TotpUtil.hpp"
+#include "../../../common/util/Util.hpp"
 #include "blog/data/user_recovery_code_info.h"
+#include "common/auth/AuthService.hpp"
+#include "common/util/TotpUtil.hpp"
+#include "user/manager/UserManager.hpp"
 
 namespace blog {
 namespace servlet {

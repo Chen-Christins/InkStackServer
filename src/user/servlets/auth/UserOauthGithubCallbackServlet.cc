@@ -12,10 +12,10 @@
 #include <chen/util/string_util.h>
 #include <chen/util/time_util.h>
 
+#include "../../../common/util/Util.hpp"
 #include "common/auth/AuthService.hpp"
 #include "user/manager/UserManager.hpp"
 #include "user/manager/UserOAuthManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

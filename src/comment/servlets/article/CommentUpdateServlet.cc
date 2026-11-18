@@ -1,9 +1,9 @@
 #include "comment/servlets/article/CommentUpdateServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "comment/manager/CommentManager.hpp"
 #include "comment/manager/CommentPraiseRelManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <json/json.h>
 

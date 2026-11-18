@@ -1,7 +1,7 @@
 #include "comment/servlets/article/CommentDeleteServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "comment/manager/CommentManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

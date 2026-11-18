@@ -1,8 +1,8 @@
 #include "platform/servlets/notify/BroadcastCloseServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "platform/manager/NotificationManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/log/log.h>
 

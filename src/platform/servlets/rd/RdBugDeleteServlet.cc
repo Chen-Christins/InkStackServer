@@ -1,10 +1,10 @@
 #include "platform/servlets/rd/RdBugDeleteServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
+#include "common/Permission.hpp"
 #include "platform/manager/BugManager.hpp"
 #include "platform/manager/OrganizationUserRelManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Permission.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

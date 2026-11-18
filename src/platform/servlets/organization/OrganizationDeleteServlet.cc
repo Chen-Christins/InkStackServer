@@ -1,10 +1,10 @@
 #include "platform/servlets/organization/OrganizationDeleteServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "common/event/EventDefine.hpp"
 #include "platform/manager/OrganizationManager.hpp"
 #include "platform/manager/OrganizationUserRelManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/log/log.h>
 

@@ -2,6 +2,7 @@
 
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/ArticleCategoryRelManager.hpp"
 #include "article/manager/ArticleLabelRelManager.hpp"
 #include "article/manager/ArticleManager.hpp"
@@ -9,7 +10,6 @@
 #include "article/manager/LabelManager.hpp"
 #include "user/manager/UserFollowRelManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

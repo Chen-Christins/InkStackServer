@@ -2,11 +2,11 @@
 
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "article/logic/Index.hpp"
 #include "article/manager/ArticleCategoryRelManager.hpp"
 #include "article/manager/ArticleManager.hpp"
 #include "article/manager/CategoryManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

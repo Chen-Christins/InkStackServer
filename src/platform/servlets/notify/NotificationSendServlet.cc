@@ -1,8 +1,8 @@
 #include "platform/servlets/notify/NotificationSendServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "platform/manager/NotificationManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/iomanager/iomanager.h>
 #include <chen/log/log.h>

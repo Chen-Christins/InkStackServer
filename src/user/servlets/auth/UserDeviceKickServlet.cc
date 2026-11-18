@@ -1,8 +1,8 @@
 #include "user/servlets/auth/UserDeviceKickServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "common/auth/SessionStore.hpp"
 #include "user/client/PlatformClient.hpp"
-#include "common/Util.hpp"
 
 #include <chen/util/json_util.h>
 

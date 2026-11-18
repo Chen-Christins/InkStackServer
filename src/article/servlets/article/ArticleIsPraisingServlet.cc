@@ -1,7 +1,7 @@
 #include "article/servlets/article/ArticleIsPraisingServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/ArticlePraiseRelManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

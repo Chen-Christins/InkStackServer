@@ -1,6 +1,6 @@
 #include "platform/manager/OrganizationManager.hpp"
 
-#include "common/Util.hpp"
+#include "../../common/util/Util.hpp"
 #include "common/manager/CacheUtil.hpp"
 
 #include <chen/log/log.h>

@@ -2,10 +2,10 @@
 
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "platform/manager/OrganizationManager.hpp"
 #include "platform/manager/OrganizationRepoManager.hpp"
 #include "platform/manager/OrganizationUserRelManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

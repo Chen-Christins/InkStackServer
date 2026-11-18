@@ -1,9 +1,9 @@
 #include "platform/servlets/rd/RdRequirementDeleteServlet.hpp"
-#include "user/manager/UserManager.hpp"
+#include "../../../common/util/Util.hpp"
+#include "common/Permission.hpp"
 #include "platform/manager/OrganizationUserRelManager.hpp"
 #include "platform/manager/RequirementManager.hpp"
-#include "common/Permission.hpp"
-#include "common/Util.hpp"
+#include "user/manager/UserManager.hpp"
 
 #include <chen/log/log.h>
 

@@ -1,9 +1,9 @@
 #include "article/servlets/admin/ArticleAdminListsServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/ArticleManager.hpp"
 #include "comment/manager/CommentManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

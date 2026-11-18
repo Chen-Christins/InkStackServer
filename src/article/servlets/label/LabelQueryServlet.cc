@@ -1,8 +1,8 @@
 #include "article/servlets/label/LabelQueryServlet.hpp"
 
-#include "common/include/Managers.hpp"
-#include "common/Util.hpp"
+#include "../../../common/util/Util.hpp"
 #include "blog/data/article_label_rel_info.h"
+#include "common/include/Managers.hpp"
 
 #include <chen/log/log.h>
 

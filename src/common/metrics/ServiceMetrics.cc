@@ -10,9 +10,9 @@
 
 #include <unistd.h>
 
+#include "../util/Util.hpp"
 #include "platform/manager/NotificationManager.hpp"
 #include "platform/manager/WSConnectionManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace metrics {

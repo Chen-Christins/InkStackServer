@@ -5,15 +5,15 @@
 
 #include <chen/log/log.h>
 
-#include "common/auth/AuthService.hpp"
-#include "common/auth/SessionStore.hpp"
+#include "../util/Util.hpp"
 #include "blog/data/user_info.h"
 #include "common/ErrorCodes.hpp"
+#include "common/auth/AuthService.hpp"
+#include "common/auth/SessionStore.hpp"
 #include "common/i18n/I18n.hpp"
 #include "common/manager/ErrorCodeManager.hpp"
-#include "user/manager/UserManager.hpp"
 #include "common/metrics/ServiceMetrics.hpp"
-#include "common/Util.hpp"
+#include "user/manager/UserManager.hpp"
 
 namespace blog {
 

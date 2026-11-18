@@ -1,9 +1,9 @@
 #include "user/servlets/admin/UserAdminDetailServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
+#include "blog/data/comment_info.h"
 #include "user/client/ArticleClient.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
-#include "blog/data/comment_info.h"
 
 namespace blog {
 namespace servlet {

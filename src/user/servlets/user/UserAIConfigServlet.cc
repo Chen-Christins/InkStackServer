@@ -2,8 +2,8 @@
 
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "user/manager/UserAIConfigManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

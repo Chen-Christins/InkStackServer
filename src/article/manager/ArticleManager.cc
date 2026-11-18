@@ -1,7 +1,7 @@
 #include "article/manager/ArticleManager.hpp"
 
+#include "../../common/util/Util.hpp"
 #include "article/logic/Index.hpp"
-#include "common/Util.hpp"
 #include "common/manager/CacheUtil.hpp"
 
 #include <chen/config/config.h>

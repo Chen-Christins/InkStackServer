@@ -4,10 +4,10 @@
 #include <chen/db/redis.h>
 #include <chen/log/log.h>
 
-#include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
-#include "common/util/TotpUtil.hpp"
+#include "../../../common/util/Util.hpp"
 #include "blog/data/user_recovery_code_info.h"
+#include "common/util/TotpUtil.hpp"
+#include "user/manager/UserManager.hpp"
 
 namespace blog {
 namespace servlet {

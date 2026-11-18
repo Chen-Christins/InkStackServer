@@ -1,10 +1,10 @@
 #include "platform/servlets/rd/RdTaskDeleteServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
+#include "common/Permission.hpp"
 #include "platform/manager/OrganizationUserRelManager.hpp"
 #include "platform/manager/TaskManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Permission.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

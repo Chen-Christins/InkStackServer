@@ -7,8 +7,8 @@
  */
 #include "platform/servlets/admin/AdminFaqDeleteServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "common/include/Managers.hpp"
-#include "common/Util.hpp"
 
 #include <chen/log/log.h>
 

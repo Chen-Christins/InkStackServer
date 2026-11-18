@@ -10,7 +10,7 @@
 #include <chen/log/log.h>
 #include <chen/util/json_util.h>
 
-#include "common/Util.hpp"
+#include "../../common/util/Util.hpp"
 #include "common/manager/CacheUtil.hpp"
 
 namespace blog {

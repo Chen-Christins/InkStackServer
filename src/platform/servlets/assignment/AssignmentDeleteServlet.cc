@@ -1,11 +1,11 @@
 #include "platform/servlets/assignment/AssignmentDeleteServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
+#include "blog/data/assignment_info.h"
+#include "blog/data/assignment_user_rel_info.h"
 #include "common/event/EventDefine.hpp"
 #include "platform/manager/AssignmentManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
-#include "blog/data/assignment_info.h"
-#include "blog/data/assignment_user_rel_info.h"
 
 #include <chen/db/query_builder.h>
 #include <chen/log/log.h>

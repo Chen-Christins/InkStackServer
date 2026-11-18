@@ -1,7 +1,7 @@
 #include "platform/logic/BlogMsgFromBot.hpp"
 
+#include "../../common/util/Util.hpp"
 #include "platform/manager/OrganizationRepoPrManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/log/log.h>
 

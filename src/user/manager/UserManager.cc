@@ -1,6 +1,6 @@
 #include "user/manager/UserManager.hpp"
 
-#include "common/Util.hpp"
+#include "../../common/util/Util.hpp"
 #include "common/manager/CacheUtil.hpp"
 
 #include <chen/config/config.h>

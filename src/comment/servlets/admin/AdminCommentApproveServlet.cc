@@ -1,9 +1,9 @@
 #include "comment/servlets/admin/AdminCommentApproveServlet.hpp"
 
-#include "common/event/EventDefine.hpp"
+#include "../../../common/util/Util.hpp"
 #include "comment/manager/CommentManager.hpp"
+#include "common/event/EventDefine.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <json/json.h>
 

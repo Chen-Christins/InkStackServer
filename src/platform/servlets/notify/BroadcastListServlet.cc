@@ -1,6 +1,6 @@
 #include "platform/servlets/notify/BroadcastListServlet.hpp"
 
-#include "common/Util.hpp"
+#include "../../../common/util/Util.hpp"
 #include "blog/data/notification_info.h"
 
 #include <chen/db/query_builder.h>

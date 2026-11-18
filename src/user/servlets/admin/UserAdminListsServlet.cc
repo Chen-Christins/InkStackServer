@@ -1,7 +1,7 @@
 #include "user/servlets/admin/UserAdminListsServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/db/query_builder.h>
 #include <chen/log/log.h>

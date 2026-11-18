@@ -1,7 +1,7 @@
 #include "user/servlets/user/UserUnfollowServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "user/manager/UserFollowRelManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

@@ -2,9 +2,9 @@
 
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "article/logic/Index.hpp"
 #include "article/manager/ArticleManager.hpp"
-#include "common/Util.hpp"
 #include "blog/data/article_info.h"
 
 namespace blog {

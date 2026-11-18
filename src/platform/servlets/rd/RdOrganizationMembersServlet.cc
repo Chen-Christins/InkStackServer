@@ -1,7 +1,7 @@
 #include "platform/servlets/rd/RdOrganizationMembersServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "platform/manager/OrganizationUserRelManager.hpp"
-#include "common/Util.hpp"
 #include "platform/servlets/rd/RdHelper.hpp"
 
 namespace blog {

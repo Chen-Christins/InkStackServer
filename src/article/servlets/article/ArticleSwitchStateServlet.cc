@@ -1,10 +1,10 @@
 #include "article/servlets/article/ArticleSwitchStateServlet.hpp"
 
-#include "common/event/EventDefine.hpp"
+#include "../../../common/util/Util.hpp"
 #include "article/logic/Index.hpp"
 #include "article/manager/ArticleManager.hpp"
+#include "common/event/EventDefine.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/log/log.h>
 

@@ -4,9 +4,9 @@
 #include <chen/db/redis.h>
 #include <chen/log/log.h>
 
+#include "../../../common/util/Util.hpp"
 #include "common/auth/AuthService.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

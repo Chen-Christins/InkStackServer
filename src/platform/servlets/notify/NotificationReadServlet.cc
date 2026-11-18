@@ -1,6 +1,6 @@
 #include "platform/servlets/notify/NotificationReadServlet.hpp"
 
-#include "common/Util.hpp"
+#include "../../../common/util/Util.hpp"
 
 #include "platform/manager/NotificationManager.hpp"
 

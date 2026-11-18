@@ -1,6 +1,6 @@
 #include "platform/servlets/file/ChunkUploadServlet.hpp"
 
-#include "common/Util.hpp"
+#include "../../../common/util/Util.hpp"
 
 #include <chen/config/config.h>
 #include <chen/log/log.h>

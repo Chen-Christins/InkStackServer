@@ -1,7 +1,7 @@
 #include "article/servlets/article/ArticleViewServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "article/manager/ArticleManager.hpp"
-#include "common/Util.hpp"
 
 namespace blog {
 namespace servlet {

@@ -1,10 +1,10 @@
 #include "platform/servlets/admin/AssignmentAdminListsServlet.hpp"
 
+#include "../../../common/util/Util.hpp"
 #include "platform/manager/AssignmentManager.hpp"
 #include "platform/manager/AssignmentOrganizationRelManager.hpp"
 #include "platform/manager/OrganizationManager.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <chen/log/log.h>
 

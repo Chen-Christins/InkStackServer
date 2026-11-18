@@ -1,10 +1,10 @@
 #include "comment/servlets/article/CommentPraiseServlet.hpp"
 
-#include "common/event/EventDefine.hpp"
+#include "../../../common/util/Util.hpp"
 #include "comment/manager/CommentManager.hpp"
 #include "comment/manager/CommentPraiseRelManager.hpp"
+#include "common/event/EventDefine.hpp"
 #include "user/manager/UserManager.hpp"
-#include "common/Util.hpp"
 
 #include <json/json.h>
 
