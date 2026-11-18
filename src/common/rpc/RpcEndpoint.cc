@@ -29,7 +29,7 @@ constexpr uint32_t kPeerIdPidSpace = 100000;
 
 } // namespace
 
-const std::string& GetHubAddress()
+std::string GetHubAddress()
 {
     return g_hub_address->getValue();
 }

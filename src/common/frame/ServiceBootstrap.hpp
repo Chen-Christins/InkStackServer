@@ -21,7 +21,7 @@ namespace blog {
  * @brief 获取配置中的 server.work_path
  * @return 工作目录，未配置时为空
  */
-const std::string& GetWorkPath();
+std::string GetWorkPath();
 
 /**
  * @brief 服务级 onLoad 公共逻辑

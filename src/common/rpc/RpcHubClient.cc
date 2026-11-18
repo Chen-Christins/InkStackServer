@@ -35,7 +35,7 @@ bool RpcHubClient::start(uint32_t func_id)
 
     std::lock_guard lock(m_mutex);
     if (!m_reconnect_timer) {
-        m_reconnect_timer = iom->addTimer(kReconnectIntervalMs, std::bind(&RpcHubClient::onReconnectTimer, this), true);
+        m_reconnect_timer = iom->addTimer(GetReconnectIntervalMs(), std::bind(&RpcHubClient::onReconnectTimer, this), true);
     }
     return ok;
 }
@@ -101,7 +101,7 @@ void RpcHubClient::logCallFailure(uint32_t func_id, uint32_t cmd, const std::str
 
 bool RpcHubClient::connectLocked()
 {
-    const std::string& hub = GetHubAddress();
+    const std::string hub = GetHubAddress();
     auto address = chen::Address::LookupAny(hub);
     if (!address) {
         WARN(logger) << "resolve rpc hub failed, address=" << hub;

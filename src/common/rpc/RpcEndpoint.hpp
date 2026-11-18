@@ -29,7 +29,7 @@ enum FuncId : uint32_t {
  * @brief 获取 hub 地址
  * @return 形如 127.0.0.1:8092，来自配置 rpc.hub.address
  */
-const std::string& GetHubAddress();
+std::string GetHubAddress();
 
 /**
  * @brief 获取跨服务调用超时

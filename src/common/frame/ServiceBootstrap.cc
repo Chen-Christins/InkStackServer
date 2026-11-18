@@ -25,7 +25,7 @@ static chen::ConfigVar<std::map<std::string, std::map<std::string, std::string>>
 
 static chen::ConfigVar<std::string>::ptr g_work_path = chen::Config::Lookup<std::string>("server.work_path", std::string(""), "server work path");
 
-const std::string& GetWorkPath()
+std::string GetWorkPath()
 {
     return g_work_path->getValue();
 }
