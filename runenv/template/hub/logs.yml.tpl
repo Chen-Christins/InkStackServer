@@ -4,11 +4,9 @@ logs:
     level: ${LOG_LEVEL}
     appenders:
       - type: FileLogAppender
-        file: ${WORK_PATH}/logs/hub-root.log
-      - type: StdoutLogAppender
+        file: ${WORK_PATH}/logs/hub/root.log
   - name: system
     level: ${LOG_LEVEL_SYSTEM}
     appenders:
       - type: FileLogAppender
-        file: ${WORK_PATH}/logs/hub-system.log
-      - type: StdoutLogAppender
+        file: ${WORK_PATH}/logs/hub/system.log
