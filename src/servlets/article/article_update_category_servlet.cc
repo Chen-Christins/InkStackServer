@@ -2,7 +2,7 @@
 
 #include <chen/log/log.h>
 
-#include "../../index.h"
+#include "../../search/search_sync.h"
 #include "../../manager/article_category_rel_manager.h"
 #include "../../manager/article_manager.h"
 #include "../../manager/category_manager.h"
@@ -136,7 +136,7 @@ int32_t ArticleUpdateCategoryServlet::handle(
         }
 
         // 分类关联已变化，同步刷新搜索索引中的 CAT_ID，避免按分类筛选结果滞后
-        IndexMgr::GetInstance()->updateArticle(ainfo);
+        SearchSyncMgr::GetInstance()->markDirty(ainfo->getId(), SearchSync::OP_UPSERT);
 
         if (!update_add_infos.empty()) {
             Json::Value add_category_ids;

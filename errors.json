@@ -116,6 +116,12 @@
     { "errno": 3007,  "key": "ARTICLE_DELETE_FAILED",       "zh": "删除文章失败",              "en": "Failed to delete article" },
     { "errno": 3008,  "key": "ARTICLE_PUBLISH_FAILED",      "zh": "发布文章失败",              "en": "Failed to publish article" },
     { "errno": 3009,  "key": "ARTICLE_CATEGORY_EMPTY",      "zh": "分类参数为空",              "en": "Category parameters empty" },
+    {
+      "errno": 3010,
+      "key": "ARTICLE_SEARCH_UNAVAILABLE",
+      "zh": "搜索服务暂不可用",
+      "en": "Search service unavailable"
+    },
 
     { "errno": 4001,  "key": "FILE_NOT_FOUND",              "zh": "文件不存在",               "en": "File not found" },
     { "errno": 4002,  "key": "FILE_TOO_LARGE",              "zh": "文件过大",                 "en": "File too large" },

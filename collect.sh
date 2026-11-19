@@ -44,7 +44,6 @@ if [ -z "$CHEN_SDK_LIB" ]; then
     exit 1
 fi
 check_file "$ROOT_DIR/errors.json"
-check_file "$ROOT_DIR/dict"
 check_file "$ROOT_DIR/locale/C/LC_MESSAGES/techhaven_en.mo"
 check_file "$ROOT_DIR/locale/C/LC_MESSAGES/techhaven_zh_CN.mo"
 
@@ -94,8 +93,7 @@ for so in "${module_sos[@]}"; do
 done
 cp "$CHEN_SDK_LIB" "$STAGE_DIR/lib/"
 
-# 4. 拷贝字典、错误码与国际化目录
-#cp -R "$ROOT_DIR/dict" "$STAGE_DIR/dict"
+# 4. 拷贝错误码与国际化目录
 cp "$ROOT_DIR/errors.json" "$STAGE_DIR/errors.json"
 mkdir -p "$STAGE_DIR/locale/C/LC_MESSAGES"
 cp "$ROOT_DIR/locale/C/LC_MESSAGES/"*.mo "$STAGE_DIR/locale/C/LC_MESSAGES/"

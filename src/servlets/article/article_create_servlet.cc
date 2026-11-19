@@ -7,6 +7,7 @@
 #include "../../manager/article_manager.h"
 #include "../../manager/category_manager.h"
 #include "../../manager/label_manager.h"
+#include "../../search/search_sync.h"
 #include "../../util.h"
 
 namespace blog {
@@ -120,6 +121,7 @@ int32_t ArticleCreateServlet::handle(
         }
 
         ArticleMgr::GetInstance()->add(info);
+        SearchSyncMgr::GetInstance()->markDirty(info->getId(), SearchSync::OP_UPSERT);
     } while (0);
     response->setBody(result->toJsonString());
     return 0;

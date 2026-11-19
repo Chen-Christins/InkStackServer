@@ -5,7 +5,7 @@
 #include <json/json.h>
 
 #include "../../event/event_define.h"
-#include "../../index.h"
+#include "../../search/search_sync.h"
 #include "../../manager/article_manager.h"
 #include "../../manager/user_manager.h"
 #include "../../util.h"
@@ -98,7 +98,7 @@ int32_t ArticleVerifyServlet::handle(
         // 审核通过或拒绝后，从定时发布调度中移除
         ArticleMgr::GetInstance()->unscheduleArticle(id);
 
-        IndexMgr::GetInstance()->updateArticle(info);
+        SearchSyncMgr::GetInstance()->markDirty(info->getId(), SearchSync::OP_UPSERT);
 
         // Notify author about review result + mark other admins' notifications as read
         {

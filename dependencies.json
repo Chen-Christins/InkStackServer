@@ -8,11 +8,5 @@
     "repo": "Chen-Christins/chen",
     "tag": "v1.0.0",
     "asset": "deps-{arch}.zip"
-  },
-  "cppjieba": {
-    "repo": "yanyiwu/cppjieba",
-    "tag": "v5.1.0",
-    "limonp_repo": "yanyiwu/limonp",
-    "limonp_ref": "a269e34dc4948d5a9209e21a7887b52daa0d3e78"
   }
 }

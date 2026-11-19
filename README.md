@@ -29,7 +29,6 @@ Web 后台设计，注重性能、可扩展性和易维护性。
 ├── cmake/              # 构建辅助脚本
 ├── dbproxy/            # ORM 表结构 XML（xml/）与生成数据访问层（data/）
 ├── deps/               # 三方依赖（构建期使用）
-├── dict/               # jieba 分词词典
 ├── docs/               # 功能与流程文档
 ├── locale/             # gettext 翻译
 ├── protocol/           # 协议定义
@@ -78,7 +77,8 @@ cp bin/conf/prod.env.example bin/conf/prod.env
 
 ## 部署打包
 
-`collect.sh` 会收集部署所需文件并打包为 tar.gz（结构与生产目录一致：`server` / `module` / `lib` / `conf` / `dict` / `errors.json` / `locale`）：
+`collect.sh` 会收集部署所需文件并打包为 tar.gz（结构与生产目录一致：`server` / `module` / `lib` / `conf` / `errors.json` /
+`locale`）：
 
 ```sh
 # 打包生产配置（配置值含部署路径 WORK_PATH 全部取自 bin/conf/prod.env）
@@ -163,38 +163,33 @@ CI 生产配置由 **GitHub Secrets/Variables** 注入（见 workflow 的 `Prepa
 
 ```json
 {
-  "chen-sdk": { "repo": "Chen-Christins/chen", "version": "1.7.0-rc3", "arch": "auto" },
-  "thirdparty": { "repo": "Chen-Christins/chen", "tag": "v1.0.0", "asset": "deps-{arch}.zip" },
-  "cppjieba": {
-    "repo": "yanyiwu/cppjieba",
-    "tag": "v5.1.0",
-    "limonp_repo": "yanyiwu/limonp",
-    "limonp_ref": "a269e34dc4948d5a9209e21a7887b52daa0d3e78"
-  }
+  "chen-sdk": { "repo": "Chen-Christins/chen", "version": "1.7.0-rc4", "arch": "auto" },
+  "thirdparty": { "repo": "Chen-Christins/chen", "tag": "v1.0.0", "asset": "deps-{arch}.zip" }
 }
 ```
 
 - `chen-sdk`：框架 SDK（`chen-sdk-<version>-<arch>.zip`），解压为根目录 `chen-sdk-<version>/`。
 - `thirdparty`：三方依赖包（protobuf / yaml-cpp / tinyxml2 / jsoncpp / hiredis-vip 的头文件 + 静态库），解压到 `deps/`。
-- `cppjieba`：中文分词头文件（`deps/include/cppjieba`）及其 `limonp` 依赖（`deps/include/limonp`）。两者均为 header-only，编译时直接进入 `libblog.so`。
+- 中文分词已迁移到 `InkStackSearchServer`，本仓库不再依赖 cppjieba 与 `dict/`。
 
-| 命令                                        | 说明                                              |
-|---------------------------------------------|---------------------------------------------------|
-| `./deps.py sync`                            | 下载 chen-sdk + thirdparty + cppjieba（默认全部） |
-| `./deps.py sync --sdk-only`                 | 只下载 chen-sdk                                   |
-| `./deps.py thirdparty`                      | 只下载三方依赖与 cppjieba 到 `deps/`              |
-| `./deps.py use <version> --arch amd64`      | 切换 SDK 版本/架构                                |
-| `./deps.py use --archive /tmp/chen-sdk.zip` | 使用本地临时 SDK 包                               |
-| `./deps.py current`                         | 查看已安装 SDK 与 `deps/` 状态                    |
-| `./deps.py list`                            | 列出远端可用资产                                  |
-| `./deps.py clean`                           | 删除 SDK、`deps/` 与缓存                          |
+| 命令                                        | 说明                                   |
+|---------------------------------------------|----------------------------------------|
+| `./deps.py sync`                            | 下载 chen-sdk + thirdparty（默认全部） |
+| `./deps.py sync --sdk-only`                 | 只下载 chen-sdk                        |
+| `./deps.py thirdparty`                      | 只下载三方依赖到 `deps/`               |
+| `./deps.py use <version> --arch amd64`      | 切换 SDK 版本/架构                     |
+| `./deps.py use --archive /tmp/chen-sdk.zip` | 使用本地临时 SDK 包                    |
+| `./deps.py current`                         | 查看已安装 SDK 与 `deps/` 状态         |
+| `./deps.py list`                            | 列出远端可用资产                       |
+| `./deps.py clean`                           | 删除 SDK、`deps/` 与缓存               |
 
 说明：
 
-- 资产缓存在 `.deps-cache/`，用 GitHub Release 的 `digest` 做 sha256 校验（离线时仅告警）；cppjieba/limonp 的源码包按 tag/commit 缓存。
+- 资产缓存在 `.deps-cache/`，用 GitHub Release 的 `digest` 做 sha256 校验（离线时仅告警）。
 - 下载失败会自动重试（最多 3 次）并利用 `.part` 断点续传；校验失败或缓存 zip 损坏时会自动删除坏缓存，重新运行
   `./deps.py sync` 即可重新下载。
-- 三方依赖与 cppjieba 头文件只用于**编译**（`deps/include`）。模块**不**静态链接三方库，运行时符号由预编译 `bin/server` 提供，避免与 server 内的静态副本重复；部署机也无需安装这些库。cppjieba 为 header-only，不存在需要额外链接的 `.a`。
+- 三方依赖头文件只用于**编译**（`deps/include`）。模块**不**静态链接三方库，运行时符号由预编译 `bin/server` 提供，避免与
+  server 内的静态副本重复；部署机也无需安装这些库。
 - 架构按主机自动识别（`dependencies.json` 的 `arch=auto`）：mac(arm64) / Linux(amd64) 各自 `./deps.py sync` 即可，无需软链；如需固定，用 `./deps.py use <version> --arch <arch>` 改配置。
 
 ## 国际化（i18n）

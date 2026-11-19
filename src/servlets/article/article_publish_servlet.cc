@@ -3,7 +3,7 @@
 #include <chen/log/log.h>
 
 #include "../../event/event_define.h"
-#include "../../index.h"
+#include "../../search/search_sync.h"
 #include "../../manager/article_manager.h"
 #include "../../manager/user_manager.h"
 #include "../../permission.h"
@@ -83,7 +83,7 @@ int32_t ArticlePublishServlet::handle(
             break;
         }
         ArticleMgr::GetInstance()->add(info);
-        IndexMgr::GetInstance()->updateArticle(info);
+        SearchSyncMgr::GetInstance()->markDirty(info->getId(), SearchSync::OP_UPSERT);
 
         // 清除对应月份的日历缓存
         ArticleMgr::GetInstance()->clearCalendarCache(info->getUserId(), info->getPublishTime());

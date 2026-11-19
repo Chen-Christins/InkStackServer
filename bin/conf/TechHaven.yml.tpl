@@ -14,10 +14,21 @@ admin:
   passwd: ${ADMIN_PASSWD}
   email: admin@example.com
 
-# 分词字典配置
+# 搜索服务（InkStackSearchServer）客户端配置
 search:
-  jieba_dict_path: ${WORK_PATH}/dict
-  index_path: ${WORK_PATH}/search_index.dat
+  enabled: true
+  hub_address: ${SEARCH_HUB_ADDRESS}
+  timeout_ms: 1500
+  update_timeout_ms: 5000
+  connect_timeout_ms: 1000
+  reconnect_interval_ms: 5000
+  flush_interval_ms: 1000
+  stats_interval_ms: 30000
+  flush_batch_size: 200
+  snapshot_page_size: 200
+  snapshot_batch_bytes: 524288
+  snapshot_rpc_timeout_ms: 10000
+  dirty_key: search:dirty
 
 # 第三方登录配置
 oauth:

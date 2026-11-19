@@ -84,6 +84,7 @@ constexpr int32_t ARTICLE_UPDATE_FAILED = 3006;  // 更新文章失败
 constexpr int32_t ARTICLE_DELETE_FAILED = 3007;  // 删除文章失败
 constexpr int32_t ARTICLE_PUBLISH_FAILED = 3008; // 发布文章失败
 constexpr int32_t ARTICLE_CATEGORY_EMPTY = 3009; // 分类参数为空
+constexpr int32_t ARTICLE_SEARCH_UNAVAILABLE = 3010; // 搜索服务不可用
 
 // ==================== 模块04: 文件/上传模块 (04001-04999) ====================
 constexpr int32_t FILE_NOT_FOUND = 4001;              // 文件不存在

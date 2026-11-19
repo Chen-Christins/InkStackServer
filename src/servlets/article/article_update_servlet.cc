@@ -4,7 +4,7 @@
 
 #include <set>
 
-#include "../../index.h"
+#include "../../search/search_sync.h"
 #include "../../manager/article_category_rel_manager.h"
 #include "../../manager/article_label_rel_manager.h"
 #include "../../manager/article_manager.h"
@@ -117,7 +117,7 @@ int32_t ArticleUpdateServlet::handle(
             ArticleMgr::GetInstance()->scheduleArticle(id, info->getPublishTime());
         }
 
-        IndexMgr::GetInstance()->updateArticle(info);
+        SearchSyncMgr::GetInstance()->markDirty(info->getId(), SearchSync::OP_UPSERT);
 
         if (old_state == ArticleManager::Status::PUBLISHED && info->getPublishTime() > 0) {
             ArticleMgr::GetInstance()->clearCalendarCache(info->getUserId(), info->getPublishTime());

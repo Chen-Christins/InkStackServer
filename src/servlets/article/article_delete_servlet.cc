@@ -2,7 +2,7 @@
 
 #include <chen/log/log.h>
 
-#include "../../index.h"
+#include "../../search/search_sync.h"
 #include "../../manager/article_manager.h"
 #include "../../util.h"
 #include "blog/data/article_info.h"
@@ -78,7 +78,7 @@ int32_t ArticleDeleteServlet::handle(
                 json_ids.append(i->getId());
                 ArticleMgr::GetInstance()->del(i->getId());
                 // 从搜索索引中移除
-                IndexMgr::GetInstance()->removeArticle(i->getId());
+                SearchSyncMgr::GetInstance()->markDirty(i->getId(), SearchSync::OP_REMOVE);
                 // 从定时发布调度中移除
                 ArticleMgr::GetInstance()->unscheduleArticle(i->getId());
                 // 删除的文章如果是已发布状态，清除对应月份的日历缓存

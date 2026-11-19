@@ -1,7 +1,7 @@
 #include "article_switch_state_servlet.h"
 
 #include "../../event/event_define.h"
-#include "../../index.h"
+#include "../../search/search_sync.h"
 #include "../../manager/article_manager.h"
 #include "../../manager/user_manager.h"
 #include "../../util.h"
@@ -73,7 +73,7 @@ int32_t ArticleSwitchStateServlet::handle(
             break;
         }
         ArticleMgr::GetInstance()->add(article);
-        IndexMgr::GetInstance()->updateArticle(article);
+        SearchSyncMgr::GetInstance()->markDirty(article->getId(), SearchSync::OP_UPSERT);
 
         // 状态变更后，从定时发布调度中移除
         ArticleMgr::GetInstance()->unscheduleArticle(article->getId());

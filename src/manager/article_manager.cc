@@ -1,6 +1,6 @@
 #include "article_manager.h"
 
-#include "../index.h"
+#include "../search/search_sync.h"
 #include "../util.h"
 #include "cache_util.h"
 
@@ -918,6 +918,7 @@ void ArticleManager::doArticlePublishSchedule()
     chen::RedisUtil::Cmd(g_redis_pool_name->getValue(), zrem_cmd.c_str());
 
     // 逐个更新文章状态
+    std::vector<int64_t> published_ids;
     auto trans = db->openTransaction();
     for (auto id : article_ids) {
         auto info = get(id);
@@ -939,9 +940,15 @@ void ArticleManager::doArticlePublishSchedule()
 
         clearCalendarCache(info->getUserId(), info->getPublishTime());
 
-        IndexMgr::GetInstance()->updateArticle(info);
+        published_ids.push_back(info->getId());
     }
-    trans->commit();
+    if (!trans->commit()) {
+        ERROR(logger) << "commit scheduled publish failed";
+        return;
+    }
+    for (auto id : published_ids) {
+        SearchSyncMgr::GetInstance()->markDirty(id, SearchSync::OP_UPSERT);
+    }
 }
 
 } // namespace blog

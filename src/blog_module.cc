@@ -24,9 +24,9 @@
 #include "./include/managers.h"
 #include "./include/servlets.h"
 #include "./include/tables.h"
-#include "./index.h"
 #include "./logic/BlogMsgFromBot.h"
 #include "./metrics/service_metrics.h"
+#include "./search/search_sync.h"
 #include "./struct.h"
 
 namespace blog {
@@ -111,6 +111,8 @@ bool BlogModule::onUnload()
 
     chen::EventBusMgr::GetInstance()->clearAll();
 
+    SearchSyncMgr::GetInstance()->stop();
+
     ArticleMgr::GetInstance()->stop();
 
     chen::FoxThreadMgr::GetInstance()->stop();
@@ -184,9 +186,8 @@ bool BlogModule::onServerReady()
 
     ArticleMgr::GetInstance()->start();
 
-    if (!IndexMgr::GetInstance()->initFromFile()) {
-        INFO(logger) << "index load failed";
-        // return false;
+    if (!SearchSyncMgr::GetInstance()->init()) {
+        ERROR(logger) << "search sync init failed, search will be unavailable";
     }
 
     std::string errorsPath = g_work_path->getValue() + "/errors.json";

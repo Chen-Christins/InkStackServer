@@ -2,9 +2,9 @@
 
 #include <chen/log/log.h>
 
-#include "../../index.h"
 #include "../../manager/article_manager.h"
 #include "../../manager/user_manager.h"
+#include "../../search/search_sync.h"
 
 namespace blog {
 namespace servlet {
@@ -27,73 +27,53 @@ int32_t ArticleSearchServlet::handle(
 
         int64_t category_id = request->getParamAs<int64_t>("category_id");
         int64_t label_id = request->getParamAs<int64_t>("label_id");
-        int64_t state = request->getParamAs<int64_t>("state", 2); // 默认只搜已发布
         int64_t channel = request->getParamAs<int64_t>("channel");
         int64_t user_id = request->getParamAs<int64_t>("user_id");
         std::string year_month = request->getParam("year_month");
 
         int64_t page = request->getParamAs<int64_t>("page", 1);
         int64_t page_size = request->getParamAs<int64_t>("page_size", 20);
-        if (page < 1)
+        if (page < 1) {
             page = 1;
-        if (page_size < 1)
+        }
+        if (page_size < 1) {
             page_size = 20;
-        if (page_size > 100)
+        }
+        if (page_size > 100) {
             page_size = 100;
+        }
 
-        // 构建索引查询参数
-        std::map<uint64_t, std::set<uint64_t>> params;
-
+        tagSearchQuery query;
+        query.Keyword = keyword;
         if (category_id > 0) {
-            params[(uint64_t)IndexType::CAT_ID].insert(category_id);
+            query.CategoryIds.push_back(static_cast<uint64_t>(category_id));
         }
         if (label_id > 0) {
-            params[(uint64_t)IndexType::LABEL_ID].insert(label_id);
+            query.LabelIds.push_back(static_cast<uint64_t>(label_id));
         }
-        if (state > 0) {
-            params[(uint64_t)IndexType::STATE].insert(state);
-        }
-        if (channel > 0) {
-            params[(uint64_t)IndexType::CHANNEL].insert(channel);
-        }
-        if (user_id > 0) {
-            params[(uint64_t)IndexType::USER_ID].insert(user_id);
-        }
-        if (!year_month.empty()) {
-            params[(uint64_t)IndexType::YEAR_MON].insert(Index::StrHash(year_month));
-        }
+        // 公共搜索接口只允许查询已发布文章，避免私密/审核中文章被检索
+        query.State = ArticleManager::Status::PUBLISHED;
+        query.Channel = channel;
+        query.UserId = user_id;
+        query.YearMonth = year_month;
+        query.Page = static_cast<int32_t>(page);
+        query.PageSize = static_cast<int32_t>(page_size);
 
-        // keyword 分词后加入 WORD 索引
-        if (!keyword.empty()) {
-            std::vector<std::string> words;
-            IndexMgr::GetInstance()->cutWord(keyword, words);
-            auto& wordKeys = params[(uint64_t)IndexType::WORD];
-            for (auto& w : words) {
-                if (w.size() >= 2) {
-                    wordKeys.insert(Index::StrHash(w));
-                }
-            }
-        }
-
-        // 有过滤条件时，走位图索引
-        uint32_t max_need = page * page_size;
-        std::vector<uint64_t> ids;
-        int32_t total = IndexMgr::GetInstance()->search(ids, params, max_need);
-
-        if (total < 0) {
+        tagSearchResult search_result;
+        if (!SearchSyncMgr::GetInstance()->query(query, search_result)) {
+            WARN(logger) << "article search unavailable, keyword=" << keyword;
+            result->setErrno(errcode::ARTICLE_SEARCH_UNAVAILABLE);
             result->set("total", 0);
             result->set("list", Json::Value(Json::arrayValue));
             break;
         }
 
-        result->set("total", total);
+        result->set("total", search_result.Total);
 
-        // 分页切片
-        int offset = (page - 1) * page_size;
         Json::Value list(Json::arrayValue);
-        for (size_t i = offset; i < ids.size() && i < (size_t)(offset + page_size); ++i) {
-            auto info = ArticleMgr::GetInstance()->get(ids[i]);
-            if (!info) {
+        for (auto id : search_result.Ids) {
+            auto info = ArticleMgr::GetInstance()->get(static_cast<int64_t>(id));
+            if (!info || info->getIsDeleted()) {
                 continue;
             }
             Json::Value item;

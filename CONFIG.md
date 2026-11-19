@@ -103,7 +103,8 @@ std::string dir = g_upload_dir->getValue();
 | `std::set<T>` / `std::unordered_set<T>` | 集合 |
 | `std::map<std::string, T>` | 键值表（对应 YAML 嵌套映射） |
 
-> 参考现有用法：`src/blog_module.cc` 中的 `mysql.dbs`、`src/index.cc` 中的 `search.jieba_dict_path`、`src/manager/user_manager.cc` 中的 `admin.account`。
+> 参考现有用法：`src/blog_module.cc` 中的 `mysql.dbs`、`src/search/search_sync.cc` 中的 `search.hub_address`、
+> `src/manager/user_manager.cc` 中的 `admin.account`。
 
 ### 4.2 配置变更监听（热重载）
 
