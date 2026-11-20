@@ -83,7 +83,7 @@ int32_t SystemSettingsServlet::handle(
             BuildSettingsJson(data, settings);
             result->setData(data);
         } else if (method == chen::http::HttpMethod::PUT) {
-            auto info = SystemSettingsMgr::GetInstance()->get();
+            auto info = SystemSettingsMgr::GetInstance()->clone();
             if (!info) {
                 result->setErrno(errcode::SETTINGS_NOT_LOADED);
                 break;

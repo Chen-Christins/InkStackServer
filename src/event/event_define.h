@@ -39,7 +39,9 @@ enum EVENT_ID {
 struct EventUserSendCodeData {
     chen::EMail::ptr email;
     std::string smtp_host;
-    uint16_t port;
+    uint16_t port = 0;
+    /// 是否使用隐式 TLS（465）；由 ResolveSmtpTls 根据 smtp_encryption 解析
+    bool use_ssl = false;
 };
 
 struct EventCommentData {

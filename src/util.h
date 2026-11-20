@@ -93,6 +93,31 @@ inline bool IsEmail(const std::string& str)
     return std::regex_match(str, pattern);
 }
 
+/**
+ * @brief 解析 SMTP 加密方式，判断是否需要隐式 TLS（SMTPS）
+ * @param encryption 系统设置中的 smtp_encryption：none / ssl / tls
+ * @param use_ssl 输出：true 表示连接后立即 TLS 握手（465），false 表示明文连接
+ * @return 当前 SDK 是否支持该加密方式
+ * @note chen::SmtpClient 只实现了隐式 TLS，不实现 STARTTLS（587），
+ *       因此 tls/starttls 配置会被判为不支持，避免明文连接被服务端拒绝。
+ */
+inline bool ResolveSmtpTls(const std::string& encryption, bool& use_ssl)
+{
+    std::string mode = chen::StringUtil::ToLower(encryption);
+    if (mode.empty() || mode == "ssl" || mode == "smtps") {
+        // 未配置时保持历史行为：按隐式 TLS 处理
+        use_ssl = true;
+        return true;
+    }
+    if (mode == "none" || mode == "plain" || mode == "off") {
+        use_ssl = false;
+        return true;
+    }
+    // tls / starttls：需要在明文连接上升级，SDK 不支持
+    use_ssl = false;
+    return false;
+}
+
 inline bool IsValidAccount(const std::string& str)
 {
     static const std::regex s_account_regex("[A-Za-z][0-9A-Za-z\\-_\\.]{4,15}");

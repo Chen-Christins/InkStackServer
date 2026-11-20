@@ -1,5 +1,7 @@
 #include "system_settings_manager.h"
 
+#include <memory>
+
 #include <chen/log/log.h>
 
 #include "../util.h"
@@ -40,6 +42,15 @@ blog::data::SystemSettingsInfo::ptr SystemSettingsManager::get()
     std::unique_lock<std::mutex> lock(m_mutex);
     m_data = info;
     return info;
+}
+
+blog::data::SystemSettingsInfo::ptr SystemSettingsManager::clone()
+{
+    auto current = get();
+    if (!current) {
+        return nullptr;
+    }
+    return std::make_shared<blog::data::SystemSettingsInfo>(*current);
 }
 
 bool SystemSettingsManager::update(blog::data::SystemSettingsInfo::ptr info)

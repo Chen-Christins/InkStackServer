@@ -80,7 +80,7 @@ int32_t SystemSettingsUploadServlet::handle(
         std::string url = "/uploads/settings/" + filename;
         INFO(logger) << "Settings image uploaded: " << url << " (Size: " << data[1].content.size() << " bytes)";
 
-        auto settings = SystemSettingsMgr::GetInstance()->get();
+        auto settings = SystemSettingsMgr::GetInstance()->clone();
         if (!settings) {
             result->setErrno(errcode::SETTINGS_NOT_LOADED);
             break;

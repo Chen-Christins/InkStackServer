@@ -187,6 +187,7 @@ constexpr int32_t NOTIFICATION_TITLE_TOO_LONG = 9015;   // 通知标题过长
 constexpr int32_t NOTIFICATION_CONTENT_TOO_LONG = 9016; // 通知内容过长
 constexpr int32_t NOTIFICATION_USERS_REQUIRED = 9017;   // 缺少目标用户
 constexpr int32_t NOTIFICATION_INVALID_TARGET = 9018;   // 无效的通知目标类型
+constexpr int32_t SMTP_ENCRYPTION_UNSUPPORTED = 9019;   // 不支持的邮件加密方式（STARTTLS）
 
 // ==================== 模块10: 反馈模块 (10001-10999) ====================
 constexpr int32_t FEEDBACK_NOT_FOUND = 10001; // 反馈不存在

@@ -196,7 +196,24 @@ webauthn:
 > 升级后已有 `prod.env` 需要补充 `WEBAUTHN_RP_ID` / `WEBAUTHN_RP_NAME` / `WEBAUTHN_ORIGIN` /
 > `WEBAUTHN_USER_HANDLE_SECRET`，否则 `switch-env.sh` 会因缺少占位符而失败。
 
-## 8. 注意事项
+## 8. SMTP 邮件发送
+
+SMTP 配置不走 `bin/conf/`，而是在管理后台「系统设置 → 邮件」里填写，保存在 `blog_system_settings` 表。
+
+| 配置项            | 说明                                                                       |
+|-------------------|----------------------------------------------------------------------------|
+| `smtp_host`       | SMTP 服务器地址，如 `smtp.gmail.com`                                       |
+| `smtp_port`       | `465`（SSL）或 `25` / `2525`（明文，通常仅限内网）                         |
+| `smtp_encryption` | `ssl`（隐式 TLS，配合 465）/ `none`（明文）/ `tls`（STARTTLS，当前不支持） |
+| `smtp_username`   | 发信账号；Gmail 需使用应用专用密码                                         |
+| `smtp_password`   | 发信密码或应用专用密码                                                     |
+| `from_email`      | 发件人地址，需与 `smtp_username` 一致，否则会被服务端拒信                  |
+
+> **不要用 587 + `tls`**：`chen::SmtpClient` 只实现了隐式 TLS（465）和明文两种连接方式，没有实现 STARTTLS（587）。
+> 用 587 会在握手阶段报 `SSL routines::wrong version number`；用 `tls` 配置调用发信接口会直接返回
+> `9019 SMTP_ENCRYPTION_UNSUPPORTED`，请把端口改成 `465`、加密方式改成 `ssl`。
+
+## 9. 注意事项
 
 1. **占位符命名**：统一用大写 snake_case（如 `MYSQL_HOST`、`UPLOAD_DIR`），并在 `dev.env` 与 `prod.env.example` 中保持一致。
 2. **密钥不入库**：生产密码、密钥只写在 `bin/conf/prod.env`（已被 `.gitignore` 忽略），不要写进 `prod.env.example` 或提交。

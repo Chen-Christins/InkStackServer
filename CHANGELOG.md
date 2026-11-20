@@ -21,6 +21,16 @@ All notable changes to this project will be documented in this file.
 - 登出、踢设备、撤销单会话、撤销全部会话、重新签发会话时联动关闭对应 WebSocket。
 - `blog_online_users` 改为按 `uid` 去重的在线用户数。
 
+### 修复
+
+- 修复验证码邮件始终按隐式 TLS 连接 SMTP 服务的问题：改为按 `smtp_encryption` 选择连接方式，不再写死 SSL；对当前 SDK 不支持的
+  STARTTLS（587 + `tls`）直接返回 `9019 SMTP_ENCRYPTION_UNSUPPORTED`，不再静默失败。
+- 修复异步发信事件在 `SmtpClient::send` 返回空指针时解引用导致 worker SIGSEGV 的问题，并补充连接/发信耗时与失败原因日志。
+- 修复访问日志 `GetRemoteIP` 未判空 `session` 可能导致空指针崩溃的问题。
+- 崩溃日志现在记录崩溃时间、线程 ID、`si_code`、出错 PC/SP/FP、模块基址与 PC 偏移、栈内容，可在帧丢失时仍用 `addr2line` 定位。
+- 系统设置的写路径（保存设置、上传站点图片）改为先复制再整体替换，避免与 `/api/v1/site/settings` 等读请求并发改写同一个
+  `std::string`。
+
 ### 移除
 
 - 移除旧 WebSocket 端点、旧通知/在线状态/私信连接表及相关管理方法。

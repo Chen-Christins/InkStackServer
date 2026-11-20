@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TechHaven-Server 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-23 13:38+0000\n"
+"POT-Creation-Date: 2026-11-20 14:40+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -235,6 +235,10 @@ msgstr ""
 
 #. errno: 3009
 msgid "ARTICLE_CATEGORY_EMPTY"
+msgstr ""
+
+#. errno: 3010
+msgid "ARTICLE_SEARCH_UNAVAILABLE"
 msgstr ""
 
 #. errno: 4001
@@ -597,6 +601,10 @@ msgstr ""
 msgid "NOTIFICATION_INVALID_TARGET"
 msgstr ""
 
+#. errno: 9019
+msgid "SMTP_ENCRYPTION_UNSUPPORTED"
+msgstr ""
+
 #. errno: 12001
 msgid "MESSAGE_CONVERSATION_NOT_FOUND"
 msgstr ""
@@ -617,28 +625,131 @@ msgstr ""
 msgid "MESSAGE_CANNOT_SELF"
 msgstr ""
 
+#: src/servlets/admin/admin_faq_delete_servlet.cc:56
+#: src/servlets/admin/admin_faq_edit_servlet.cc:56
+#: src/servlets/admin/admin_feedback_convert_servlet.cc:57
+#: src/servlets/admin/admin_feedback_delete_servlet.cc:49
+#: src/servlets/database/backup_delete_servlet.cc:43
+#: src/servlets/database/backup_download_servlet.cc:53
+#: src/servlets/database/export_delete_servlet.cc:43
+#: src/servlets/database/export_download_servlet.cc:53
+#: src/servlets/message/conversation_delete_servlet.cc:37
+#: src/servlets/message/conversation_message_servlet.cc:40
+#: src/servlets/message/conversation_read_servlet.cc:37
+msgid "invalid id"
+msgstr ""
+
+#: src/servlets/admin/admin_feedback_convert_servlet.cc:49
+msgid "target must be faq, requirement or bug"
+msgstr ""
+
+#: src/servlets/admin/admin_feedback_convert_servlet.cc:96
+msgid "insert faq failed"
+msgstr ""
+
+#: src/servlets/admin/admin_feedback_convert_servlet.cc:110
+#: src/servlets/admin/admin_feedback_convert_servlet.cc:142
+msgid "invalid orgId"
+msgstr ""
+
+#: src/servlets/admin/admin_feedback_convert_servlet.cc:128
+msgid "insert requirement failed"
+msgstr ""
+
+#: src/servlets/admin/admin_feedback_convert_servlet.cc:161
+msgid "insert bug failed"
+msgstr ""
+
+#: src/servlets/admin/admin_feedback_list_servlet.cc:50
+msgid "query feedbacks failed"
+msgstr ""
+
+#: src/servlets/admin/user_admin_create_servlet.cc:32
+#: src/servlets/user/user_create_servlet.cc:36
+msgid "account and password required"
+msgstr ""
+
+#: src/servlets/admin/user_admin_create_servlet.cc:56
+#: src/servlets/admin/user_admin_update_servlet.cc:86
+#: src/servlets/organization/organization_user_switch_role_servlet.cc:70
+msgid "invalid role"
+msgstr ""
+
+#: src/servlets/admin/user_admin_create_servlet.cc:60
+#: src/servlets/admin/user_admin_update_servlet.cc:93
+#: src/servlets/organization/organization_join_check_servlet.cc:35
+msgid "invalid state"
+msgstr ""
+
+#: src/servlets/admin/user_admin_create_servlet.cc:85
+#: src/servlets/admin/user_admin_reset_passwd_servlet.cc:66
+#: src/servlets/auth/user_reset_passwd_servlet.cc:78
+#: src/servlets/user/user_create_servlet.cc:92
+msgid "insert user failed"
+msgstr ""
+
+#: src/servlets/admin/user_admin_delete_servlet.cc:56
+msgid "delete user failed"
+msgstr ""
+
+#: src/servlets/admin/user_admin_reset_passwd_servlet.cc:32
+#: src/servlets/auth/user_reset_passwd_servlet.cc:35
+msgid "password required"
+msgstr ""
+
+#: src/servlets/admin/user_admin_update_servlet.cc:107
+#: src/servlets/user/user_update_servlet.cc:100
+msgid "update user failed"
+msgstr ""
+
 #: src/servlets/article/article_calendar_servlet.cc:36
 msgid "invalid year or month"
 msgstr ""
 
 #: src/servlets/auth/passkey_register_begin_servlet.cc:43
-#: src/servlets/auth/passkey_register_finish_servlet.cc:56
+#: src/servlets/auth/passkey_register_finish_servlet.cc:55
 msgid "passkey name too long"
 msgstr ""
 
-#: src/servlets/category/category_create_servlet.cc:44
-msgid "invalid parent_id"
+#: src/servlets/auth/user_2fa_confirm_servlet.cc:54
+msgid "please call /api/v1/user/2fa/enable first"
 msgstr ""
 
-#: src/servlets/category/category_create_servlet.cc:53
+#: src/servlets/auth/user_2fa_disable_servlet.cc:63
+msgid "disable 2fa failed"
+msgstr ""
+
+#: src/servlets/auth/user_2fa_reset_servlet.cc:81
+msgid "reset 2fa failed"
+msgstr ""
+
+#: src/servlets/auth/user_oauth_github_callback_servlet.cc:303
+#: src/servlets/auth/user_oauth_github_servlet.cc:59
+msgid "GitHub OAuth 未配置"
+msgstr ""
+
+#: src/servlets/auth/user_send_code_servlet.cc:91
+msgid "SMTP STARTTLS is not supported, use port 465 with SSL encryption"
+msgstr ""
+
+#: src/servlets/category/category_create_servlet.cc:74
 msgid "invalid cid"
 msgstr ""
 
-#: src/servlets/category/category_create_servlet.cc:83
+#: src/servlets/category/category_create_servlet.cc:100
+#: src/servlets/category/category_create_servlet.cc:104
+msgid "invalid parent_id"
+msgstr ""
+
+#: src/servlets/category/category_create_servlet.cc:122
+msgid "category name exists"
+msgstr ""
+
+#: src/servlets/category/category_create_servlet.cc:144
 msgid "category operation failed"
 msgstr ""
 
-#: src/servlets/category/category_delete_servlet.cc:61
+#: src/servlets/category/category_delete_servlet.cc:108
 msgid "no categories"
 msgstr ""
 
@@ -665,20 +776,6 @@ msgstr ""
 msgid "param id is required"
 msgstr ""
 
-#: src/servlets/database/backup_delete_servlet.cc:43
-#: src/servlets/database/backup_download_servlet.cc:53
-#: src/servlets/database/export_delete_servlet.cc:43
-#: src/servlets/database/export_download_servlet.cc:53
-#: src/servlets/help/admin_faq_delete_servlet.cc:56
-#: src/servlets/help/admin_faq_edit_servlet.cc:56
-#: src/servlets/help/admin_feedback_convert_servlet.cc:57
-#: src/servlets/help/admin_feedback_delete_servlet.cc:49
-#: src/servlets/message/conversation_delete_servlet.cc:37
-#: src/servlets/message/conversation_message_servlet.cc:40
-#: src/servlets/message/conversation_read_servlet.cc:37
-msgid "invalid id"
-msgstr ""
-
 #: src/servlets/database/backup_delete_servlet.cc:49
 #: src/servlets/database/backup_download_servlet.cc:59
 msgid "backup record not found"
@@ -703,31 +800,6 @@ msgstr ""
 
 #: src/servlets/database/export_delete_servlet.cc:54
 msgid "delete export failed"
-msgstr ""
-
-#: src/servlets/help/admin_feedback_convert_servlet.cc:49
-msgid "target must be faq, requirement or bug"
-msgstr ""
-
-#: src/servlets/help/admin_feedback_convert_servlet.cc:96
-msgid "insert faq failed"
-msgstr ""
-
-#: src/servlets/help/admin_feedback_convert_servlet.cc:110
-#: src/servlets/help/admin_feedback_convert_servlet.cc:142
-msgid "invalid orgId"
-msgstr ""
-
-#: src/servlets/help/admin_feedback_convert_servlet.cc:128
-msgid "insert requirement failed"
-msgstr ""
-
-#: src/servlets/help/admin_feedback_convert_servlet.cc:161
-msgid "insert bug failed"
-msgstr ""
-
-#: src/servlets/help/admin_feedback_list_servlet.cc:50
-msgid "query feedbacks failed"
 msgstr ""
 
 #: src/servlets/help/feedback_servlet.cc:46
@@ -778,12 +850,6 @@ msgstr ""
 msgid "action must be approve or reject"
 msgstr ""
 
-#: src/servlets/organization/organization_join_check_servlet.cc:35
-#: src/servlets/user/user_admin_create_servlet.cc:60
-#: src/servlets/user/user_admin_update_servlet.cc:92
-msgid "invalid state"
-msgstr ""
-
 #: src/servlets/organization/organization_repo_prs_delete_servlet.cc:46
 msgid "PR 记录不存在"
 msgstr ""
@@ -804,11 +870,11 @@ msgstr ""
 msgid "无权访问该组织"
 msgstr ""
 
-#: src/servlets/organization/organization_repo_prs_sync_servlet.cc:74
+#: src/servlets/organization/organization_repo_prs_sync_servlet.cc:73
 msgid "param id or repo_id is required"
 msgstr ""
 
-#: src/servlets/organization/organization_repo_prs_sync_servlet.cc:119
+#: src/servlets/organization/organization_repo_prs_sync_servlet.cc:118
 msgid "仅研发主管及以上角色可同步 PR"
 msgstr ""
 
@@ -852,11 +918,11 @@ msgstr ""
 msgid "删除仓库失败"
 msgstr ""
 
-#: src/servlets/organization/organization_repos_sync_servlet.cc:62
+#: src/servlets/organization/organization_repos_sync_servlet.cc:61
 msgid "仅研发主管及以上角色可触发仓库同步"
 msgstr ""
 
-#: src/servlets/organization/organization_repos_sync_servlet.cc:77
+#: src/servlets/organization/organization_repos_sync_servlet.cc:76
 msgid "同步失败"
 msgstr ""
 
@@ -866,12 +932,6 @@ msgstr ""
 
 #: src/servlets/organization/organization_repos_token_servlet.cc:74
 msgid "保存 Token 失败"
-msgstr ""
-
-#: src/servlets/organization/organization_user_switch_role_servlet.cc:70
-#: src/servlets/user/user_admin_create_servlet.cc:56
-#: src/servlets/user/user_admin_update_servlet.cc:85
-msgid "invalid role"
 msgstr ""
 
 #: src/servlets/rd/rd_bug_detail_servlet.cc:26
@@ -916,44 +976,6 @@ msgstr ""
 msgid "无权访问任何组织"
 msgstr ""
 
-#: src/servlets/user/user_2fa_confirm_servlet.cc:54
-msgid "please call /api/v1/user/2fa/enable first"
-msgstr ""
-
-#: src/servlets/user/user_2fa_disable_servlet.cc:63
-msgid "disable 2fa failed"
-msgstr ""
-
-#: src/servlets/user/user_2fa_reset_servlet.cc:81
-msgid "reset 2fa failed"
-msgstr ""
-
-#: src/servlets/user/user_admin_create_servlet.cc:32
-#: src/servlets/user/user_create_servlet.cc:36
-msgid "account and password required"
-msgstr ""
-
-#: src/servlets/user/user_admin_create_servlet.cc:85
-#: src/servlets/user/user_admin_reset_passwd_servlet.cc:66
-#: src/servlets/user/user_create_servlet.cc:92
-#: src/servlets/user/user_reset_passwd_servlet.cc:78
-msgid "insert user failed"
-msgstr ""
-
-#: src/servlets/user/user_admin_delete_servlet.cc:55
-msgid "delete user failed"
-msgstr ""
-
-#: src/servlets/user/user_admin_reset_passwd_servlet.cc:32
-#: src/servlets/user/user_reset_passwd_servlet.cc:35
-msgid "password required"
-msgstr ""
-
-#: src/servlets/user/user_admin_update_servlet.cc:106
-#: src/servlets/user/user_update_servlet.cc:99
-msgid "update user failed"
-msgstr ""
-
 #: src/servlets/user/user_ai_config_servlet.cc:60
 msgid "type must be openai, claude or glm"
 msgstr ""
@@ -962,16 +984,11 @@ msgstr ""
 msgid "max_tokens is required for claude"
 msgstr ""
 
-#: src/servlets/user/user_oauth_github_callback_servlet.cc:305
-#: src/servlets/user/user_oauth_github_servlet.cc:59
-msgid "GitHub OAuth 未配置"
-msgstr ""
-
-#: src/servlets/user/user_update_servlet.cc:59
+#: src/servlets/user/user_update_servlet.cc:60
 msgid "old password required"
 msgstr ""
 
-#: src/util.h:147 src/util.h:156
+#: src/util.h:173 src/util.h:182
 #, c-format
 msgid "param %s is required"
 msgstr ""

@@ -25,9 +25,15 @@ const std::string SessionDataKey::ANONYMOUS = "anonymous";
 
 std::string GetRemoteIP(chen::http::HttpRequest::ptr request, chen::http::HttpSession::ptr session)
 {
+    if (!request) {
+        return "-";
+    }
     auto rt = request->getHeader("X-Real-IP");
     if (!rt.empty()) {
         return rt;
+    }
+    if (!session) {
+        return "-";
     }
     rt = session->getRemoteAddressString();
     auto pos = rt.find(':');

@@ -80,8 +80,14 @@ int32_t UserSendCodeServlet::handle(
 
         // 检查 SMTP 配置（在写 DB 之前校验，避免产生无效验证码）
         auto sys_settings = SystemSettingsMgr::GetInstance()->get();
-        if (!sys_settings || sys_settings->getSmtpHost().empty()) {
+        if (!sys_settings || sys_settings->getSmtpHost().empty() || sys_settings->getSmtpPort() <= 0 || sys_settings->getSmtpPort() > 65535) {
             result->setErrno(errcode::SMTP_NOT_CONFIGURED);
+            break;
+        }
+        bool smtp_use_ssl = false;
+        if (!ResolveSmtpTls(sys_settings->getSmtpEncryption(), smtp_use_ssl)) {
+            ERROR(logger) << "unsupported smtp encryption: " << sys_settings->getSmtpEncryption();
+            result->setErrno(errcode::SMTP_ENCRYPTION_UNSUPPORTED, "SMTP STARTTLS is not supported, use port 465 with SSL encryption");
             break;
         }
 
@@ -127,7 +133,8 @@ int32_t UserSendCodeServlet::handle(
             EventUserSendCodeData data = {};
             data.email = mail;
             data.smtp_host = smtp_host;
-            data.port = smtp_port;
+            data.port = static_cast<uint16_t>(smtp_port);
+            data.use_ssl = smtp_use_ssl;
 
             chen::EventBusMgr::GetInstance()->emitAsync(EVENT_ID_USER_SEND_CODE, std::move(data));
         }

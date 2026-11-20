@@ -218,6 +218,12 @@
     { "errno": 9016,  "key": "NOTIFICATION_CONTENT_TOO_LONG","zh": "通知内容过长",              "en": "Notification content too long" },
     { "errno": 9017,  "key": "NOTIFICATION_USERS_REQUIRED", "zh": "缺少目标用户",              "en": "Target users required" },
     { "errno": 9018,  "key": "NOTIFICATION_INVALID_TARGET", "zh": "无效的通知目标类型",          "en": "Invalid notification target type" },
+    {
+      "errno": 9019,
+      "key": "SMTP_ENCRYPTION_UNSUPPORTED",
+      "zh": "当前版本不支持 STARTTLS，请改用 465 端口并选择 SSL 加密",
+      "en": "STARTTLS is not supported, use port 465 with SSL encryption"
+    },
 
     { "errno": 12001, "key": "MESSAGE_CONVERSATION_NOT_FOUND", "zh": "会话不存在",              "en": "Conversation not found" },
     { "errno": 12002, "key": "MESSAGE_SEND_FAILED",            "zh": "消息发送失败",            "en": "Failed to send message" },
